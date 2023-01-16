@@ -3,7 +3,7 @@
 
 #define GMATH_DEBUG
 
-int iclamp(int target, int max, int min)
+int iclamp(int target, int min, int max)
 {
 	if (target > max) return max;
 	else if (target < min) return min;
