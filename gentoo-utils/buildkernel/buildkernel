@@ -1,0 +1,427 @@
+#!/bin/bash
+#
+#	buildkernel automatically builds the linux source tree symlinked in /usr/src/linux.
+#	Also handles initramfs generation, unified kernel generation, upgrading kernel .config to another kernel, 
+#	regenerating grub.cfg, moving and cleaning up build files. 
+#	Modify for your setup.
+#
+#	Made for Gentoo openrc.
+#			1. sys-apps/mlocate for its merging locate database.
+#			2. sys-boot/grub as a bootloader (set up /etc/default/grub).
+#				Add: globs="/boot/EFI/gentoo/distribution/vmlinuz-* /boot/EFI/gentoo/custom/vmlinuz-* /boot/EFI/gentoo/git/vmlinuz-*"
+#				to /etc/grub.d/09_custom after copying /etc/grub.d/10_linux to /etc/grub.d/09_custom as a template. Remove the old globs.
+#			3. sys-kernel/dracut for initramfs and unified kernel image generation. (see 'man /etc/dracut.conf' add secure boot key, etc)
+#			4.	(efi-boot) app-crypt/sbctl & app-crypt/sbsigntools for secure boot
+#
+#				Set your /etc/dracut.conf.d/custom.conf with key and uefi_stub location:
+#				-------
+#				uefi_stub="/usr/lib/systemd/boot/efi/linuxx64.efi.stub"
+#				uefi_secureboot_cert="/usr/share/secureboot/keys/db/db.pem"
+#				uefi_secureboot_key="/usr/share/secureboot/keys/db/db.key"
+#				-------
+#
+#			5. (efi-boot) sys-apps/systemd-utils +boot USE flag is required for dracut to generate unified kernels images.
+#
+#			6. (optional) sys-devel/distcc for distributed compiling across local computers. 
+#				Change hosts and hostsTJ below to reflect host names and thread count respectively. Localhost mode automatically finds
+#				and builds with the thread count of your processor.
+#
+#	Change the current symlinked linux source tree with 'eselect kernel list/set'.
+#		
+#	Run 'buildkernel --help' for the help page.
+#
+
+# Color definitions
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+NOC='\033[0m'
+
+if [ "$EUID" -ne 0 ]; then
+    echo -e "${RED}Please run as root.${NOC}"
+    exit
+fi
+
+# sbctl to manage keys
+SECUREBOOTKEY="/usr/share/secureboot/keys/db/db.key"
+SECUREBOOTCERT="/usr/share/secureboot/keys/db/db.pem"
+# host names 
+declare -a hosts=("host_one" "host_two" "host_three") 
+declare -a hostsTJ=("6" "8" "8")
+
+yes_or_no()
+{
+    while true; do
+        read -p "[Y/n]: " yn
+        case $yn in
+            [Yy]*) return 0  ;;
+            [Nn]*) echo -e "${RED}Aborted${NOC}\n" ; return  1 ;;
+        esac
+    done
+}
+
+relocate()
+{
+        updatedb
+        kernel=$(locate /boot/vmlinuz-* | grep "^/boot/")
+        sysmap=$(locate /boot/System.map-* | grep "^/boot/")
+        config=$(locate /boot/config-* | grep "^/boot/")
+        initrd=$(locate /boot/initramfs-* | grep "^/boot/")
+        efi=$(locate Linux | grep "^/boot/EFI/Linux/linux")
+        [[ -z $efi ]] && efi=$(locate /boot/gentoo-linux | grep "^/boot/gentoo")
+
+}
+
+getKernelVersion() 
+{
+	kver=$(eselect kernel show | grep src | awk '{print $NF}' | cut -c 16-)
+}
+
+build_initramfs()
+{
+	relocate
+	[[ -n $initrd ]] && echo -e "Found: ${GREEN}$initrd${NOC}"
+	[[ -n $(echo $initrd | grep "dist.img") ]] && kver=$(echo $initrd | cut -c 17- | cut -c -19)
+	[[ -z $kver ]] && getKernelVersion
+	echo -e "Kernel version: ${GREEN}$kver${NOC}"
+	echo "Build initramfs?"
+	if (yes_or_no "$input") then
+		if [[ -s $SECUREBOOTKEY && -s $SECUREBOOTCERT ]]; then
+			echo -e "\n${GREEN}Building unified kernel image...${NOC}\n"
+			dracut --kver=$kver --force --uefi
+		fi
+			# build backup initramfs for unsecure boot 
+			echo -e "\n${GREEN}Building initramfs...${NOC}\n"
+			dracut --kver=$kver --force
+	fi
+}
+
+find_total_threads()
+{
+	distcc_status=$(rc-service distccd status | grep started)
+	[[ -n $distcc_status ]] && distcc="true"
+	[[ -z $distcc_status ]] && distcc="false"
+    hostsLength=${#hosts[@]}
+	hostsOnline=0
+	if [[ $localhostmode == "false" && $distcc == "true" ]]; then
+		tj=0	
+		# check if hosts are online
+		for (( i=0; i<${hostsLength}; i++ ));
+		do
+			pingResponse=$(ping ${hosts[$i]} -c 1 -W 0.5)
+			pingExitCode=$(echo $?)
+			if [ 0 = "$pingExitCode" ] 
+			then
+				tj=$(echo "$tj + ${hostsTJ[$i]}" | bc)	
+				hostsOnline=$(echo "$hostsOnline + 1" | bc)
+			else
+				echo -e "${RED}Host ${hosts[$i]} is offline${NOC}"
+			fi
+		done
+	fi
+	if [[ $localhostmode == "true" || $distcc == "false" || 
+		  $(echo "$hostsOnline <= 1" | bc) == 1 ]]; then
+		[[ $localhostmode == "false" && $distcc == "false" ]] && echo -e "${RED}Service distccd is not started.${RED}"
+        if [[ $localhostmode == "true" ]]; then
+            for (( i=0; i<${hostsLength}; i++ ))
+            do
+                if [[ ${hosts[$i]} == $(hostname) ]]; then
+                    tj=${hostsTJ[$i]}
+		            echo -e "${GREEN}Localhost mode enabled.${NOC}"
+                    break
+                fi
+            done
+        elif [[ $distcc == "false" || $(echo "$hostsOnline <= 1" | bc) == 1 ]]; then 
+            tj=$(cat /proc/cpuinfo  | grep siblings | sort -u | awk -F ": " '{print $NF}')
+			echo -e "${GREEN}Localhost mode enabled.${NOC}"
+        fi
+	fi
+}
+
+make_kernel()
+{
+	find_total_threads
+	echo -e "${GREEN}Making kernel with ${BLUE}$tj${GREEN} threads...${NOC}"
+	if [[ $distcc == "true" ]]; then
+        make -j$tj CC="distcc gcc"
+    else
+        make -j$tj CC="gcc"
+    fi
+	echo -e "\n${GREEN}Making and installing modules...${NOC}"
+	make modules_install
+	echo -e "\nInstalling kernel to /boot..."
+	make install
+}
+
+build()
+{
+	echo "Is this the correct kernel to build?"
+	eselect kernel list
+	if (yes_or_no "$input") then
+		cd /usr/src/linux
+		
+		echo -e "\nClean linux tree?"
+		if (yes_or_no "$input") then
+			echo -e "\n${GREEN}Making clean...${NOC}"
+			make clean
+		fi
+
+		time make_kernel
+		echo ""
+	fi
+}
+
+menu_config()
+{
+	cd /usr/src/linux
+	make menuconfig MENUCONFIG_COLOR=mono
+}
+
+rename()
+{
+	cd /boot
+	if [[ -n "$kernel" && -z $(echo $kernel | grep "dist") ]]; then
+		kernelb="${kernel##*/}" #base file name
+		newName="vmlinuz-$1-"${kernelb:8:${#kernelb}}
+		echo -e "\nRenaming ${GREEN}$kernelb${NOC} to ${GREEN}$newName${NOC}"
+		mv $kernelb $newName
+	fi
+	if [ -n "$efi" ]; then
+		newName="gentoo-linux-$1.efi"
+		echo -e "\nRenaming ${GREEN}$efi${NOC} to ${GREEN}$newName${NOC}"
+		mv $efi $newName
+		rm -rf /boot/EFI/Linux/
+	fi
+}
+
+move_build() 
+{
+	relocate
+	cd /boot
+	# bzip2 the system.map
+	if [[ -n "$sysmap" && ${sysmap: -8} != ".tar.bz2" ]]; then
+		echo -e "\nCompressing ${GREEN}$sysmap${NOC}"
+		sysmapb="${sysmap##*/}" #base file name
+		tar -cjSf $sysmapb.tar.bz2 $sysmapb
+		rm $sysmap
+		relocate
+	fi
+	echo -e "\nMoving build files to ${GREEN}$1${NOC}\n"
+	[ -n "$kernel" ] && mv $kernel $1
+	[ -n "$sysmap" ] && mv $sysmap $1
+	[ -n "$config" ] && mv $config $1
+	[ -n "$initrd" ] && mv $initrd $1
+	[ -n "$efi"    ] && mv $efi /boot/EFI/gentoo
+	
+	[[ -n $(lscpu | grep Intel) && -a "/boot/amd-uc.img" ]] && rm /boot/amd-uc.img
+	[[ -n $(lscpu | grep AMD) && -a "/boot/intel-uc.img" ]] && rm /boot/intel-uc.img	
+}
+
+regen_grub() 
+{
+	grub-mkconfig -o /boot/grub/grub.cfg
+}
+
+upgrade_kernel()
+{
+	getKernelVersion
+	
+	echo -e "\nCurrent kernel is ${GREEN}$kver${NOC}\n"
+	echo "Choose where to copy current .config to:"
+	ls /usr/src/  | grep '^linux-' | cut -c 7- | grep -n ''
+	read -p ": " upgrade_kver
+	
+	[[ -d /usr/src/linux-$upgrade_kver ]] && valid_flag=1	
+	if [[ -z $valid_flag && -n $(echo $upgrade_kver | grep '^[0-9]' | grep -v '-') ]]; then
+		int_filter="^$upgrade_kver:"
+		if  cut_len=$(echo "${#upgrade_kver} + 2" | bc) ; then 
+			upgrade_kver=$(ls /usr/src/  | grep '^linux-' | cut -c 7- | grep -n '' | grep "$int_filter" | cut -c $cut_len-)
+			[[ -d /usr/src/linux-$upgrade_kver ]] && valid_flag=1
+		fi
+	fi       
+	
+	[[ -z $valid_flag ]] && echo -e "${RED}Invalid kernel name.${NOC}" && exit
+	[[ $upgrade_kver == $kver ]] && echo -e "${RED}Cannot upgrade current kernel with current kernel.${NOC}" && exit
+	
+	echo -e "Are you sure you want to ${RED}overwrite${NOC} ${GREEN}/usr/src/linux-$upgrade_kver/.config${NOC} with ${GREEN}/usr/src/linux-$kver/.config${NOC}?"
+	if (yes_or_no "$input") then
+		echo ""
+		cp -v /usr/src/linux/.config /usr/src/linux-$upgrade_kver
+	fi
+}
+
+remove_kernels()
+{
+    baseDir="/boot/EFI/gentoo"
+    echo -e "${GREEN}Kernels in $baseDir/*${NOC}\n"
+    cd $baseDir
+    ls custom/ | grep vmlinuz && ls distribution/ | grep vmlinuz && ls git/ | grep vmlinuz
+    echo -e "\n${GREEN}Enter part of the full kernel name to remove wildcards.${NOC}\n"
+    read rkn
+    echo -e "\n${RED}Are you sure you want to remove these kernels?"
+    echo -e "(including sysmap, initramfs, configs, and modules)${NOC}\n"
+    found=$(ls custom/ | grep vmlinuz | grep $rkn)
+    found=$found"\n$(ls distribution/ | grep vmlinuz | grep $rkn)"
+    found=$found"\n$(ls git/ | grep vmlinuz | grep $rkn)"
+    echo -e "$found\n"
+    if (yes_or_no "$input") then
+        cd $baseDir/custom
+        echo -e "${GREEN}Checking /custom${NOC}"
+        rm -Iv *$rkn*
+        echo -e "${GREEN}Checking /distribution${NOC}"
+        cd $baseDir/distribution
+        rm -Iv *$rkn*
+        echo -e "${GREEN}Checking /git${NOC}"
+        cd $baseDir/git
+        rm -Iv *$rkn*
+        echo -e "${GREEN}Checking /lib/modules${NOC}"
+        cd /lib/modules
+        rm -Ir *$rkn*
+    else
+        exit 0
+    fi
+
+    echo -e "${BLUE}Dont forget to regen grub.cfg!${NOC}"
+}
+
+clean_cache()
+{
+	echo -e "${RED}Are you sure you want to clean out the cache directory?"
+	echo -e "( rm -rf /var/cache/* )${NOC}"
+	if (yes_or_no "$input") then
+		rm -rf /var/cache/*
+	else
+		exit
+	fi
+	echo -e "${GREEN}Done.${NOC}"
+}
+
+
+
+case $2 in
+	"localhost" | "local" | 'l' | '-l' | "--local" | "--localhost")
+		localhostmode="true"
+	;;
+	*)
+		[[ -n $2 ]] && kver=$2
+		localhostmode="false"
+	;;
+esac
+
+case $1 in
+    'move' | 'm' | '-m' | '--move')
+	;;
+	'regen' | 'r' | '-r' | '--regen')
+		regen_grub
+		exit
+	;;
+	'build' | 'b' | '-b' | '--build')
+		build
+		exit
+	;;
+	'initramfs' | 'i' | '-i' | '--initramfs')
+		build_initramfs
+		exit
+	;;
+	'im' | '-im' | '--im')
+		build_initramfs
+	;;
+	'current' | 'c' | '-c' | '--current')
+		eselect kernel list
+		exit
+	;;
+	'clean' | 'cl' | '-cl' | '--clean')
+		clean_cache
+		exit
+	;;
+	'auto' | 'a' | '-a' | '--auto')
+		build
+		build_initramfs
+	;;
+	'upgrade' | 'u' | '-u' | '--upgrade')
+		upgrade_kernel
+		exit
+	;;
+	'menu' | 'me' | '-me' | '--menu')
+		menu_config
+		exit
+	;;
+	'rmk' | '-rmk' | '--rmkernels' | '--removekernels')
+		remove_kernels
+		exit
+	;;
+	*)
+		echo -e "buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -me -c -cl -rmk -h${NOC}] [${BLUE}kernel_version,localhost${NOC}]"
+		echo -e "${GREEN}--move${NOC}         -- move build files."
+		echo -e "${GREEN}--regen${NOC}        -- regenerate /boot/grub/grub.cfg and exit."
+		echo -e "${GREEN}--build${NOC}        -- build /usr/src/linux and exit."
+		echo -e "${GREEN}--auto${NOC}         -- build /usr/src/linux & initramfs then continue to automatic moving."
+		echo -e "${BLUE}--localhost${NOC}    -- make in localhost only mode (e.g. \"buildkernel ${GREEN}--auto ${BLUE}--localhost${NOC}\")."
+		echo -e "${GREEN}--i${NOC}   ${BLUE}[kver]${NOC}   -- build initramfs and exit. ${BLUE}[kver]${NOC} is optional."
+		echo -e "${GREEN}--im${NOC}  ${BLUE}[kver]${NOC}   -- build initramfs and continue to moving. ${BLUE}[kver]${NOC} is optional."
+		echo -e "${GREEN}--upgrade${NOC}      -- copy the .config of the current kernel to a new kernel directory."
+		echo -e "${GREEN}--menu${NOC}         -- open menuconfig in /usr/src/linux."
+		echo -e "${GREEN}--current${NOC}      -- print current kernel(s) in eselect and exit."
+		echo -e "${GREEN}--clean${NOC}        -- clean cache directory: /var/cache/*"
+		echo -e "${GREEN}--rmkernels${NOC}    -- remove old kernels and modules using a wildcard."
+		echo -e "${GREEN}--help${NOC}         -- print this help page and exit."
+		exit
+	;;
+esac
+
+relocate
+
+[[ -n $(echo "$kernel $sysmap $config $initrd $efi" | grep .old) ]] && old_build_files="true"
+
+echo -e "\nLocated build files:${GREEN}"
+[[ -n $kernel ]] && echo $kernel
+[[ -n $sysmap ]] && echo $sysmap
+[[ -n $config ]] && echo $config
+[[ -n $initrd ]] && echo $initrd
+[[ -n $efi    ]] && echo $efi
+
+[[ -n $old_build_files ]] && echo -e "\n${RED}Old build files detected, its probably not a good idea to move them.
+It is recommended to first remove all build files and then rebuild."
+
+echo -e "\n${NOC}Choose where to move the build files:"
+echo 	"[ (c)ustom ]        /boot/EFI/gentoo/custom"
+echo 	"[ (d)istribution ]  /boot/EFI/gentoo/distribution"
+echo 	"[ (g)it sources  ]  /boot/EFI/gentoo/git"
+echo    "[ (r)emove ]        Remove all build files in /boot (NOT recursive). Also removes /boot/EFI/Linux (recursive)."
+echo 	"[ (q|e) ]           Exit program"
+echo 	"[ (m)ove ]          Manually move build files in /boot."
+read -p ": " build_dir
+
+case $build_dir in
+	'd' | 'dist')
+		rename "dist"
+		move_build "/boot/EFI/gentoo/distribution/"
+		regen_grub
+	;;
+	'c' | 'custom')
+		rename "custom"
+		move_build "/boot/EFI/gentoo/custom/"
+		regen_grub
+	;;
+	'g' | 'git')
+		rename "git"
+		move_build "/boot/EFI/gentoo/git/"
+		regen_grub
+	;;
+	'r' | 'remove')
+		echo -e "\n${RED}Removing build files...${NOC}"
+		rm -v /boot/System.map-*
+		rm -v /boot/config-*
+		rm -v /boot/initramfs-*
+		rm -v /boot/vmlinuz-*
+		rm -vrf /boot/EFI/Linux/
+	;;
+	'e' | 'exit' | 'q' | 'quit')
+		exit
+	;;
+	'm' | 'move' | 'manual')
+		echo -e "\nDropping to root shell in /boot."
+		cd /boot
+		exec /bin/bash
+	;;
+esac

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ -z $1 ] 
+then
+	cp -v buildkernel /usr/local/sbin/buildkernel
+else
+	cp -v buildkernel $1
+fi
+
+

@@ -6,6 +6,7 @@
 
 #include "gmath.h"
 
+
 int main()
 {
 	GMATH_Tests();

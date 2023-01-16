@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# emergesync  [  -f  -uc  -t  -ts  ]
+# -f    --force         =    Force syncing portage, updating the @world set, and depclean ask.
+# -uc   --updateclean   =    Skip syncing portage then update the @world set and depclean ask.
+# -t    --time          =    Get formatted time since last portage sync operation. 
+# -ts   --timesec       =    Get raw seconds since last portage sync opeation.
+#
+
+MIN_TIME="7200"
+min_hour=$(echo "$MIN_TIME / 3600" | bc)
+
+if [ -s /var/log/emerge.log ]; then
+    lastsync=$(sudo qlop --sync | tail -n 1)
+    lastsync=${lastsync:0:19}
+    lastsync=$(date -d"$lastsync" +%s)
+    elapsed=$(echo "$(date +%s) - $lastsync" | bc)
+    flag=$(echo "$elapsed >= $MIN_TIME" | bc)
+else
+    elapsed='0'
+    flag='1'
+fi
+
+h=$(echo "$elapsed/3600" | bc)
+m=$(echo "$elapsed%3600/60" | bc)
+s=$(echo "$elapsed%60" | bc)
+hms="$h hours, $m minutes, and $s seconds"
+
+if [[ $1 == '-t' || $1 == '--time' ]]; then
+    echo "Last sync was $hms ago."
+elif [[ $1 == '-ts' || $1 == '--timesec' ]]; then
+    echo $elapsed
+elif [[ $1 == '-uc' || $1 == '--updateclean' ]]; then
+    echo "Last sync was $hms ago."
+    echo -e "\nUpdating @world set and depcleaning...\n"
+    
+    sleep 1.5
+
+    sudo emerge -uNDtav @world
+    sudo emerge -ca
+elif [[ $flag == '1' || $1 == '-f' || $1 == '--force' ]]; then
+    echo "Last sync was $hms ago."
+    if [[ $flag == '1' ]]; then
+    	echo "Portage has not been synced within $min_hour hours."
+    fi
+    if [[ $1 == '-f' || $1 == '--force' ]]; then
+        echo -e "\nSyncing portage (forced)...\n"
+    else
+        echo -e "\nSyncing portage...\n"
+    fi
+
+    sleep 1.5
+	
+	sudo emerge --sync
+	
+	if [[ -z $1 || $1 == '-f' || $1 == '--force' ]]; then
+		sudo emerge -uNDtav @world
+		sudo emerge -ca
+	fi
+else
+	echo "Portage was synced within $min_hour hours."
+	echo "Last sync was $hms ago."
+fi

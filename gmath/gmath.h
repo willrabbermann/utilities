@@ -192,7 +192,7 @@ void GMATH_Tests()
 	// Free all the nodes
 	for (int i = 0; i < size; i++)
 	{
-		if (nodeArray[i] != NULL)
+		if (nodeArray[i])
 			freenode(nodeArray[i]);
 	}
 }
