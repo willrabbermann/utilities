@@ -1,0 +1,25 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]; then
+	echo "Please run as root."
+	exit
+fi
+
+build_cmd="emerge --nospinner -uND @world"
+log="/var/log/icebuild.log"
+build_num=1
+
+$build_cmd &> $log
+
+while [[ -n $(cat $log | grep "internal compiler error: Segmentation fault") ]]
+do
+    echo "[Attempt #$build_num] $(date "+%H:%M:%S")"
+    tail -n 4 /var/log/emerge.log | grep Compiling | cut -c 18-
+    cat $log | grep -A 2 "internal compiler error: Segmentation fault"
+    echo "Rebuilding..."
+    build_num=$(echo "$build_num + 1" | bc)
+    $build_cmd &> $log
+done
+
+echo "Compile finished with no errors."
+echo "Full build log left in $log"

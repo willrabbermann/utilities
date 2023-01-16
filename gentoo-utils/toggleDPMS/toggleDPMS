@@ -1,0 +1,14 @@
+#!/bin/sh
+# POSIX compliant
+if [ -n "$(xset q | grep 'DPMS is Enabled')" ]
+then
+	xset -dpms
+	xset s noblank
+	xset s off
+	echo "DPMS is disabled."
+else
+	xset +dpms
+	xset s blank
+	xset s on
+	echo "DPMS is enabled."
+fi
