@@ -5,10 +5,8 @@
 
 int iclamp(int target, int max, int min)
 {
-	if (target > max)
-		return max;
-	if (target < min)
-		return min;
+	if (target > max) return max;
+	else if (target < min) return min;
 	else return target;
 }
 
