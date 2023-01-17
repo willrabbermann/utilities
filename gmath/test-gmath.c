@@ -34,7 +34,8 @@ GMATH_Tests()
 	free(v);
 }
 
-int main()
+int 
+main()
 {
 	GMATH_Tests();
 	return 0;
