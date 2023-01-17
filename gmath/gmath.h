@@ -1,198 +1,53 @@
-#ifndef GMATH_H
-#define GMATH_H
+#ifndef _GMATH_H_
+#define _GMATH_H_
 
-#define GMATH_DEBUG
+#ifndef M_PI
+#define M_E 2.7182818284590452354
+#define M_LOG2E 1.4426950408889634074
+#define M_LN2 0.69314718055994530942
+#define M_LN10 2.30258509299404568402
+#define M_PI 3.14159265358979323846
+#define M_SQRT2 1.41421356237309504880
+#define M_SQRT1_2 0.70710678118654752440
+#endif
 
-int iclamp(int target, int min, int max)
-{
-	if (target > max) return max;
-	else if (target < min) return min;
-	else return target;
-}
+#define M_TAU (2 * M_PI)
+#define M_SQRT3 1.73205080756887729352
+#define M_SQRT5 2.23606797749978969640
+#define M_PHI 1.61803398874989484820
+#define M_SQRTPHI 1.27201964951406896425
+#define M_SQRTE 1.64872127070012814684
+#define M_SQRTPI 1.77245385090551602729
+
+typedef float float2x2[2][2];
+typedef float float3x3[3][3];
+typedef float float4x4[4][4];
+
+#define deg2rad(x) ((x)*M_PI / 180)
+#define rad2deg(x) ((x)*180 / M_PI)
+
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+#define max(a, b) (((a) > (b)) ? (a) : (b))
+
+typedef struct {
+	float x, y;
+} vec2f;
+
+typedef struct {
+	float x, y, z;
+} vec3f;
 
 typedef struct {
 	float x, y, z, w;
 } vec4f;
 
-vec4f *newvec4f(float x, float y, float z, float w)
-// Initialize a new vec4f
-{
-	vec4f *new = malloc(sizeof(vec4f));
-	new->x = x;
-	new->y = y;
-	new->z = z;
-	new->w = w;
-		
-	return new;
-}
+int iclamp(int target, int min, int max);
+float fclamp(float target, float min, float max);
 
-void transform(vec4f *left, vec4f *right)
-// transform left by right
-{
-	left->x = left->x + right->x;
-	left->y = left->y + right->y;
-	left->z = left->z + right->z;
-	left->w = left->w + right->w;
-}
+vec4f *newvec4f(float x, float y, float z, float w);
+void transform(vec4f *left, vec4f *right);
+void scale(vec4f *left, float right);
 
-void scale(vec4f *left, float right)
-// scale left by right
-{
-	left->x = left->x * right;
-	left->y = left->y * right;
-	left->z = left->z * right;
-	left->w = left->w * right;
-}
+void printvec4f(vec4f *v);
 
-void printvec4f(vec4f *v)
-{
-	printf("{ %f, %f, %f, %f }\n", v->x, v->y, v->z, v->w);
-}
-
-// Linked List of vec4f
-typedef struct node {
-	struct node *next;
-	struct node *prev;
-	vec4f *position;
-} node;
-
-node *newnode(vec4f *v, node *n)
-// Add new node to the end of the list, 
-// regardless of n's position in the list.
-// Start a new list with n = NULL.
-{
-	node *new = malloc(sizeof(node));
-	if (n)
-	{
-		node *p = n;
-		while(p->next)
-			p = p->next;
-		new->position = v;
-		new->next = NULL;
-		new->prev = p;
-		p->next = new;
-		return new;
-	}
-	else
-	{
-		new->position = v;
-		new->next = NULL;
-		new->prev = NULL;
-		return new;
-	}
-}
-
-void freenode(node *n)
-// Free any node from the list.
-{
-	printf("\nFreeing node: ");
-	printvec4f(n->position);
-	
-	if (n->prev && n->next)
-	{
-		n->prev->next = n->next;
-		n->next->prev = n->prev;
-	}
-	else if (!n->prev && n->next)
-		n->next->prev = NULL;
-	else if (!n->next && n->prev)
-		n->prev->next = NULL;
-	free(n);
-}
-
-void printnodes(node *n)
-{
-	printf("Start\n|\n---> ");
-	node *p = n;
-	while(p->prev)
-		p = p->prev;
-	while(1)
-	{
-		printf("\t[\n\t\tnext = %p,\n\t\tprev = %p,\n\t\tposition = { %f, %f, %f, %f }\n", (void *)p->next, 
-				(void *)p->prev, p->position->x, p->position->y, p->position->z, p->position->w );
-		
-		if(p->next)
-		{
-			printf("------\t]\n|\n|\n---> ");
-			p = p->next;
-		}
-		else
-		{	
-			printf("\t]\n");
-			break;
-		}
-	}
-}
-
-#ifdef GMATH_DEBUG
-void GMATH_Tests()
-{
-	printf("sizeof(int) = %ld bytes\n", sizeof(int)); 		// 4 bytes
-	printf("sizeof(float) = %ld bytes\n", sizeof(float)); 	// 4 bytes
-	printf("sizeof(double) = %ld bytes\n", sizeof(double));	// 8 bytes
-	printf("sizeof(void *) = %ld bytes\n", sizeof(void *));	// 8 bytes
-
-	vec4f *v = newvec4f(0.0f, 1.5f, 1.0f, 1.0f);
-	printf("Initial vec4f\nv = ");
-	printvec4f(v);
-	
-	vec4f *b = newvec4f(1.0f, 2.0f, 3.0f, 0.0f);
-	printf("\nb = ");
-	printvec4f(b);
-	
-	transform(v, b);
-
-	free(b);
-	printf("transform(v, b)\nv = ");
-	printvec4f(v);
-
-	float c = 2.0f;	
-	printf("\nscale(v, %f)\nv = ", c);
-	scale(v, c);
-	printvec4f(v);
-
-	printf("\n"); 
-	
-	// Create an array of pointers (8 bytes * size)
-	const int size = 8;
-	node *nodeArray[size];
-	printf("\nsizeof(nodeArray) = %ld bytes\n", sizeof(nodeArray));
-	
-	// Init to null
-	for (int i = 0; i < size; i++)
-		nodeArray[i] = 0; 
-
-
-	// Randomly generate nodes
-	srand(time(0));
-	for (int i = 0; i < size; i++)
-	{
-		if (i)
-			nodeArray[i] = 
-				newnode(newvec4f(sin(rand()), sin(rand()), sin(rand()), sin(rand())), 
-						nodeArray[i-1]);
-		else
-			nodeArray[i] = 
-				newnode(newvec4f(sin(rand()), sin(rand()), sin(rand()), sin(rand())), 
-						0);
-	}
-	
-	printnodes(nodeArray[0]); 
-	
-	// Remove some nodes
-	freenode(nodeArray[1]);
-	nodeArray[1] = 0;
-	freenode(nodeArray[size-1]);
-	nodeArray[size-1] = 0;
-
-	printnodes(nodeArray[size-2]); 
-	
-	// Free all the nodes
-	for (int i = 0; i < size; i++)
-	{
-		if (nodeArray[i])
-			freenode(nodeArray[i]);
-	}
-}
-#endif
 #endif
