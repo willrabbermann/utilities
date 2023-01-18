@@ -43,11 +43,22 @@ typedef struct {
 
 int iclamp(int target, int min, int max);
 float fclamp(float target, float min, float max);
+double dclamp(double target, double min, double max);
+
+vec2f *newvec2f(float x, float y);
+void printvec2f(vec2f *v);
+void transformvec2f(vec2f *src, vec2f *change);
+void scalevec2f(vec2f *src, float scalar);
+void rotatevec2f(vec2f *origin, vec2f *vec, float degrees);
+
+vec3f *newvec3f(float x, float y, float z);
+void printvec3f(vec3f *v);
+void transformvec3f(vec3f *src, vec3f *change);
+void scalevec3f(vec3f *src, float scalar);
 
 vec4f *newvec4f(float x, float y, float z, float w);
-void transform(vec4f *left, vec4f *right);
-void scale(vec4f *left, float right);
-
 void printvec4f(vec4f *v);
+void transformvec4f(vec4f *src, vec4f *change);
+void scalevec4f(vec4f *src, float scalar);
 
 #endif

@@ -14,24 +14,41 @@ GMATH_Tests()
 	printf("sizeof(void *) = %ld bytes\n", sizeof(void *));	// 8 bytes
 
 	vec4f *v = newvec4f(0.0f, 1.5f, 1.0f, 1.0f);
-	printf("Initial vec4f\nv = ");
+	printf("\nv = ");
 	printvec4f(v);
 	
 	vec4f *b = newvec4f(1.0f, 2.0f, 3.0f, 0.0f);
-	printf("\nb = ");
+	printf("b = ");
 	printvec4f(b);
 	
-	transform(v, b);
+	transformvec4f(v, b);
 
 	free(b);
-	printf("transform(v, b)\nv = ");
+	printf("\ntransformvec4f(v, b)\nv = ");
 	printvec4f(v);
 
 	float c = 2.0f;	
-	printf("\nscale(v, %f)\nv = ", c);
-	scale(v, c);
+	printf("\nscalevec4f(v, %f)\nv = ", c);
+	scalevec4f(v, c);
 	printvec4f(v);
 	free(v);
+
+	vec2f *v2 = newvec2f(3.0f, 2.0f);
+	vec2f *o = newvec2f(3.0f, 0.0f);
+	printf("\nv2 = ");
+	printvec2f(v2);
+	printf("o = ");
+	printvec2f(o);
+
+	printf("\nrotatevec2f(o, v2, 90.0f)\n");
+	
+	rotatevec2f(o, v2, 90.0f);
+
+	printf("v2 = ");
+	printvec2f(v2);
+	
+	free(v2);
+	free(o);
 }
 
 int 
