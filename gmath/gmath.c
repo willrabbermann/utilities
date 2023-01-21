@@ -202,78 +202,6 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 	free(rot_matrix);
 }
 
-void
-multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
-//Preform dot product a*b output vec3f
-{
-	if (a == result)
-	{
-		vec3f *tmp = malloc(sizeof *tmp);
-		tmp->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
-		tmp->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
-		tmp->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
-		memcpy(result, tmp, sizeof *tmp);
-		free(tmp);
-	}
-	else
-	{
-		result->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
-		result->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
-		result->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
-	}
-}
-
-void 
-eyefloat2x2(float2x2 a)
-{
-	memset(a, 0, sizeof(float2x2));
-	for (int i = 0; i < 2; i++)
-		a[i][i] = 1;
-}
-
-void
-eyefloat3x3(float3x3 a)
-{
-	memset(a, 0, sizeof(float3x3));
-	for (int i = 0; i < 3; i++)
-		a[i][i] = 1;
-}
-
-void
-eyefloat4x4(float4x4 a)
-{
-	memset(a, 0, sizeof(float4x4));
-	for (int i = 0; i < 4; i++)
-		a[i][i] = 1;
-}
-
-void 
-printfloat3x3(float3x3 a)
-{
-	for (int b = 0; b < 3; b++)
-	{
-		for (int c = 0; c < 3; c++)
-			printf("[%f]", a[b][c]);
-		printf("\n");
-	}
-}
-
-void
-multiplyfloat3x3(float3x3 a, float3x3 b, float3x3 result)
-{
-	for (int c = 0; c < 3; c++)
-		for (int d = 0; d < 3; d++)
-			result[c][d] = a[c][d] * b[c][d];
-}
-
-void 
-addfloat3x3(float3x3 a, float3x3 b, float3x3 result)
-{
-	for (int c = 0; c < 3; c++)
-		for (int d = 0; d < 3; d++)
-			result[c][d] = a[c][d] + b[c][d];
-}
-
 vec4f
 *newvec4f(float x, float y, float z, float w)
 {
@@ -353,5 +281,108 @@ scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char op)
 			result->y = a->y / scalar;
 			result->z = a->z / scalar;
 			result->w = a->w / scalar;
+	}
+}
+
+void 
+eyefloat2x2(float2x2 a)
+{
+	memset(a, 0, sizeof(float2x2));
+	for (int i = 0; i < 2; i++)
+		a[i][i] = 1;
+}
+
+void
+eyefloat3x3(float3x3 a)
+{
+	memset(a, 0, sizeof(float3x3));
+	for (int i = 0; i < 3; i++)
+		a[i][i] = 1;
+}
+
+void
+eyefloat4x4(float4x4 a)
+{
+	memset(a, 0, sizeof(float4x4));
+	for (int i = 0; i < 4; i++)
+		a[i][i] = 1;
+}
+
+void 
+printfloat2x2(float2x2 a)
+{
+	for (int b = 0; b < 2; b++)
+	{
+		for (int c = 0; c < 2; c++)
+			printf("[%f]", a[b][c]);
+		printf("\n");
+	}
+}
+
+void 
+printfloat3x3(float3x3 a)
+{
+	for (int b = 0; b < 3; b++)
+	{
+		for (int c = 0; c < 3; c++)
+			printf("[%f]", a[b][c]);
+		printf("\n");
+	}
+}
+
+
+void 
+printfloat4x4(float4x4 a)
+{
+	for (int b = 0; b < 4; b++)
+	{
+		for (int c = 0; c < 4; c++)
+			printf("[%f]", a[b][c]);
+		printf("\n");
+	}
+}
+
+void
+opfloat3x3(float3x3 a, float3x3 b, float3x3 result, char op)
+// Preform a op b
+{
+	for (int c = 0; c < 3; c++)
+		for (int d = 0; d < 3; d++)
+			switch (op)
+			{
+				case '+':
+					result[c][d] = a[c][d] + b[c][d];
+					break;
+				case '-':
+					result[c][d] = a[c][d] - b[c][d];
+					break;
+				case '*':
+					result[c][d] = a[c][d] * b[c][d];
+					break;
+				case '/':
+					result[c][d] = a[c][d] / b[c][d];
+					break;
+			}
+}
+
+
+void
+multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
+//Preform dot product a*b output vec3f
+{
+	if (a == result)
+	{
+		vec3f *tmp = malloc(sizeof *tmp);
+		tmp->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
+		tmp->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
+		tmp->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
+		memcpy(result, tmp, sizeof *tmp);
+		free(tmp);
+	}
+	else
+	{
+		result->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
+		result->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
+		result->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
 	}
 }
