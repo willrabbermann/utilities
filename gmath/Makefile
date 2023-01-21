@@ -7,7 +7,7 @@ all:
 
 debug:
 	cc $(CFLAGS) -g -o solution test-gmath.c $(SRC) $(LDFLAGS)
-	gdb ./test-gmath
+	gdb ./solution
 
 clean:
-	rm -f test-gmath
+	rm -f solution
