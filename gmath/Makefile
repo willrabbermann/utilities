@@ -1,12 +1,12 @@
-CFLAGS=-fsanitize=address -Wall -Wextra -O2 -pedantic
+CFLAGS=-fsanitize=address -Wall -Wextra -pedantic -O2
 LDFLAGS=-lm
 SRC=gmath.c
 
 all:
-	cc $(CFLAGS) -o test-gmath test-gmath.c $(SRC) $(LDFLAGS)
+	cc $(CFLAGS) -o solution test-gmath.c $(SRC) $(LDFLAGS)
 
 debug:
-	cc $(CFLAGS) -g -o test-gmath test-gmath.c $(SRC) $(LDFLAGS)
+	cc $(CFLAGS) -g -o solution test-gmath.c $(SRC) $(LDFLAGS)
 	gdb ./test-gmath
 
 clean:

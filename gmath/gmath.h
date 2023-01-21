@@ -29,6 +29,7 @@ typedef float float4x4[4][4];
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
+#define clamp(a, b, c) min(c, max(b, a))
 
 typedef struct {
 	float x, y;
@@ -41,10 +42,6 @@ typedef struct {
 typedef struct {
 	float x, y, z, w;
 } vec4f;
-
-int iclamp(int target, int min, int max);
-float fclamp(float target, float min, float max);
-double dclamp(double target, double min, double max);
 
 vec2f *newvec2f(float x, float y);
 void printvec2f(vec2f *v);

@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+#include <tgmath.h>
 
 #include "gmath.h"
 
 void
-GMATH_Tests()
+Vector_Scaling_Test()
 {
 	// vec4f transform
 	vec4f *v = newvec4f(0.0f, 1.5f, 1.0f, 1.0f);
@@ -26,7 +28,10 @@ GMATH_Tests()
 	printvec4f(v);
 	free(v);
 	free(c);
-
+}
+void
+Vector_Rotation_Test()
+{
 	// vec2f rotation
 	vec2f *v2 = newvec2f(3.0f, 2.0f);
 	vec2f *o = newvec2f(3.0f, 0.0f);
@@ -48,13 +53,26 @@ GMATH_Tests()
 	printvec3f(v3);
 	printf("o2 = ");
 	printvec3f(o2);
-	rotatevec3f(o2, v3, 90.0f, 'x');
 	printf("rotatevec3f(o2, v3, 90.0f, 'x')\n");
+	rotatevec3f(o2, v3, 90.0f, 'x');
 	printf("v3 = ");
 	printvec3f(v3);
+	printf("rotatevec3f(o2, v3, 90.0f, 'y')\n");
+	rotatevec3f(o2, v3, 90.0f, 'y');
+	printf("v3 = ");
+	printvec3f(v3);
+	printf("rotatevec3f(o2, v3, 90.0f, 'z')\n");
+	rotatevec3f(o2, v3, 90.0f, 'z');
+	printf("v3 = ");
+	printvec3f(v3);
+	
 	free(v3);
 	free(o2);
+}
 
+void
+Vector_and_Matrix_Test()
+{
 	// Matrix operations
 	printf("\ng = \n");
 	float3x3 *g = calloc(1, sizeof *g);
@@ -76,9 +94,28 @@ GMATH_Tests()
 	free(g);
 }
 
+void
+Macros_Test()
+{
+	printf("\nclamp(1, 50.1234, 100) = ");
+	printf("%f\n", clamp(0, 50.1234, 100));
+
+	printf("min('A', 'B') = ");
+	printf("%c\n", min('A', 'B'));
+	printf("max('A', 'B') = ");
+	printf("%c\n", max('A', 'B'));
+
+	printf("π = %f\n", M_PI);
+	printf("√(π) = %f\n", M_SQRTPI);
+}
+
 int 
 main()
 {
-	GMATH_Tests();
+	Vector_Scaling_Test();
+	Vector_Rotation_Test();
+	Vector_and_Matrix_Test();
+	Macros_Test();
+	
 	return 0;
 }

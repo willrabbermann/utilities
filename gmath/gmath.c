@@ -1,41 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <tgmath.h>
 #include <string.h>
+#include <tgmath.h>
+#include <math.h>
 
 #include "gmath.h"
-
-// Clamp target between min & max
-
-int 
-iclamp(int target, int min, int max)
-{
-	if (target > max) return max;
-	else if (target < min) return min;
-	else return target;
-}
-
-float
-fclamp(float target, float min, float max)
-{
-	if (target > max) return max;
-	else if (target < min) return min;
-	else return target;
-}
-
-double
-dclamp(double target, double min, double max)
-{
-	if (target > max) return max;
-	else if (target < min) return min;
-	else return target;
-}
-
-// 2 point float vector //
 
 vec2f 
 *newvec2f(float x, float y)
