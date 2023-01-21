@@ -47,7 +47,7 @@ opvec2f(vec2f *a, vec2f *b, vec2f *result, char op)
 }
 
 void
-scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char *op)
+scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char op)
 // Preform op on vec using scalar
 {
 	switch (op)
@@ -55,16 +55,16 @@ scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char *op)
 		case '+': 
 			result->x = a->x + scalar;
 			result->y = a->y + scalar;
-		break;
+			break;
 		case '-':
 			result->x = a->x - scalar;
 			result->y = a->y - scalar;
-		break;
+			break;
 		case '*':
 			result->x = a->x * scalar;
 			result->y = a->y * scalar;
-		break;
-		case '/:
+			break;
+		case '/':
 			result->x = a->x / scalar;
 			result->y = a->y / scalar;
 	}
@@ -130,7 +130,7 @@ opvec3f(vec3f *a, vec3f *b, vec3f *result, char op)
 }
 
 void
-scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char *op)
+scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char op)
 // Preform op on vec using scalar
 {
 	switch (op)
@@ -139,18 +139,18 @@ scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char *op)
 			result->x = a->x + scalar;
 			result->y = a->y + scalar;
 			result->z = a->z + scalar;
-		break;
+			break;
 		case '-':
 			result->x = a->x - scalar;
 			result->y = a->y - scalar;
 			result->z = a->z - scalar;
-		break;
+			break;
 		case '*':
 			result->x = a->x * scalar;
 			result->y = a->y * scalar;
 			result->z = a->z * scalar;
-		break;
-		case '/:
+			break;
+		case '/':
 			result->x = a->x / scalar;
 			result->y = a->y / scalar;
 			result->z = a->z / scalar;
@@ -204,7 +204,7 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 
 void
 multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
-//Preform dot product a*b
+//Preform dot product a*b output vec3
 {
 	if (a == result)
 	{
@@ -310,7 +310,7 @@ opvec4f(vec4f *a, vec4f *b, vec4f *result, char op)
 }
 
 void
-scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char *op)
+scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char op)
 // Preform op on vec using scalar
 {
 	switch (op)
@@ -320,20 +320,20 @@ scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char *op)
 			result->y = a->y + scalar;
 			result->z = a->z + scalar;
 			result->w = a->w + scalar;
-		break;
+			break;
 		case '-':
 			result->x = a->x - scalar;
 			result->y = a->y - scalar;
 			result->z = a->z - scalar;
 			result->w = a->w - scalar;
-		break;
+			break;
 		case '*':
 			result->x = a->x * scalar;
 			result->y = a->y * scalar;
 			result->z = a->z * scalar;
 			result->w = a->w * scalar;
-		break;
-		case '/:
+			break;
+		case '/':
 			result->x = a->x / scalar;
 			result->y = a->y / scalar;
 			result->z = a->z / scalar;

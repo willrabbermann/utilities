@@ -23,8 +23,8 @@ Vector_Scaling_Test()
 	// vec4f scale
 	float *c = malloc(sizeof(float));
 	*c = 2.0f;
-	printf("scalevec4f(v, %f, v)\nv = ", *c);
-	scalevec4f(v, *c, v);
+	printf("scalar_op_vec4f(v, %f, v, '*')\nv = ", *c);
+	scalar_op_vec4f(v, *c, v, '*');
 	printvec4f(v);
 	free(v);
 	free(c);
