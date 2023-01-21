@@ -24,9 +24,12 @@ typedef float float1x2[1][2];
 typedef float float2x2[2][2];
 
 typedef float float1x3[1][3];
+typedef float float2x3[2][3];
 typedef float float3x3[3][3];
 
 typedef float float1x4[1][4];
+typedef float float2x4[2][4];
+typedef float float3x4[3][4];
 typedef float float4x4[4][4];
 
 #define deg2rad(x) ((x)*M_PI / 180)
