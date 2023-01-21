@@ -58,13 +58,10 @@ void opvec3f(vec3f *a, vec3f *b, vec3f *result, char op);
 void addvec3f(vec3f *src, vec3f *change);
 void scalevec3f(vec3f *src, float scalar);
 void multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result);
-
-
 void rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis);
 
 void printfloat3x3(float3x3 a);
 void multiply3x3(float3x3 a, float3x3 b, float3x3 result);
-
 void addfloat3x3(float3x3 a, float3x3 b, float3x3 result);
 
 vec4f *newvec4f(float x, float y, float z, float w);

@@ -7,12 +7,12 @@
 void
 GMATH_Tests()
 {
-	printf("sizeof(int) = %ld bytes\n", sizeof(int)); 		// 4 bytes
-	printf("sizeof(float) = %ld bytes\n", sizeof(float)); 	// 4 bytes
-	printf("sizeof(float*) = %ld bytes\n", sizeof(float*)); //  bytes
-	printf("sizeof(double) = %ld bytes\n", sizeof(double));	// 8 bytes
-	printf("sizeof(void *) = %ld bytes\n", sizeof(void *));	// 8 bytes
-	printf("sizeof(float3x3) = %ld bytes\n", sizeof(float3x3)); //  bytes
+	printf("sizeof(int) = %ld bytes\n", sizeof(int));
+	printf("sizeof(float) = %ld bytes\n", sizeof(float));
+	printf("sizeof(float*) = %ld bytes\n", sizeof(float*));
+	printf("sizeof(double) = %ld bytes\n", sizeof(double));
+	printf("sizeof(void *) = %ld bytes\n", sizeof(void *));
+	printf("sizeof(float3x3) = %ld bytes\n", sizeof(float3x3)); 
 
 	// vec4f transform
 	vec4f *v = newvec4f(0.0f, 1.5f, 1.0f, 1.0f);
@@ -63,14 +63,23 @@ GMATH_Tests()
 	free(o2);
 
 	// Matrix operations
-	printf("\nMatrix 3x3\n");
+	printf("\ng = \n");
 	float3x3 *g = calloc(1, sizeof *g);
 	memcpy(g, &(float3x3){
+		{ 1, 2, 3 },
 		{ 0, 0, 0 },
-		{ 1, 1, 1 },
-		{ 0, 0, 0 }
+		{ 1, 2, 3 }
 	}, sizeof *g);
 	printfloat3x3(*g);
+
+	vec3f *v4 = newvec3f(1.0f, 2.0f, 1.0f);
+	printf("\nv4 = ");
+	printvec3f(v4);
+	printf("\nmutliplyvec3f3x3(v4, g, v4)\n");
+	multiplyvec3f3x3(v4, g, v4);
+	printf("v4 = ");
+	printvec3f(v4);
+	free(v4);
 	free(g);
 }
 

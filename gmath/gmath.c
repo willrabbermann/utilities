@@ -101,73 +101,6 @@ printvec3f(vec3f *v)
 }
 
 void
-addvec3f(vec3f *src, vec3f *change)
-{
-	src->x = src->x + change->x;
-	src->y = src->y + change->y;
-	src->z = src->z + change->z;
-}
-
-void
-scalevec3f(vec3f *src, float scalar)
-{
-	src->x = src->x * scalar;
-	src->y = src->y * scalar;
-	src->z = src->z * scalar;
-}
-
-void
-multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
-{
-	result->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
-	result->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
-	result->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
-}
-
-void
-rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
-{
-	float angle = deg2rad(degrees);
-	float3x3 *rot_matrix = malloc(sizeof(*rot_matrix));
-	switch(axis)
-	{
-		case 'x':
-			memcpy(rot_matrix, &(float3x3){
-					{ 1, 0, 0 },
-					{ 0, cos(angle), -sin(angle) },
-					{ 0, sin(angle),  cos(angle) }},
-					sizeof(float3x3));
-			break;
-		case 'y':
-			memcpy(rot_matrix, &(float3x3){
-					{ cos(angle), 0, sin(angle) },
-					{ 0, 1, 0 },
-					{ -sin(angle), 0, cos(angle) }},
-					sizeof(float3x3));
-			break;
-		case 'z':
-			memcpy(rot_matrix, &(float3x3){
-					{ cos(angle), -sin(angle), 0 },
-					{ sin(angle), cos(angle), 0 },
-					{ 0, 0, 1 }},
-					sizeof(float3x3));			
-			break;
-		default:
-			fprintf(stderr, "rotatevec3f ERROR: '%c' is an invalid axis value.\n", axis);
-			return;
-	}
-	vec3f *offset_vec = malloc(sizeof(*offset_vec)); 
-	opvec3f(vec, origin, offset_vec, '-');
-	opvec3f(offset_vec, origin, offset_vec, '+');
-	multiplyvec3f3x3(offset_vec , rot_matrix, offset_vec);
-	vec->x = offset_vec->x;
-	vec->y = offset_vec->y;
-	vec->z = offset_vec->z;
-	free(offset_vec);
-	free(rot_matrix);
-}
-
-void
 opvec3f(vec3f *a, vec3f *b, vec3f *result, char op)
 {
 	switch(op)
@@ -192,6 +125,84 @@ opvec3f(vec3f *a, vec3f *b, vec3f *result, char op)
 			result->y = (a->y / b->y);
 			result->z = (a->z / b->z);
 	}
+}
+
+void
+addvec3f(vec3f *src, vec3f *change)
+{
+	src->x = src->x + change->x;
+	src->y = src->y + change->y;
+	src->z = src->z + change->z;
+}
+
+void
+scalevec3f(vec3f *src, float scalar)
+{
+	src->x = src->x * scalar;
+	src->y = src->y * scalar;
+	src->z = src->z * scalar;
+}
+
+void
+multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
+{
+	if (a == result)
+	{
+		vec3f *tmp = malloc(sizeof *tmp);
+		tmp->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
+		tmp->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
+		tmp->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
+		memcpy(result, tmp, sizeof *tmp);
+		free(tmp);
+	}
+	else
+	{
+		result->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
+		result->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
+		result->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
+	}
+}
+
+void
+rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
+{
+	float angle = deg2rad(degrees);
+	float3x3 *rot_matrix = malloc(sizeof(*rot_matrix));
+	switch(axis)
+	{
+		case 'x':
+			memcpy(rot_matrix, &(float3x3){
+					{ 1, 0, 0 },
+					{ 0, -sin(angle), cos(angle) },
+					{ 0, cos(angle), sin(angle) }},
+					sizeof(float3x3));
+			break;
+		case 'y':
+			memcpy(rot_matrix, &(float3x3){
+					{ sin(angle), 0, cos(angle) },
+					{ 0, 1, 0 },
+					{ cos(angle), 0, -sin(angle) }},
+					sizeof(float3x3));
+			break;
+		case 'z':
+			memcpy(rot_matrix, &(float3x3){
+					{ -sin(angle), cos(angle), 0 },
+					{ cos(angle), sin(angle), 0 },
+					{ 0, 0, 1 }},
+					sizeof(float3x3));			
+			break;
+		default:
+			fprintf(stderr, "rotatevec3f ERROR: '%c' is an invalid axis value.\n", axis);
+			free(rot_matrix);
+			return;
+	}
+	vec3f *offset_vec = malloc(sizeof *offset_vec); 
+	opvec3f(vec, origin, offset_vec, '-');
+	multiplyvec3f3x3(offset_vec, rot_matrix, offset_vec);
+	opvec3f(offset_vec, origin, offset_vec, '+');
+	memcpy(vec, offset_vec, sizeof(*offset_vec));
+	free(offset_vec);
+	free(rot_matrix);
 }
 
 void
