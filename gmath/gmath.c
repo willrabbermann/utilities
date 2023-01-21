@@ -54,17 +54,33 @@ printvec2f(vec2f *v)
 }
 
 void
-addvec2f(vec2f *src, vec2f *change)
+opvec2f(vec2f *a, vec2f *b, vec2f *result, char op)
 {
-	src->x = src->x + change->x;
-	src->y = src->y + change->y;
+	switch(op)
+	{
+		case '+':
+			result->x = (a->x + b->x);
+			result->y = (a->y + b->y);
+			break;
+		case '-':
+			result->x = (a->x - b->x);
+			result->y = (a->y - b->y);
+			break;
+		case '*':
+			result->x = (a->x * b->x);
+			result->y = (a->y * b->y);
+			break;
+		case '/':
+			result->x = (a->x / b->x);
+			result->y = (a->y / b->y);
+	}
 }
 
 void
-scalevec2f(vec2f *src, float scalar)
+scalevec2f(vec2f *a, float scalar, vec2f *result)
 {
-	src->x = src->x * scalar;
-	src->y = src->y * scalar;
+	result->x = a->x * scalar;
+	result->y = a->y * scalar;
 }
 
 void
@@ -128,39 +144,11 @@ opvec3f(vec3f *a, vec3f *b, vec3f *result, char op)
 }
 
 void
-addvec3f(vec3f *src, vec3f *change)
+scalevec3f(vec3f *a, float scalar, vec3f *result)
 {
-	src->x = src->x + change->x;
-	src->y = src->y + change->y;
-	src->z = src->z + change->z;
-}
-
-void
-scalevec3f(vec3f *src, float scalar)
-{
-	src->x = src->x * scalar;
-	src->y = src->y * scalar;
-	src->z = src->z * scalar;
-}
-
-void
-multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
-{
-	if (a == result)
-	{
-		vec3f *tmp = malloc(sizeof *tmp);
-		tmp->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
-		tmp->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
-		tmp->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
-		memcpy(result, tmp, sizeof *tmp);
-		free(tmp);
-	}
-	else
-	{
-		result->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
-		result->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
-		result->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
-	}
+	result->x = a->x * scalar;
+	result->y = a->y * scalar;
+	result->z = a->z * scalar;
 }
 
 void
@@ -192,7 +180,9 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 					sizeof(float3x3));			
 			break;
 		default:
-			fprintf(stderr, "rotatevec3f ERROR: '%c' is an invalid axis value.\n", axis);
+			fprintf(stderr, 
+					"rotatevec3f ERROR: '%c' is an invalid axis value.\n", 
+					axis);
 			free(rot_matrix);
 			return;
 	}
@@ -203,6 +193,26 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 	memcpy(vec, offset_vec, sizeof(*offset_vec));
 	free(offset_vec);
 	free(rot_matrix);
+}
+
+void
+multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
+{
+	if (a == result)
+	{
+		vec3f *tmp = malloc(sizeof *tmp);
+		tmp->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
+		tmp->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
+		tmp->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
+		memcpy(result, tmp, sizeof *tmp);
+		free(tmp);
+	}
+	else
+	{
+		result->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
+		result->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
+		result->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
+	}
 }
 
 void
@@ -262,19 +272,41 @@ printvec4f(vec4f *v)
 }
 
 void
-addvec4f(vec4f *src, vec4f *change)
+opvec4f(vec4f *a, vec4f *b, vec4f *result, char op)
 {
-	src->x = src->x + change->x;
-	src->y = src->y + change->y;
-	src->z = src->z + change->z;
-	src->w = src->w + change->w;
+	switch(op)
+	{
+		case '+':
+			result->x = (a->x + b->x);
+			result->y = (a->y + b->y);
+			result->z = (a->z + b->z);
+			result->w = (a->w + b->w);
+			break;
+		case '-':
+			result->x = (a->x - b->x);
+			result->y = (a->y - b->y);
+			result->z = (a->z - b->z);
+			result->w = (a->w - b->w);
+			break;
+		case '*':
+			result->x = (a->x * b->x);
+			result->y = (a->y * b->y);
+			result->z = (a->z * b->z);
+			result->w = (a->w * b->w);
+			break;
+		case '/':
+			result->x = (a->x / b->x);
+			result->y = (a->y / b->y);
+			result->z = (a->z / b->z);
+			result->w = (a->w / b->w);
+	}
 }
 
 void
-scalevec4f(vec4f *src, float scalar)
+scalevec4f(vec4f *a, float scalar, vec4f *result)
 {
-	src->x = src->x * scalar;
-	src->y = src->y * scalar;
-	src->z = src->z * scalar;
-	src->w = src->w * scalar;
+	result->x = a->x * scalar;
+	result->y = a->y * scalar;
+	result->z = a->z * scalar;
+	result->w = a->w * scalar;
 }

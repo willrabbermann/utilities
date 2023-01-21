@@ -7,30 +7,22 @@
 void
 GMATH_Tests()
 {
-	printf("sizeof(int) = %ld bytes\n", sizeof(int));
-	printf("sizeof(float) = %ld bytes\n", sizeof(float));
-	printf("sizeof(float*) = %ld bytes\n", sizeof(float*));
-	printf("sizeof(double) = %ld bytes\n", sizeof(double));
-	printf("sizeof(void *) = %ld bytes\n", sizeof(void *));
-	printf("sizeof(float3x3) = %ld bytes\n", sizeof(float3x3)); 
-
 	// vec4f transform
 	vec4f *v = newvec4f(0.0f, 1.5f, 1.0f, 1.0f);
-	printf("\nv = ");
+	printf("v = ");
 	printvec4f(v);
 	vec4f *b = newvec4f(1.0f, 2.0f, 3.0f, 0.0f);
 	printf("b = ");
 	printvec4f(b);
-	addvec4f(v, b);
-	printf("\ntransformvec4f(v, b)\nv = ");
+	printf("opvec4f(v, b, v, '+')\nv = ");
+	opvec4f(v, b, v, '+');
 	printvec4f(v);
 	free(b);
-
 	// vec4f scale
 	float *c = malloc(sizeof(float));
 	*c = 2.0f;
-	printf("\nscalevec4f(v, %f)\nv = ", *c);
-	scalevec4f(v, *c);
+	printf("scalevec4f(v, %f, v)\nv = ", *c);
+	scalevec4f(v, *c, v);
 	printvec4f(v);
 	free(v);
 	free(c);
@@ -42,7 +34,7 @@ GMATH_Tests()
 	printvec2f(v2);
 	printf("o = ");
 	printvec2f(o);
-	printf("\nrotatevec2f(o, v2, 90.0f)\n");
+	printf("rotatevec2f(o, v2, 90.0f)\n");
 	rotatevec2f(o, v2, 90.0f);
 	printf("v2 = ");
 	printvec2f(v2);
@@ -57,7 +49,8 @@ GMATH_Tests()
 	printf("o2 = ");
 	printvec3f(o2);
 	rotatevec3f(o2, v3, 90.0f, 'x');
-	printf("\nrotatevec3f(o2, v3, 90.0f, 'x')\n");
+	printf("rotatevec3f(o2, v3, 90.0f, 'x')\n");
+	printf("v3 = ");
 	printvec3f(v3);
 	free(v3);
 	free(o2);
@@ -73,9 +66,9 @@ GMATH_Tests()
 	printfloat3x3(*g);
 
 	vec3f *v4 = newvec3f(1.0f, 2.0f, 1.0f);
-	printf("\nv4 = ");
+	printf("v4 = ");
 	printvec3f(v4);
-	printf("\nmutliplyvec3f3x3(v4, g, v4)\n");
+	printf("mutliplyvec3f3x3(v4, g, v4)\n");
 	multiplyvec3f3x3(v4, g, v4);
 	printf("v4 = ");
 	printvec3f(v4);

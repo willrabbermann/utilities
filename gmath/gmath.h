@@ -48,25 +48,26 @@ double dclamp(double target, double min, double max);
 
 vec2f *newvec2f(float x, float y);
 void printvec2f(vec2f *v);
-void addvec2f(vec2f *src, vec2f *change);
-void scalevec2f(vec2f *src, float scalar);
+void opvec2f(vec2f *a, vec2f *b, vec2f *result, char op);
+void scalevec2f(vec2f *a, float scalar, vec2f *result);
 void rotatevec2f(vec2f *origin, vec2f *vec, float degrees);
 
 vec3f *newvec3f(float x, float y, float z);
 void printvec3f(vec3f *v);
 void opvec3f(vec3f *a, vec3f *b, vec3f *result, char op);
-void addvec3f(vec3f *src, vec3f *change);
-void scalevec3f(vec3f *src, float scalar);
-void multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result);
+void scalevec3f(vec3f *a, float scalar, vec3f *result);
 void rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis);
 
+void multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result);
+
+void eyefloat3x3(float3x3 a);
 void printfloat3x3(float3x3 a);
 void multiply3x3(float3x3 a, float3x3 b, float3x3 result);
 void addfloat3x3(float3x3 a, float3x3 b, float3x3 result);
 
 vec4f *newvec4f(float x, float y, float z, float w);
 void printvec4f(vec4f *v);
-void addvec4f(vec4f *src, vec4f *change);
-void scalevec4f(vec4f *src, float scalar);
+void opvec4f(vec4f *a, vec4f *b, vec4f *result, char op);
+void scalevec4f(vec4f *a, float scalar, vec4f *result);
 
 #endif
