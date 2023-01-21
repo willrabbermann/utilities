@@ -66,8 +66,6 @@ rotatevec2f(vec2f *origin, vec2f *vec, float degrees)
 	vec->y = (y_rot + origin->y);
 }
 
-// 3 point float vector //
-
 vec3f 
 *newvec3f(float x, float y, float z)
 {
@@ -219,8 +217,6 @@ addfloat3x3(float3x3 a, float3x3 b, float3x3 result)
 		for (int d = 0; d < 3; d++)
 			result[c][d] = a[c][d] + b[c][d];
 }
-
-// 4 point float vector //
 
 vec4f
 *newvec4f(float x, float y, float z, float w)
