@@ -120,6 +120,7 @@ scalevec3f(vec3f *a, float scalar, vec3f *result)
 
 void
 rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
+// Rotate vec counter clockwise about the origin on axis
 {
 	float angle = deg2rad(degrees);
 	float3x3 *rot_matrix = malloc(sizeof(*rot_matrix));
