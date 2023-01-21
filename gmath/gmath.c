@@ -24,6 +24,7 @@ printvec2f(vec2f *v)
 
 void
 opvec2f(vec2f *a, vec2f *b, vec2f *result, char op)
+// Preform op on two vec
 {
 	switch(op)
 	{
@@ -46,10 +47,27 @@ opvec2f(vec2f *a, vec2f *b, vec2f *result, char op)
 }
 
 void
-scalevec2f(vec2f *a, float scalar, vec2f *result)
+scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char *op)
+// Preform op on vec using scalar
 {
-	result->x = a->x * scalar;
-	result->y = a->y * scalar;
+	switch (op)
+	{
+		case '+': 
+			result->x = a->x + scalar;
+			result->y = a->y + scalar;
+		break;
+		case '-':
+			result->x = a->x - scalar;
+			result->y = a->y - scalar;
+		break;
+		case '*':
+			result->x = a->x * scalar;
+			result->y = a->y * scalar;
+		break;
+		case '/:
+			result->x = a->x / scalar;
+			result->y = a->y / scalar;
+	}
 }
 
 void
@@ -85,6 +103,7 @@ printvec3f(vec3f *v)
 
 void
 opvec3f(vec3f *a, vec3f *b, vec3f *result, char op)
+// Preform op on two vec
 {
 	switch(op)
 	{
@@ -111,11 +130,31 @@ opvec3f(vec3f *a, vec3f *b, vec3f *result, char op)
 }
 
 void
-scalevec3f(vec3f *a, float scalar, vec3f *result)
+scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char *op)
+// Preform op on vec using scalar
 {
-	result->x = a->x * scalar;
-	result->y = a->y * scalar;
-	result->z = a->z * scalar;
+	switch (op)
+	{
+		case '+': 
+			result->x = a->x + scalar;
+			result->y = a->y + scalar;
+			result->z = a->z + scalar;
+		break;
+		case '-':
+			result->x = a->x - scalar;
+			result->y = a->y - scalar;
+			result->z = a->z - scalar;
+		break;
+		case '*':
+			result->x = a->x * scalar;
+			result->y = a->y * scalar;
+			result->z = a->z * scalar;
+		break;
+		case '/:
+			result->x = a->x / scalar;
+			result->y = a->y / scalar;
+			result->z = a->z / scalar;
+	}
 }
 
 void
@@ -165,6 +204,7 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 
 void
 multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
+//Preform dot product a*b
 {
 	if (a == result)
 	{
@@ -239,6 +279,7 @@ printvec4f(vec4f *v)
 
 void
 opvec4f(vec4f *a, vec4f *b, vec4f *result, char op)
+// Preform op on two vec
 {
 	switch(op)
 	{
@@ -269,10 +310,33 @@ opvec4f(vec4f *a, vec4f *b, vec4f *result, char op)
 }
 
 void
-scalevec4f(vec4f *a, float scalar, vec4f *result)
+scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char *op)
+// Preform op on vec using scalar
 {
-	result->x = a->x * scalar;
-	result->y = a->y * scalar;
-	result->z = a->z * scalar;
-	result->w = a->w * scalar;
+	switch (op)
+	{
+		case '+': 
+			result->x = a->x + scalar;
+			result->y = a->y + scalar;
+			result->z = a->z + scalar;
+			result->w = a->w + scalar;
+		break;
+		case '-':
+			result->x = a->x - scalar;
+			result->y = a->y - scalar;
+			result->z = a->z - scalar;
+			result->w = a->w - scalar;
+		break;
+		case '*':
+			result->x = a->x * scalar;
+			result->y = a->y * scalar;
+			result->z = a->z * scalar;
+			result->w = a->w * scalar;
+		break;
+		case '/:
+			result->x = a->x / scalar;
+			result->y = a->y / scalar;
+			result->z = a->z / scalar;
+			result->w = a->w / scalar;
+	}
 }
