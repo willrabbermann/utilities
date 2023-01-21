@@ -39,38 +39,52 @@ typedef float float4x4[4][4];
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define clamp(a, b, c) min(c, max(b, a))
 
+// Vectors & Vertices
+
 typedef struct {
 	float x, y;
-} vec2f;
+} vec2f, vert2f;
 
 typedef struct {
 	float x, y, z;
-} vec3f;
+} vec3f, vert3f;
 
 typedef struct {
 	float x, y, z, w;
-} vec4f;
+} vec4f, vert4f;
 
+// vec2f //
 vec2f *newvec2f(float x, float y);
+// Operations
 void printvec2f(vec2f *v);
 void opvec2f(vec2f *a, vec2f *b, vec2f *result, char op);
 void scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char op);
 void rotatevec2f(vec2f *origin, vec2f *vec, float degrees);
 
+// vec3f //
 vec3f *newvec3f(float x, float y, float z);
+// Operations
 void printvec3f(vec3f *v);
 void opvec3f(vec3f *a, vec3f *b, vec3f *result, char op);
 void scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char op);
 void rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis);
 
+// Dot product
 void multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result);
 
+// Identity matrix
+void eyefloat2x2(float2x2 a);
 void eyefloat3x3(float3x3 a);
+void eyefloat4x4(float4x4 a);
+
+// Matrix Operations
 void printfloat3x3(float3x3 a);
 void multiply3x3(float3x3 a, float3x3 b, float3x3 result);
 void addfloat3x3(float3x3 a, float3x3 b, float3x3 result);
 
+// vec4f //
 vec4f *newvec4f(float x, float y, float z, float w);
+// Operations
 void printvec4f(vec4f *v);
 void opvec4f(vec4f *a, vec4f *b, vec4f *result, char op);
 void scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char op);

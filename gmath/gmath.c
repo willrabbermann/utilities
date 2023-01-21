@@ -204,7 +204,7 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 
 void
 multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
-//Preform dot product a*b output vec3
+//Preform dot product a*b output vec3f
 {
 	if (a == result)
 	{
@@ -223,13 +223,28 @@ multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
 	}
 }
 
+void 
+eyefloat2x2(float2x2 a)
+{
+	memset(a, 0, sizeof(float2x2));
+	for (int i = 0; i < 2; i++)
+		a[i][i] = 1;
+}
+
 void
 eyefloat3x3(float3x3 a)
 {
 	memset(a, 0, sizeof(float3x3));
-	a[0][0] = 1;
-	a[1][1] = 1;
-	a[2][2] = 1;
+	for (int i = 0; i < 3; i++)
+		a[i][i] = 1;
+}
+
+void
+eyefloat4x4(float4x4 a)
+{
+	memset(a, 0, sizeof(float4x4));
+	for (int i = 0; i < 4; i++)
+		a[i][i] = 1;
 }
 
 void 
