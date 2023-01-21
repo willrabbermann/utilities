@@ -1,4 +1,4 @@
-CFLAGS=-fsanitize=address -Wall -Wextra -pedantic -O2
+CFLAGS=-fsanitize=address -Wall -Wextra -O2 -pedantic
 LDFLAGS=-lm
 SRC=gmath.c
 
@@ -7,6 +7,7 @@ all:
 
 debug:
 	cc $(CFLAGS) -g -o test-gmath test-gmath.c $(SRC) $(LDFLAGS)
+	gdb ./test-gmath
 
 clean:
 	rm -f test-gmath
