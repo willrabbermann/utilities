@@ -167,23 +167,23 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 	{
 		case 'x':
 			memcpy(rot_matrix, &(float3x3){
-					{ 1, 0, 0 },
-					{ 0, -sin(angle), cos(angle) },
-					{ 0, cos(angle), sin(angle) }},
+					{ 1,            0,          0 },
+					{ 0,   cos(angle), -sin(angle) },
+					{ 0,   sin(angle),  cos(angle) }},
 					sizeof(float3x3));
 			break;
 		case 'y':
 			memcpy(rot_matrix, &(float3x3){
-					{ sin(angle), 0, cos(angle) },
-					{ 0, 1, 0 },
-					{ cos(angle), 0, -sin(angle) }},
+					{ cos(angle),   0, sin(angle) },
+					{ 0,            1,          0 },
+					{ -sin(angle),  0, cos(angle) }},
 					sizeof(float3x3));
 			break;
 		case 'z':
 			memcpy(rot_matrix, &(float3x3){
-					{ -sin(angle), cos(angle), 0 },
-					{ cos(angle), sin(angle), 0 },
-					{ 0, 0, 1 }},
+					{  cos(angle), -sin(angle), 0 },
+					{  sin(angle),  cos(angle), 0 },
+					{  0,           0,          1 }},
 					sizeof(float3x3));			
 			break;
 		default:
@@ -195,7 +195,7 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 	}
 	vec3f *offset_vec = malloc(sizeof *offset_vec); 
 	opvec3f(vec, origin, offset_vec, '-');
-	multiplyvec3f3x3(offset_vec, rot_matrix, offset_vec);
+	dotproduct_3x3_vec3f(rot_matrix, offset_vec, offset_vec);
 	opvec3f(offset_vec, origin, offset_vec, '+');
 	memcpy(vec, offset_vec, sizeof(*offset_vec));
 	free(offset_vec);
@@ -367,22 +367,23 @@ opfloat3x3(float3x3 a, float3x3 b, float3x3 result, char op)
 
 
 void
-multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result)
-//Preform dot product a*b output vec3f
+dotproduct_3x3_vec3f(float3x3 *a, vec3f *b, vec3f *result)
+// Preform dot product a*b output vec3f
+// vec3f 'a' is treated as a column matrix
 {
-	if (a == result)
+	if (b == result)
 	{
 		vec3f *tmp = malloc(sizeof *tmp);
-		tmp->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
-		tmp->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
-		tmp->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
+		tmp->x = (*a)[0][0] * b->x + (*a)[0][1] * b->y + (*a)[0][2] * b->z;
+		tmp->y = (*a)[1][0] * b->x + (*a)[1][1] * b->y + (*a)[1][2] * b->z;
+		tmp->z = (*a)[2][0] * b->x + (*a)[2][1] * b->y + (*a)[2][2] * b->z;
 		memcpy(result, tmp, sizeof *tmp);
 		free(tmp);
 	}
 	else
 	{
-		result->x = a->x * (*b)[0][0] + a->y * (*b)[1][0] + a->z * (*b)[2][0];
-		result->y = a->x * (*b)[0][1] + a->y * (*b)[1][1] + a->z * (*b)[2][1];
-		result->z = a->x * (*b)[0][2] + a->y * (*b)[1][2] + a->z * (*b)[2][2];
+		result->x = (*a)[0][0] * b->x + (*a)[0][1] * b->y + (*a)[0][2] * b->z;
+		result->y = (*a)[1][0] * b->x + (*a)[1][1] * b->y + (*a)[1][2] * b->z;
+		result->z = (*a)[2][0] * b->x + (*a)[2][1] * b->y + (*a)[2][2] * b->z;
 	}
 }

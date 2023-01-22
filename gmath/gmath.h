@@ -19,7 +19,6 @@
 #define M_SQRTE 1.64872127070012814684
 #define M_SQRTPI 1.77245385090551602729
 
-
 typedef float float1x2[1][2];
 typedef float float2x2[2][2];
 
@@ -83,8 +82,6 @@ void printfloat4x4(float4x4 a);
 void opfloat3x3(float3x3 a, float3x3 b, float3x3 result, char op);
 
 // Dot product
-void multiplyvec3f3x3(vec3f *a, float3x3 *b, vec3f *result);
-
-
+void dotproduct_3x3_vec3f(float3x3 *a, vec3f *b, vec3f *result);
 
 #endif
