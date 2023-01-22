@@ -10,10 +10,44 @@ void
 Vector_Scaling_Test()
 {
 	printf("Vector transformation/scaling tests\n");
+	vec2f *f = newvec2f(5.0f, 3.3f);
+	vec2f *g = newvec2f(1.5f, 0.0f);
+	printf("\nf = ");
+	printvec2f(f);
+	printf("g = ");
+	printvec2f(g);
+	printf("opvec2f(f, g, f, '-')\nf = ");
+	opvec2f(f, g, f, '-');
+	printvec2f(f);
+	free(g);
+	
+	float h = 3.333f;
+	printf("scalar_op_vec2f(f, %f, f, '/')\nf = ", h);
+	scalar_op_vec2f(f, h, f, '/');
+	printvec2f(f);
+	free(f);
+
+	vec3f *a = newvec3f(1.0f, 2.5f, 0.0f);
+	vec3f *d = newvec3f(1.0f, 2.0f, 1.0f);
+	printf("\na = ");
+	printvec3f(a);
+	printf("d = ");
+	printvec3f(d);
+	printf("opvec3f(a, d, a, '*')\na = ");
+	opvec3f(a, d, a, '*');
+	printvec3f(a);
+	free(d);
+	
+	float e = 0.5f;
+	printf("scalar_op_vec3f(a, %f, a, '*')\na = ", e);
+	scalar_op_vec3f(a, e, a, '*');
+	printvec3f(a);
+	free(a);
+
 	vec4f *v = newvec4f(0.0f, 1.5f, 1.0f, 1.0f);
+	vec4f *b = newvec4f(1.0f, 2.0f, 3.0f, 0.0f);
 	printf("\nv = ");
 	printvec4f(v);
-	vec4f *b = newvec4f(1.0f, 2.0f, 3.0f, 0.0f);
 	printf("b = ");
 	printvec4f(b);
 	printf("opvec4f(v, b, v, '+')\nv = ");
@@ -21,13 +55,11 @@ Vector_Scaling_Test()
 	printvec4f(v);
 	free(b);
 
-	float *c = malloc(sizeof(float));
-	*c = 2.0f;
-	printf("scalar_op_vec4f(v, %f, v, '*')\nv = ", *c);
-	scalar_op_vec4f(v, *c, v, '*');
+	float c = 2.0f;
+	printf("scalar_op_vec4f(v, %f, v, '*')\nv = ", c);
+	scalar_op_vec4f(v, c, v, '*');
 	printvec4f(v);
 	free(v);
-	free(c);
 }
 
 void
@@ -129,17 +161,56 @@ Vector_and_Matrix_Test()
 	printf("v4 = ");
 	printvec3f(v4);
 	if (!(8.0 == v4->x || 0.0 == v4->y || 8.0 == v4->z))	
-		printf("Dot product error when multiplying (float3x3)g by (vec3f)v4.\n");
+		printf("Dot product error when multiplying (float3x3)g by (vec3f)v4\n");
 	free(v4);
 	free(g);
+
+	vec2f *v1 = newvec2f(0.0f, 2.5f);
+	vec2f *v2 = newvec2f(6.2f, 9.5f);
+	printf("\nv1 = ");
+	printvec2f(v1);
+	printf("v2 = ");
+	printvec2f(v2);
+	float vec2fdist = distancevec2f(v1, v2); 
+	printf("distancevec2f(v1, v2) = %f\n", vec2fdist);
+	if ((float)9.3509357820488 != vec2fdist)
+			printf("distancevec2f error\n");
+	free(v1);
+	free(v2);
+
+	vec3f *v5 = newvec3f(0.0f, 2.5f, 0.0f);
+	vec3f *v6 = newvec3f(6.2f, 9.5f, -5.0f);
+	printf("\nv5 = ");
+	printvec3f(v5);
+	printf("v6 = ");
+	printvec3f(v6);
+	float vec3fdist = distancevec3f(v5, v6); 
+	printf("distancevec3f(v5, v6) = %f\n", vec3fdist);
+	if ((float)10.603772913449 != vec3fdist)
+			printf("distancevec3f error\n");
+	free(v5);
+	free(v6);
+
+	vec4f *v7 = newvec4f(0.0f, 2.5f, 2.0f, 1.0f);
+	vec4f *v8 = newvec4f(6.2f, 9.5f, 0.0f, -1.0f);
+	printf("\nv7 = ");
+	printvec4f(v7);
+	printf("v8 = ");
+	printvec4f(v8);
+	float vec4fdist = distancevec4f(v7, v8); 
+	printf("distancevec4f(v7, v8) = %f\n", vec4fdist);
+	if ((float)9.7693397934558 != vec4fdist)
+			printf("distancevec4f error\n");
+	free(v7);
+	free(v8);
 }
 
 void
 Macros_Test()
 {
 	printf("\nMacro tests\n");
-	printf("\nclamp(1, 50.1234, 100) = ");
-	printf("%f\n", clamp(0, 50.1234, 100));
+	printf("\nclamp(1, 50.1234567, 100) = ");
+	printf("%f\n", clamp(0, 50.1234567, 100));
 
 	printf("min('A', 'B') = ");
 	printf("%c\n", min('A', 'B'));

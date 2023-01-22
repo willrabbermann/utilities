@@ -16,6 +16,12 @@ vec2f
 	return new;
 }
 
+float
+distancevec2f(vec2f *a, vec2f *b)
+{
+	return sqrt(pow((b->x - a->x), 2) + pow((b->y - a->y), 2));
+}
+
 void
 printvec2f(vec2f *v)
 {
@@ -93,6 +99,13 @@ vec3f
 	new->z = z;
 		
 	return new;
+}
+
+float
+distancevec3f(vec3f *a, vec3f *b)
+{
+	return sqrt(pow((b->x - a->x), 2) + pow((b->y - a->y), 2) 
+			+ pow((b->z - a->z), 2));
 }
 
 void
@@ -212,6 +225,13 @@ vec4f
 	new->w = w;
 		
 	return new;
+}
+
+float
+distancevec4f(vec4f *a, vec4f *b)
+{
+	return sqrt(pow((b->x - a->x), 2) + pow((b->y - a->y), 2) 
+			+ pow((b->z - a->z), 2) + pow((b->w - a->w), 2));
 }
 
 void
@@ -369,7 +389,7 @@ opfloat3x3(float3x3 a, float3x3 b, float3x3 result, char op)
 void
 dotproduct_3x3_vec3f(float3x3 *a, vec3f *b, vec3f *result)
 // Preform dot product a*b output vec3f
-// vec3f 'a' is treated as a column matrix
+// vec3f 'b' is treated as a column matrix
 {
 	if (b == result)
 	{
