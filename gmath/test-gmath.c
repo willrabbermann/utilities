@@ -22,8 +22,8 @@ Vector_Scaling_Test()
 	free(g);
 	
 	float h = 3.333f;
-	printf("scalar_op_vec2f(f, %f, f, '/')\nf = ", h);
-	scalar_op_vec2f(f, h, f, '/');
+	printf("scalar_op_vec2f(f, %f, f, '/', 'e')\nf = ", h);
+	scalar_op_vec2f(f, h, f, '/', 'e');
 	printvec2f(f);
 	free(f);
 
@@ -39,8 +39,8 @@ Vector_Scaling_Test()
 	free(d);
 	
 	float e = 0.5f;
-	printf("scalar_op_vec3f(a, %f, a, '*')\na = ", e);
-	scalar_op_vec3f(a, e, a, '*');
+	printf("scalar_op_vec3f(a, %f, a, '*', 'x')\na = ", e);
+	scalar_op_vec3f(a, e, a, '*', 'x');
 	printvec3f(a);
 	free(a);
 
@@ -56,8 +56,8 @@ Vector_Scaling_Test()
 	free(b);
 
 	float c = 2.0f;
-	printf("scalar_op_vec4f(v, %f, v, '*')\nv = ", c);
-	scalar_op_vec4f(v, c, v, '*');
+	printf("scalar_op_vec4f(v, %f, v, '*', 'a')\nv = ", c);
+	scalar_op_vec4f(v, c, v, '*', 'a');
 	printvec4f(v);
 	free(v);
 }
@@ -307,6 +307,8 @@ Macros_Test()
 
 	printf("π = %.48f\n", M_PI);
 	printf("√(π) = %.52f\n", M_SQRTPI);
+
+	printf("1e-100L = %.100Lf\n", 1e-100L);
 }
 
 int 

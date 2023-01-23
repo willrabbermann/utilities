@@ -53,26 +53,68 @@ opvec2f(vec2f *a, vec2f *b, vec2f *result, char op)
 }
 
 void
-scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char op)
-// Preform op on vec using scalar
+scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char op, char axis)
+// Preform op on vec using scalar on axis (default = all)
 {
 	switch (op)
 	{
 		case '+': 
-			result->x = a->x + scalar;
-			result->y = a->y + scalar;
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x + scalar;
+					break;
+				case 'y':
+					result->y = a->y + scalar;
+					break;
+				default:
+					result->x = a->x + scalar;
+					result->y = a->y + scalar;
+			}
 			break;
 		case '-':
-			result->x = a->x - scalar;
-			result->y = a->y - scalar;
+			
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x - scalar;
+					break;
+				case 'y':
+					result->y = a->y - scalar;
+					break;
+				default:
+					result->x = a->x - scalar;
+					result->y = a->y - scalar;
+			}
 			break;
 		case '*':
-			result->x = a->x * scalar;
-			result->y = a->y * scalar;
+			
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x * scalar;
+					break;
+				case 'y':
+					result->y = a->y * scalar;
+					break;
+				default:
+					result->x = a->x * scalar;
+					result->y = a->y * scalar;
+			}
 			break;
 		case '/':
-			result->x = a->x / scalar;
-			result->y = a->y / scalar;
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x / scalar;
+					break;
+				case 'y':
+					result->y = a->y / scalar;
+					break;
+				default:
+					result->x = a->x / scalar;
+					result->y = a->y / scalar;
+			}
 	}
 }
 
@@ -143,30 +185,84 @@ opvec3f(vec3f *a, vec3f *b, vec3f *result, char op)
 }
 
 void
-scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char op)
-// Preform op on vec using scalar
+scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char op, char axis)
+// Preform op on vec using scalar on axis (default = all)
 {
 	switch (op)
 	{
 		case '+': 
-			result->x = a->x + scalar;
-			result->y = a->y + scalar;
-			result->z = a->z + scalar;
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x + scalar;
+					break;
+				case 'y':
+					result->y = a->y + scalar;
+					break;
+				case 'z':
+					result->z = a->z + scalar;
+					break;
+				default:
+					result->x = a->x + scalar;
+					result->y = a->y + scalar;
+					result->z = a->z + scalar;
+			}
 			break;
 		case '-':
-			result->x = a->x - scalar;
-			result->y = a->y - scalar;
-			result->z = a->z - scalar;
+			
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x - scalar;
+					break;
+				case 'y':
+					result->y = a->y - scalar;
+					break;
+				case 'z':
+					result->z = a->z - scalar;
+					break;
+				default:
+					result->x = a->x - scalar;
+					result->y = a->y - scalar;
+					result->z = a->z - scalar;
+			}
 			break;
 		case '*':
-			result->x = a->x * scalar;
-			result->y = a->y * scalar;
-			result->z = a->z * scalar;
+			
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x * scalar;
+					break;
+				case 'y':
+					result->y = a->y * scalar;
+					break;
+				case 'z':
+					result->z = a->z * scalar;
+					break;
+				default:
+					result->x = a->x * scalar;
+					result->y = a->y * scalar;
+					result->z = a->z * scalar;
+			}
 			break;
 		case '/':
-			result->x = a->x / scalar;
-			result->y = a->y / scalar;
-			result->z = a->z / scalar;
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x / scalar;
+					break;
+				case 'y':
+					result->y = a->y / scalar;
+					break;
+				case 'z':
+					result->z = a->z / scalar;
+					break;
+				default:
+					result->x = a->x / scalar;
+					result->y = a->y / scalar;
+					result->z = a->z / scalar;
+			}
 	}
 }
 
@@ -273,34 +369,100 @@ opvec4f(vec4f *a, vec4f *b, vec4f *result, char op)
 }
 
 void
-scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char op)
-// Preform op on vec using scalar
+scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char op, char axis)
+// Preform op on vec using scalar on axis (default = all)
 {
 	switch (op)
 	{
 		case '+': 
-			result->x = a->x + scalar;
-			result->y = a->y + scalar;
-			result->z = a->z + scalar;
-			result->w = a->w + scalar;
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x + scalar;
+					break;
+				case 'y':
+					result->y = a->y + scalar;
+					break;
+				case 'z':
+					result->z = a->z + scalar;
+					break;
+				case 'w':
+					result->w = a->w + scalar;
+					break;
+				default:
+					result->x = a->x + scalar;
+					result->y = a->y + scalar;
+					result->z = a->z + scalar;
+					result->w = a->w + scalar;
+			}
 			break;
 		case '-':
-			result->x = a->x - scalar;
-			result->y = a->y - scalar;
-			result->z = a->z - scalar;
-			result->w = a->w - scalar;
+			
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x - scalar;
+					break;
+				case 'y':
+					result->y = a->y - scalar;
+					break;
+				case 'z':
+					result->z = a->z - scalar;
+					break;
+				case 'w':
+					result->w = a->w - scalar;
+					break;
+				default:
+					result->x = a->x - scalar;
+					result->y = a->y - scalar;
+					result->z = a->z - scalar;
+					result->w = a->w - scalar;
+			}
 			break;
 		case '*':
-			result->x = a->x * scalar;
-			result->y = a->y * scalar;
-			result->z = a->z * scalar;
-			result->w = a->w * scalar;
+			
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x * scalar;
+					break;
+				case 'y':
+					result->y = a->y * scalar;
+					break;
+				case 'z':
+					result->z = a->z * scalar;
+					break;
+				case 'w':
+					result->w = a->w * scalar;
+					break;
+				default:
+					result->x = a->x * scalar;
+					result->y = a->y * scalar;
+					result->z = a->z * scalar;
+					result->w = a->w * scalar;
+			}
 			break;
 		case '/':
-			result->x = a->x / scalar;
-			result->y = a->y / scalar;
-			result->z = a->z / scalar;
-			result->w = a->w / scalar;
+			switch (axis)
+			{
+				case 'x':
+					result->x = a->x / scalar;
+					break;
+				case 'y':
+					result->y = a->y / scalar;
+					break;
+				case 'z':
+					result->z = a->z / scalar;
+					break;
+				case 'w':
+					result->w = a->w / scalar;
+					break;
+				default:
+					result->x = a->x / scalar;
+					result->y = a->y / scalar;
+					result->z = a->z / scalar;
+					result->w = a->w / scalar;
+			}
 	}
 }
 
