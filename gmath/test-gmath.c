@@ -163,6 +163,20 @@ Vector_and_Matrix_Test()
 	if (!(8.0 == v4->x || 0.0 == v4->y || 8.0 == v4->z))	
 		printf("Dot product error when multiplying (float3x3)g by (vec3f)v4\n");
 	free(v4);
+	
+	printf("\nh = \n");
+	float3x3 *h = malloc(sizeof *h);
+	eyefloat3x3(*h);
+	printfloat3x3(*h);
+	printf("opfloat3x3(g, h, h, '+')\n");
+	opfloat3x3(*g, *h, *h, '+');
+	printf("h = \n");
+	printfloat3x3(*h);
+	printf("opfloat3x3(h, h, h, '*')\n");
+	opfloat3x3(*h, *h, *h, '*');
+	printf("h = \n");
+	printfloat3x3(*h);
+	free(h);
 	free(g);
 
 	vec2f *v1 = newvec2f(0.0f, 2.5f);

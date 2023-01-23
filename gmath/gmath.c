@@ -181,8 +181,8 @@ rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis)
 		case 'x':
 			memcpy(rot_matrix, &(float3x3){
 					{ 1,            0,          0 },
-					{ 0,   cos(angle), -sin(angle) },
-					{ 0,   sin(angle),  cos(angle) }},
+					{ 0,   cos(angle), -sin(angle)},
+					{ 0,   sin(angle),  cos(angle)}},
 					sizeof(float3x3));
 			break;
 		case 'y':
@@ -381,7 +381,6 @@ opfloat3x3(float3x3 a, float3x3 b, float3x3 result, char op)
 					break;
 				case '/':
 					result[c][d] = a[c][d] / b[c][d];
-					break;
 			}
 }
 
