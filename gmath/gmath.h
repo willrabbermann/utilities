@@ -32,11 +32,11 @@ typedef float float3x3[3][3];
 typedef float float4x4[4][4];
 
 typedef struct {
-float x, y;
+	float x, y;
 } vec2f, vert2f;
 
 typedef struct {
-float x, y, z;
+	float x, y, z;
 } vec3f, vert3f;
 
 typedef struct {
