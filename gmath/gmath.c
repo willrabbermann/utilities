@@ -384,6 +384,25 @@ opfloat3x3(float3x3 a, float3x3 b, float3x3 result, char op)
 			}
 }
 
+void dotproduct_2x2_vec2f(float2x2 *a, vec2f *b, vec2f *result)
+// Preform dot product a*b output vec2f
+// vec2f 'b' is treated as a column matrix
+{
+	if (b == result)
+	{
+		vec2f *tmp = malloc(sizeof *tmp);
+		tmp->x = (*a)[0][0] * b->x + (*a)[0][1] * b->y;
+		tmp->y = (*a)[1][0] * b->x + (*a)[1][1] * b->y;
+		memcpy(result, tmp, sizeof *tmp);
+		free(tmp);
+	}
+	else
+	{
+		result->x = (*a)[0][0] * b->x + (*a)[0][1] * b->y;
+		result->y = (*a)[1][0] * b->x + (*a)[1][1] * b->y;
+	}
+
+}
 
 void
 dotproduct_3x3_vec3f(float3x3 *a, vec3f *b, vec3f *result)
@@ -404,5 +423,30 @@ dotproduct_3x3_vec3f(float3x3 *a, vec3f *b, vec3f *result)
 		result->x = (*a)[0][0] * b->x + (*a)[0][1] * b->y + (*a)[0][2] * b->z;
 		result->y = (*a)[1][0] * b->x + (*a)[1][1] * b->y + (*a)[1][2] * b->z;
 		result->z = (*a)[2][0] * b->x + (*a)[2][1] * b->y + (*a)[2][2] * b->z;
+	}
+}
+
+
+void
+dotproduct_4x4_vec4f(float4x4 *a, vec4f *b, vec4f *result)
+// Preform dot product a*b output vec4f
+// vec4f 'b' is treated as a column matrix
+{
+	if (b == result)
+	{
+		vec4f *tmp = malloc(sizeof *tmp);
+		tmp->x = (*a)[0][0] * b->x + (*a)[0][1] * b->y + (*a)[0][2] * b->z + (*a)[0][3] * b->w;
+		tmp->y = (*a)[1][0] * b->x + (*a)[1][1] * b->y + (*a)[1][2] * b->z + (*a)[1][3] * b->w;
+		tmp->z = (*a)[2][0] * b->x + (*a)[2][1] * b->y + (*a)[2][2] * b->z + (*a)[2][3] * b->w;
+		tmp->w = (*a)[3][0] * b->x + (*a)[3][1] * b->y + (*a)[3][2] * b->z + (*a)[3][3] * b->w;
+		memcpy(result, tmp, sizeof *tmp);
+		free(tmp);
+	}
+	else
+	{
+		result->x = (*a)[0][0] * b->x + (*a)[0][1] * b->y + (*a)[0][2] * b->z + (*a)[0][3] * b->w;
+		result->y = (*a)[1][0] * b->x + (*a)[1][1] * b->y + (*a)[1][2] * b->z + (*a)[1][3] * b->w;
+		result->z = (*a)[2][0] * b->x + (*a)[2][1] * b->y + (*a)[2][2] * b->z + (*a)[2][3] * b->w;
+		result->w = (*a)[3][0] * b->x + (*a)[3][1] * b->y + (*a)[3][2] * b->z + (*a)[3][3] * b->w;
 	}
 }

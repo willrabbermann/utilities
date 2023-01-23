@@ -76,7 +76,7 @@ Vec2f_Rotation_Test()
 	rotatevec2f(o, v2, 90.0f);
 	printf("v2 = ");
 	printvec2f(v2);
-	if (!(1 == v2->x || 0 == v2->y))	
+	if (!(aprox(v2->x, 1.0, 1e-6f) && aprox(v2->y, 0.0, 1e-6f)))
 		printf("Rotation error when rotating (3,2) 90 degrees around origin (3,0).\n");
 	free(v2);
 	free(o);
@@ -96,7 +96,7 @@ Vec3f_Rotation_Test()
 	rotatevec3f(o2, v3, 90.0f, 'x');
 	printf("v3 = ");
 	printvec3f(v3);
-	if (!(0.0 == v3->x || 0.0 == v3->y || 1.0 == v3->z))
+	if (!(aprox(v3->x, 0.0, 1e-6f) && aprox(v3->y, 0.0, 1e-6f) && aprox(v3->z, 1.0, 1e-6f)))	
 		printf("Rotation error when rotating (0,1,0) 90 degrees around the x axis\n");
 	
 	free(v3);
@@ -107,7 +107,7 @@ Vec3f_Rotation_Test()
 	rotatevec3f(o2, v3, 90.0f, 'y');
 	printf("v3 = ");
 	printvec3f(v3);
-	if (!(1.0 == v3->x || 0.0 == v3->y || 0 == v3->z))	
+	if (!(aprox(v3->x, 1.0, 1e-6f) && aprox(v3->y, 0.0, 1e-6f) && aprox(v3->z, 0.0, 1e-6f)))	
 		printf("Rotation error when rotating (0,0,1) 90 degrees around the y axis\n");
 	
 	free(v3);
@@ -118,7 +118,7 @@ Vec3f_Rotation_Test()
 	rotatevec3f(o2, v3, 90.0f, 'z');
 	printf("v3 = ");
 	printvec3f(v3);
-	if (!(0.0 == v3->x || 1.0 == v3->y || 0.0 == v3->z))
+	if (!(aprox(v3->x, 0.0, 1e-6f) && aprox(v3->y, 1.0, 1e-6f) && aprox(v3->z, 0.0, 1e-6f)))	
 		printf("Rotation error when rotating (1,0,0) 90 degrees around the z axis\n");
 	
 	free(v3);
@@ -133,7 +133,7 @@ Vec3f_Rotation_Test()
 	rotatevec3f(o2, v3, 90.0f, 'x');
 	printf("v3 = ");
 	printvec3f(v3);
-	if (!(1.0 == v3->x || -1.0 == v3->y || 2.0 == v3->z))	
+	if (!(aprox(v3->x, 1.0, 1e-6f) && aprox(v3->y, -1.0, 1e-6f) && aprox(v3->z, 2.0, 1e-6f)))	
 		printf("Rotation error when rotating (1,2,1) 90 degrees around the x axis of origin (1,0,0)\n");
 
 	free(v3);
@@ -144,6 +144,28 @@ void
 Vector_and_Matrix_Test()
 {
 	printf("\nVector and Matrix tests\n");
+	
+	printf("\na = \n");
+	float2x2 *a = calloc(1, sizeof *a);
+	memcpy(a, &(float2x2){
+		{ 1, 2 },
+		{ 3, 4 },
+	}, sizeof *a);
+	printfloat2x2(*a);
+	vec2f *v0 = malloc(sizeof(*v0));
+	memcpy(v0, &(vec2f){ 1.2f, 3.4f }, sizeof *v0);
+	printf("v0 = ");
+	printvec2f(v0);
+	printf("dotproduct_2x2_vec2f(a, v0, v0)\n");
+
+	dotproduct_2x2_vec2f(a, v0, v0);
+	printf("v0 = ");
+	printvec2f(v0);
+	if (!(8.0f == v0->x && aprox(17.2, v0->y, 1e-6f)))
+		printf("Dot product error when multiplying (float2x2)a by (vec2f)v0\n");
+	free(v0);
+	free(a);
+
 	printf("\ng = \n");
 	float3x3 *g = calloc(1, sizeof *g);
 	memcpy(g, &(float3x3){
@@ -160,10 +182,10 @@ Vector_and_Matrix_Test()
 	dotproduct_3x3_vec3f(g, v4, v4);
 	printf("v4 = ");
 	printvec3f(v4);
-	if (!(8.0 == v4->x || 0.0 == v4->y || 8.0 == v4->z))	
+	if (!(8.0 == v4->x && 0.0 == v4->y && 8.0 == v4->z))	
 		printf("Dot product error when multiplying (float3x3)g by (vec3f)v4\n");
 	free(v4);
-	
+
 	printf("\nh = \n");
 	float3x3 *h = malloc(sizeof *h);
 	eyefloat3x3(*h);
@@ -178,6 +200,29 @@ Vector_and_Matrix_Test()
 	printfloat3x3(*h);
 	free(h);
 	free(g);
+
+	printf("\ni = \n");
+	float4x4 *i = calloc(1, sizeof *i);
+	memcpy(i, &(float4x4){
+			{ 1, 2, 3, 4 },
+			{ 5, 6, 7, 8,},
+			{ 9, 0, 1, 2,},
+			{ 3, 4, 5, 6,}
+			}, sizeof *i);
+	printfloat4x4(*i);
+
+	vec4f *v10 = newvec4f(1.9f, 2.1f, 3.3f, 6.4f);
+	printf("v10 = ");
+	printvec4f(v10);
+	printf("dotproduct_4x4_vec4f(i, v10, v10)\n");
+	dotproduct_4x4_vec4f(i, v10, v10);
+	printf("v10 = ");
+	printvec4f(v10);
+	if (!(aprox(41.6, v10->x, 1e-5f) && aprox(96.4, v10->y, 1e-5f) && 
+		  aprox(33.2, v10->z, 1e-5f) && aprox(69, v10->w, 1e-5f)))	
+		printf("Dot product error when multiplying (float4x4)i by (vec4f)v10\n");
+	free(i);
+	free(v10);
 
 	vec2f *v1 = newvec2f(0.0f, 2.5f);
 	vec2f *v2 = newvec2f(6.2f, 9.5f);
@@ -223,16 +268,45 @@ void
 Macros_Test()
 {
 	printf("\nMacro tests\n");
-	printf("\nclamp(1, 50.1234567, 100) = ");
-	printf("%f\n", clamp(0, 50.1234567, 100));
-
+	printf("\nclamp(1, 50, 100) = ");
+	printf("%d\n", clamp(0, 50, 100));
+	printf("aprox(1, 1.01, 1e-10f) = %d\n", 
+			aprox(1, 1.01, 1e-10f));
+	printf("aprox(1, 1.01, 0.02) = %d\n", 
+			aprox(1, 1.01, 0.02));
+	printf("aprox(1, 1.001, 0.0001) = %d\n", 
+			aprox(1, 1.001, 0.0001));
+	printf("aprox(1, 1.001, 2e-3f) = %d\n", 
+			aprox(1, 1.001, 2e-3f));
+	printf("aprox(1, 1.0001, 0.0001) = %d\n", 
+			aprox(1, 1.0001, 0.0001));
+	printf("aprox(1, 1.0001, 0.00001) = %d\n", 
+			aprox(1, 1.0001, 0.00001));
+	printf("aprox(1, 1.00001, 2e-5f) = %d\n", 
+			aprox(1, 1.00001, 2e-5f));
+	printf("aprox(1, 1.000001, 1e-5f) = %d\n", 
+			aprox(1, 1.000001, 1e-5f));
+	printf("aprox(1, 1.000001, 1e-6f) = %d\n", 
+			aprox(1, 1.000001, 1e-6f));
+	printf("0.000001 >= 1e-6f = %d\n", 
+			0.000001 >= 1e-6f);
+	printf("0.000001 == 1e-6f = %d\n", 
+			0.000001 == 1e-6f);
+	printf("0.000001 <= 1e-6f = %d\n", 
+			0.000001 <= 1e-6f);
+	printf("aprox(1, 1.000001, 2e-6f) = %d\n", 
+			aprox(1, 1.000001, 2e-6f));
+	printf("aprox(1, 1.0000000001, 1e-5f) = %d\n", 
+			aprox(1, 1.0000000001, 1e-5f));
+	printf("abs(-1) = %d\n", abs(-1));
+	
 	printf("min('A', 'B') = ");
 	printf("%c\n", min('A', 'B'));
 	printf("max('A', 'B') = ");
 	printf("%c\n", max('A', 'B'));
 
-	printf("π = %f\n", M_PI);
-	printf("√(π) = %f\n", M_SQRTPI);
+	printf("π = %.48f\n", M_PI);
+	printf("√(π) = %.52f\n", M_SQRTPI);
 }
 
 int 
