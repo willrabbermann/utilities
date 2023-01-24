@@ -48,8 +48,6 @@ typedef struct {
 	quaternion rot;
 } g_object;
 
-
-
 vec2f *newvec2f(float x, float y);
 float distancevec2f(vec2f *a, vec2f *b);
 void printvec2f(vec2f *v);
@@ -61,16 +59,14 @@ vec3f *newvec3f(float x, float y, float z);
 float distancevec3f(vec3f *a, vec3f *b);
 void printvec3f(vec3f *v);
 void opvec3f(vec3f *a, vec3f *b, vec3f *result, char op);
-void scalar_op_vec3f(vec3f *a, float scalar, vec3f *result,
-	char op, char axis);
+void scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char op, char axis);
 void rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis);
 
 vec4f *newvec4f(float x, float y, float z, float w);
 float distancevec4f(vec4f *a, vec4f *b);
 void printvec4f(vec4f *v);
 void opvec4f(vec4f *a, vec4f *b, vec4f *result, char op);
-void scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, 
-	char op, char axis);
+void scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char op, char axis);
 
 
 void eyefloat2x2(float2x2 a);
