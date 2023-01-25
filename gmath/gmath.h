@@ -39,35 +39,35 @@ typedef struct {
 	float x, y, z;
 } vec3f, vert3f;
 
-typedef struct {
+typedef struct vec4f {
 	float x, y, z, w;
-} vec4f, vert4f, quaternion;
+} vec4f, quaternion;
 
 typedef struct {
-	vec3f pos;
+	vert3f globalpos;
+	vert3f localpos;
 	quaternion rot;
 } g_object;
 
 vec2f *newvec2f(float x, float y);
-float distancevec2f(vec2f *a, vec2f *b);
-void printvec2f(vec2f *v);
-void opvec2f(vec2f *a, vec2f *b, vec2f *result, char op);
-void scalar_op_vec2f(vec2f *a, float scalar, vec2f *result, char op, char axis);
-void rotatevec2f(vec2f *origin, vec2f *vec, float degrees);
+float distancevec2f(vec2f a, vec2f b);
+void printvec2f(vec2f v);
+void opvec2f(vec2f a, vec2f b, vec2f *result, char op);
+void scalar_op_vec2f(vec2f a, float scalar, vec2f *result, char op, char axis);
+void rotatevec2f(vec2f origin, vec2f *vec, float degrees);
 
 vec3f *newvec3f(float x, float y, float z);
-float distancevec3f(vec3f *a, vec3f *b);
-void printvec3f(vec3f *v);
-void opvec3f(vec3f *a, vec3f *b, vec3f *result, char op);
-void scalar_op_vec3f(vec3f *a, float scalar, vec3f *result, char op, char axis);
-void rotatevec3f(vec3f *origin, vec3f *vec, float degrees, char axis);
+float distancevec3f(vec3f a, vec3f b);
+void printvec3f(vec3f v);
+void opvec3f(vec3f a, vec3f b, vec3f *result, char op);
+void scalar_op_vec3f(vec3f a, float scalar, vec3f *result, char op, char axis);
+void rotatevec3f(vec3f origin, vec3f *vec, float degrees, char axis);
 
 vec4f *newvec4f(float x, float y, float z, float w);
-float distancevec4f(vec4f *a, vec4f *b);
-void printvec4f(vec4f *v);
-void opvec4f(vec4f *a, vec4f *b, vec4f *result, char op);
-void scalar_op_vec4f(vec4f *a, float scalar, vec4f *result, char op, char axis);
-
+float distancevec4f(vec4f a, vec4f b);
+void printvec4f(vec4f v);
+void opvec4f(vec4f a, vec4f b, vec4f *result, char op);
+void scalar_op_vec4f(vec4f a, float scalar, vec4f *result, char op, char axis);
 
 void eyefloat2x2(float2x2 a);
 void eyefloat3x3(float3x3 a);
@@ -77,8 +77,11 @@ void printfloat3x3(float3x3 a);
 void printfloat4x4(float4x4 a);
 void opfloat3x3(float3x3 a, float3x3 b, float3x3 result, char op);
 
-void dotproduct_2x2_vec2f(float2x2 *a, vec2f *b, vec2f *result);
-void dotproduct_3x3_vec3f(float3x3 *a, vec3f *b, vec3f *result);
-void dotproduct_4x4_vec4f(float4x4 *a, vec4f *b, vec4f *result);
+void dotproduct_2x2_vec2f(float2x2 a, vec2f *b, vec2f *result);
+void dotproduct_3x3_vec3f(float3x3 a, vec3f *b, vec3f *result);
+void dotproduct_4x4_vec4f(float4x4 a, vec4f *b, vec4f *result);
+
+void calc_global_g_object(g_object *obj);
+void set_quaternion_g_object(g_object *obj, float degree, float x, float y, float z);
 
 #endif
