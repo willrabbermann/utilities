@@ -626,7 +626,8 @@ calc_global_g_object(g_object *obj)
 }
 
 void 
-set_quaternion_g_object(g_object *obj, float degree, float x, float y, float z) {
+set_quaternion_g_object(g_object *obj, float degree, float x, float y, float z)
+{
     float angle = deg2rad(fmod(degree, 360.0f));
     float length = sqrt(x*x + y*y + z*z);
     float sA = sin(angle);
