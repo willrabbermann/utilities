@@ -67,12 +67,8 @@ alias info="nocorrect info"
 
 eval `ssh-agent` > /dev/null
 
-case "$PATH" in
-    *_"distcc"_*) 
-		export PATH="/usr/lib/distcc/bin:${PATH}"
-		;;
-	*)
-esac
-
+if grep -q  "distcc" <<< "$PATH"; then
+else export PATH="/usr/lib/distcc/bin:${PATH}"
+fi
 
 . /etc/env.d/00custom
