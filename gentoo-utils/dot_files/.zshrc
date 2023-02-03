@@ -61,7 +61,18 @@ alias l='ls -CF'
 
 su_cmd="sudo"
 alias locate="nocorrect $su_cmd locate"
+alias grep="nocorrect grep"
+alias man="nocorrect man"
+alias info="nocorrect info"
 
 eval `ssh-agent` > /dev/null
-[[ -e /usr/bin/distcc && -z $(echo $PATH | grep distcc) ]] && export PATH='/usr/lib/distcc/bin:${PATH}'
+
+case "$PATH" in
+    *_"distcc"_*) 
+		export PATH="/usr/lib/distcc/bin:${PATH}"
+		;;
+	*)
+esac
+
+
 . /etc/env.d/00custom
