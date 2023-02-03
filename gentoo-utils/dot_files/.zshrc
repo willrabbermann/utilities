@@ -64,6 +64,7 @@ alias locate="nocorrect $su_cmd locate"
 alias grep="nocorrect grep"
 alias man="nocorrect man"
 alias info="nocorrect info"
+alias tmux="nocorrect tmux"
 
 eval `ssh-agent` > /dev/null
 
