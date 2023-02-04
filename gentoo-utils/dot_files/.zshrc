@@ -19,7 +19,7 @@ add-zsh-hook -Uz precmd reset_broken_terminal
 
 git_prompt()
 {
-	ref=git symbolic-ref HEAD --short 2>/dev/null && echo "( $ref) "
+	ref=$(git symbolic-ref HEAD --short 2>/dev/null) && echo "( $ref) "
 }
 
 setopt prompt_subst
