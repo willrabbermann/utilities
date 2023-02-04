@@ -24,7 +24,7 @@ git_prompt()
 }
 
 setopt prompt_subst
-PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '	
+PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '
 
 bindkey '^[[H' beginning-of-line
 bindkey '^[OH' beginning-of-line
@@ -54,9 +54,26 @@ alias dir='dir --color=auto'
 alias vdir='vdir --color=auto'
 alias grep='grep --color=auto'
 
-alias ll='ls -laF --group-directories-first'
-alias la='ls -A  --group-directories-first'
-alias l='ls -CF  --group-directories-first'
+alias ll='ls -laAFh --group-directories-first'
+alias la='ls -aAF  --group-directories-first'
+alias l='ls -CFA  --group-directories-first'
+
+function dotcomplete()
+{
+	if [[ $BUFFER =~ ^'\.'$ ]]; then
+		BUFFER='./'
+		CURSOR=2
+		zle list-choices
+	elif [[ $BUFFER = '' ]];  then
+		print && ls -CFaA --group-directories-first
+		zle reset-prompt
+	else
+		zle expand-or-complete		
+	fi
+}
+
+bindkey '^I' dotcomplete
+zle -N dotcomplete
 
 eval `ssh-agent` > /dev/null
 
