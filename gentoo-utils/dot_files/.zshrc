@@ -64,7 +64,7 @@ function dotcomplete()
 		BUFFER='./'
 		CURSOR=2
 		zle list-choices
-	elif [[ $BUFFER = '' ]];  then
+	elif [[ $BUFFER = '' ]]; then
 		print && ls -CFaA --group-directories-first
 		zle reset-prompt
 	else
@@ -77,7 +77,7 @@ zle -N dotcomplete
 
 eval `ssh-agent` > /dev/null
 
-if [[ -d /usr/lib/distcc/ ]] then
+if [[ -d /usr/lib/distcc/ ]]; then
 	if grep -q  "distcc" <<< "$PATH"; then
 	else export PATH="/usr/lib/distcc/bin:${PATH}"
 	fi
