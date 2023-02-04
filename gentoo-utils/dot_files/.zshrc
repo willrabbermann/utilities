@@ -8,8 +8,6 @@ zstyle ':completion::complete:*' use-cache 1
 # completion styling
 zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
 zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
-# auto-correct commands
-setopt correctall
 
 git_prompt()
 {
@@ -54,13 +52,6 @@ alias grep='grep --color'
 alias ll='ls -laF'
 alias la='ls -A'
 alias l='ls -CF'
-
-su_cmd="sudo"
-alias locate="nocorrect $su_cmd locate"
-alias grep="nocorrect grep"
-alias man="nocorrect man"
-alias info="nocorrect info"
-alias tmux="nocorrect tmux"
 
 eval `ssh-agent` > /dev/null
 
