@@ -63,7 +63,7 @@ tab_complete()
 		BUFFER='./'
 		CURSOR=2
 		zle list-choices
-	elif [[ $BUFFER = '' || $BUFFER = ' ' ]]; then
+	elif [[ -z "${BUFFER// /}" ]]; then
 		print && ls -CFaA --group-directories-first
 		zle reset-prompt
 	else
