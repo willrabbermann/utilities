@@ -12,7 +12,7 @@ zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
 git_prompt()
 {
 	ref=$(git symbolic-ref HEAD --short 2>/dev/null)
-	[ $? = 0 ] && echo "( $ref) " && return
+	[ $? = 0 ] && echo "( $ref) "
 }
 
 setopt prompt_subst
