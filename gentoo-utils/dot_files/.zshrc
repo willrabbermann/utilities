@@ -57,7 +57,7 @@ alias ll='ls -lAFh --group-directories-first'
 alias la='ls -CFA --group-directories-first'
 alias l='ls -CF --group-directories-first'
 
-function dotcomplete()
+dotcomplete()
 {
 	if [[ $BUFFER =~ ^'\.'$ ]]; then
 		BUFFER='./'
