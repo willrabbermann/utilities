@@ -14,11 +14,7 @@ setopt correctall
 git_prompt()
 {
 	ref=$(git symbolic-ref HEAD --short 2>/dev/null)
-	if [ $? = 0 ]
-	then
-		[ $ref = 'main' ] && echo "( $ref) " && return
-		echo "( $ref) "	
-	fi
+	[ $? = 0 ] && echo "( $ref) " && return
 }
 
 setopt prompt_subst
