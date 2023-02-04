@@ -87,4 +87,3 @@ fi
 . /usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh
 typeset -A ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_MAXLENGTH=512
-
