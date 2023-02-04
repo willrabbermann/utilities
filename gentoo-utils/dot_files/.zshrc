@@ -55,7 +55,6 @@ alias vdir='vdir --color=auto'
 alias grep='grep --color=auto'
 
 alias ll='ls -laAFh --group-directories-first'
-alias la='ls -aAF  --group-directories-first'
 alias l='ls -CFA  --group-directories-first'
 
 function dotcomplete()
