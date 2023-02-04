@@ -1,13 +1,21 @@
-# enable tab completion
 autoload -U compinit promptinit
 compinit
 promptinit; prompt gentoo
 
-# use completion caching
 zstyle ':completion::complete:*' use-cache 1
-# completion styling
-zstyle ':completion:*:descriptions' format '%U%B%d%b%u'
-zstyle ':completion:*:warnings' format '%BSorry, no matches for: %d%b'
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' insert-tab false
+
+[[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
+
+autoload -Uz add-zsh-hook
+
+reset_broken_terminal()
+{
+	printf '%b' '\e[0m\e(B\e)0\017\e[?5l\e7\e[0;0r\e8'
+}
+
+add-zsh-hook -Uz precmd reset_broken_terminal
 
 git_prompt()
 {
@@ -18,12 +26,13 @@ git_prompt()
 setopt prompt_subst
 PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '	
 
-# keybinds
 bindkey '^[[H' beginning-of-line
 bindkey '^[OH' beginning-of-line
+bindkey '^[[1~'	beginning-of-line
 bindkey '^H' beginning-of-line
 bindkey '^[OF' end-of-line
 bindkey '^[[F' end-of-line
+bindkey '^[[4~' end-of-line
 bindkey '^E' end-of-line
 bindkey '^[[1;5C' forward-word
 bindkey '^[[1;5D' backward-word
@@ -33,25 +42,21 @@ bindkey '^R' history-incremental-search-backward
 
 export HISTSIZE=2000
 export HISTFILE="$HOME/.zsh_history" 
-# enable history
 export SAVEHIST=$HISTSIZE
-
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
 
-# autocd if only a directory is entered
 setopt autocd
-
 setopt extendedglob
 
-alias ls='ls --color'
-alias dir='dir --color'
-alias vdir='vdir --color'
-alias grep='grep --color'
+alias ls='ls --color=auto'
+alias dir='dir --color=auto'
+alias vdir='vdir --color=auto'
+alias grep='grep --color=auto'
 
-alias ll='ls -laF'
-alias la='ls -A'
-alias l='ls -CF'
+alias ll='ls -laF --group-directories-first'
+alias la='ls -A  --group-directories-first'
+alias l='ls -CF  --group-directories-first'
 
 eval `ssh-agent` > /dev/null
 
@@ -62,3 +67,7 @@ if [[ -d /usr/lib/distcc/ ]] then
 fi
 
 . /etc/env.d/00custom
+. /usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh
+typeset -A ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_MAXLENGTH=512
+
