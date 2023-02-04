@@ -57,13 +57,13 @@ alias ll='ls -lAFh --group-directories-first'
 alias la='ls -CFA --group-directories-first'
 alias l='ls -CF --group-directories-first'
 
-dotcomplete()
+tab_complete()
 {
 	if [[ $BUFFER =~ ^'\.'$ ]]; then
 		BUFFER='./'
 		CURSOR=2
 		zle list-choices
-	elif [[ $BUFFER = '' ]]; then
+	elif [[ $BUFFER = '' || $BUFFER = ' ' ]]; then
 		print && ls -CFaA --group-directories-first
 		zle reset-prompt
 	else
@@ -71,8 +71,8 @@ dotcomplete()
 	fi
 }
 
-bindkey '^I' dotcomplete
-zle -N dotcomplete
+bindkey '^I' tab_complete
+zle -N tab_complete
 
 eval `ssh-agent` > /dev/null
 
