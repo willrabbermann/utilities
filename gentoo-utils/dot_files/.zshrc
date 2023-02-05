@@ -92,7 +92,7 @@ zle -N tab_complete
 
 eval `ssh-agent` > /dev/null
 
-if [[ -d /usr/lib/distcc/ ]]; then
+if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
 	if grep -q  "distcc" <<< "$PATH"; then
 	else export PATH="/usr/lib/distcc/bin:${PATH}"
 	fi
