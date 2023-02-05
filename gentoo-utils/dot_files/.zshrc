@@ -25,6 +25,7 @@ git_prompt()
 setopt prompt_subst
 PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '
 
+bindkey -d
 bindkey '^[[H' beginning-of-line
 bindkey '^[OH' beginning-of-line
 bindkey '^[[1~'	beginning-of-line
@@ -33,11 +34,25 @@ bindkey '^[OF' end-of-line
 bindkey '^[[F' end-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^E' end-of-line
+# Shift|Ctrl + Left|Right move by word
 bindkey '^[[1;5C' forward-word
 bindkey '^[[1;5D' backward-word
+bindkey '^[[1;2C' forward-word
+bindkey '^[[1;2D' backward-word
+# Shift+Ctrl+Left|Right delete word
+bindkey '^[[1;6C' delete-word
+bindkey '^[[1;6D' backward-delete-word
+# Ctrl+Up|Down change case of word
+bindkey '^[[1;5B' down-case-word
+bindkey '^[[1;5A' up-case-word
+# Shift+Up|Down swap case of char
+bindkey '^[[1;2A' vi-swap-case
+bindkey '^[[1;2B' vi-swap-case
 bindkey '^Z' undo
-bindkey '^[[3~' delete-char
 bindkey '^R' history-incremental-search-backward
+bindkey '^[[3~' delete-char
+# Shift+tab clear screen
+bindkey '^[[Z' clear-screen
 
 export HISTSIZE=2000
 export HISTFILE="$HOME/.zsh_history" 
@@ -64,7 +79,8 @@ tab_complete()
 		CURSOR=2
 		zle list-choices
 	elif [[ -z "${BUFFER// /}" ]]; then
-		print && ls -CFaA --group-directories-first
+		#zle -R "" $(la)
+		print && la
 		zle reset-prompt
 	else
 		zle expand-or-complete		
