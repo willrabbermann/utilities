@@ -12,14 +12,15 @@ char *strsplit(char *str,int offset, int length)
 // (str, 2, -1) == "llo world"
 // (str, -1, 2) == "Hello Wor"
 {
-    int alen;
+    int alen = strlen(str);
     int newsize = length;
-    alen = strlen(str);
-    if(offset > alen 
+    
+	if(offset > alen 
         || length > alen 
         || (offset + length) > alen
         || (offset == -1 && length == -1))
         return "\0";
+
     if (-1 == length) 
     {
         length = alen - offset;
@@ -28,8 +29,9 @@ char *strsplit(char *str,int offset, int length)
     else if (-1 == offset)
         newsize = alen - length;
     
-    char *newstr = malloc(sizeof(char) * (newsize + 1));
-    if (-1 != offset)
+    char *newstr = calloc(1, (newsize + 1));
+    
+	if (-1 != offset)
     {
         int i = 0;
         for (int c = offset; c < (offset + length); c++)
@@ -37,13 +39,12 @@ char *strsplit(char *str,int offset, int length)
             newstr[i] = str[c];
             i++;
         }
-    }
-    else if (-1 == offset)
-    {
+    } 
+	else if (-1 == offset) 
+	{
         for (int i = alen - length - 1; i >= 0; i--)
             newstr[i] = str[i];
     }
-    newstr[newsize] = '\0';
     return newstr;
 }
 
@@ -87,30 +88,29 @@ char *str_rm(char *str1, char *str2, int limit_spaces)
 // Also removes trailing/beginning space characters.
 {
     if (strlen(str2) > strlen(str1)) return NULL;
-    size_t str1_size = sizeof(char) * strlen(str1);
-    char *str1_cpy = malloc(str1_size);
-    memcpy(str1_cpy, str1, str1_size);
+    char *str1_cpy = calloc(1, strlen(str1)+1);
+    strcpy(str1_cpy, str1);
     size_t occurances = 0;
-    
+	char *found_str2;
     while (1)
     {
-        char *found_str2 = strstr(str1_cpy, str2);
-        int index = found_str2 - str1_cpy;
-        if (found_str2 != NULL)
+        found_str2 = strstr(str1_cpy, str2);
+        if (found_str2)
         {
+			int index = found_str2 - str1_cpy;
             occurances++;
             for (int i = index; i < (index + strlen(str2)); i++)
                 str1_cpy[i] = EOF;
         }
-        else break;
+        else 
+			break;	
     }
     
-    size_t size = sizeof(char) * (strlen(str1) - (occurances * strlen(str2)));
-    
-    char *newstr = malloc(size);
-    memset(newstr , '\0', size);
+    size_t size = (strlen(str1) - (occurances * strlen(str2))) + 1;
+    char *newstr = malloc(sizeof(char) * size);
+	memset(newstr, '\0', size);
     int a = 0, newstr_len = size;
-    for (int i = 0; i < str1_size; i++)
+    for (int i = 0; i < strlen(str1); i++)
     {
         if (str1_cpy[i] != EOF)
         {

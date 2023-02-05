@@ -67,6 +67,7 @@ alias ls='ls --color=auto'
 alias dir='dir --color=auto'
 alias vdir='vdir --color=auto'
 alias grep='grep --color=auto'
+alias tree='tree -C'
 
 alias ll='ls -lAFh --group-directories-first'
 alias la='ls -CFA --group-directories-first'
