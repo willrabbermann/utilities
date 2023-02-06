@@ -24,7 +24,7 @@ I made toggledistcc so I could easily turn distcc off when I start getting ICE (
 Some things compile fine with distcc opts but its useful being able to turn them off when errors arise.
 
 ## Notice ##
-It is important to remove ```/usr/lib/distcc/bin:``` from your PATH environment variable when you disable distcc.
+It is important to add/remove ```/usr/lib/distcc/bin:``` from the beginning PATH environment variable when you enable/disable distcc.
 Running toggledistcc can not do this for you, as it is a child process and changes to PATH are not peristant when the program ends.
 Restart your shell after using toggledistcc and update PATH in your .shellrc like so:
 ```
