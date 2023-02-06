@@ -6,7 +6,8 @@ zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' rehash true
 zstyle ':completion:*' insert-tab false
 
-[[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
+[[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor && 
+	custom_colors=1
 
 autoload -Uz add-zsh-hook
 
@@ -101,11 +102,10 @@ fi
 
 . /etc/env.d/00custom
 
-. /usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh
-typeset -A ZSH_HIGHLIGHT_STYLES
-ZSH_HIGHLIGHT_MAXLENGTH=512
-custom_colors=1
 if [ $custom_colors = 1 ]; then
+	. /usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh
+	typeset -A ZSH_HIGHLIGHT_STYLES
+	ZSH_HIGHLIGHT_MAXLENGTH=512
 	ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern regexp root line)
 	ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='underline'
 	ZSH_HIGHLIGHT_STYLES[bracket-level-1]='fg=red,bold'
