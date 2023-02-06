@@ -30,8 +30,13 @@ git_prompt()
 setopt prompt_subst
 PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '
 
-bindkey -d
+# insert / page / space  keys
+bindkey '^[[2~' complete-word
+bindkey '^[[5~' up-history
+bindkey '^[[6~' down-history
+# home / end keys
 bindkey '^[[H' beginning-of-line
+bindkey '^[[104;5u' beginning-of-line
 bindkey '^[OH' beginning-of-line
 bindkey '^[[1~'	beginning-of-line
 bindkey '^H' beginning-of-line
