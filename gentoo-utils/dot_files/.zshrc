@@ -6,8 +6,12 @@ zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' rehash true
 zstyle ':completion:*' insert-tab false
 
-[[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor && 
-	custom_colors=1
+[[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
+
+case $(tty) in
+	(/dev/tty[1-9]) custom_colors=0;;
+	(*) custom_colors=1;;
+esac
 
 autoload -Uz add-zsh-hook
 
