@@ -19,8 +19,18 @@ toggledistcc is compiled with a constant ```DISTCC_TJ```, which represents the m
 
 A system command is run to find the thread count of your local processor. Therefore it is not necessary to update ```LOCAL_TJ```.
 
-# why? #
+## why? ##
 I made toggledistcc so I could easily turn distcc off when I start getting ICE (internal compiler errors).
 Some things compile fine with distcc opts but its useful being able to turn them off when errors arise.
 
-
+## Notice ##
+It is important to remove "/usr/lib/distcc/bin:" from your PATH environment variable when you disable distcc.
+Running toggledistcc can not do this for you, as it is a child process and changes to PATH are not peristant when the program ends. 
+I would restart your shell after using toggledistcc and check for distcc and update PATH in your .shellrc like so:
+```
+if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
+    if grep -q  "distcc" <<< "$PATH"; then
+    else export PATH="/usr/lib/distcc/bin:${PATH}"
+    fi
+fi
+```
