@@ -100,6 +100,36 @@ if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
 fi
 
 . /etc/env.d/00custom
+
 . /usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh
 typeset -A ZSH_HIGHLIGHT_STYLES
 ZSH_HIGHLIGHT_MAXLENGTH=512
+custom_colors=1
+if [ $custom_colors = 1 ]; then
+	ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern regexp root line)
+	ZSH_HIGHLIGHT_STYLES[cursor-matchingbracket]='underline'
+	ZSH_HIGHLIGHT_STYLES[bracket-level-1]='fg=red,bold'
+	ZSH_HIGHLIGHT_STYLES[bracket-level-2]='fg=green,bold'
+	ZSH_HIGHLIGHT_STYLES[bracket-level-3]='fg=blue,bold'
+	ZSH_HIGHLIGHT_STYLES[bracket-level-4]='fg=magenta,bold'
+	ZSH_HIGHLIGHT_STYLES[path]='none'
+	ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=none'
+	ZSH_HIGHLIGHT_STYLES[reserved-word]='fg=green'
+	ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=green'
+	ZSH_HIGHLIGHT_STYLES[global-alias]='fg=green'
+	ZSH_HIGHLIGHT_STYLES[builtin]='fg=green'
+	ZSH_HIGHLIGHT_STYLES[function]='fg=blue'
+	ZSH_HIGHLIGHT_STYLES[command]='fg=blue'
+	ZSH_HIGHLIGHT_STYLES[precommand]='fg=blue'
+	ZSH_HIGHLIGHT_STYLES[alias]='fg=blue'
+	ZSH_HIGHLIGHT_STYLES[globbing]='fg=magenta'
+	ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=magenta'
+	ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=magenta'
+	ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=magenta'
+	ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=blue'
+	ZSH_HIGHLIGHT_STYLES[command-substitution]='fg=magenta'
+	ZSH_HIGHLIGHT_PATTERNS+=('sudo' 'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('rm -r' 'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('rm -rf' 'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('rm -fr' 'fg=red,bold')
+fi
