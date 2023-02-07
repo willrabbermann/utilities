@@ -107,7 +107,7 @@ kill_ssh_agent()
 	ssh-agent -k > /dev/null
 }
 
-SSH_AGENT_PID=$(ssh-agent | grep PID | cut -f2 -d '=' | cut -f1 -d ';')
+SSH_AGENT_PID=$(eval 'ssh-agent' | grep PID | cut -f2 -d '=' | cut -f1 -d ';')
 add-zsh-hook -Uz zshexit kill_ssh_agent
 
 
