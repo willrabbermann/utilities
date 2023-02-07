@@ -2,7 +2,7 @@
 #
 #	buildkernel automatically builds the linux source tree symlinked in /usr/src/linux.
 #	Also handles initramfs generation, unified kernel generation, upgrading kernel .config to another kernel, 
-#	regenerating grub.cfg, moving and cleaning up build files. 
+#	regenerating grub.cfg, moving and cleaning up build files. Clean up old distfiles and binpkgs with eclean. 
 #	Modify for your setup.
 #
 #	Made for Gentoo openrc.
@@ -284,20 +284,6 @@ remove_kernels()
     echo -e "${BLUE}Dont forget to regen grub.cfg!${NOC}"
 }
 
-clean_cache()
-{
-	echo -e "${RED}Are you sure you want to clean out the cache directory?"
-	echo -e "( rm -rf /var/cache/* )${NOC}"
-	if (yes_or_no "$input") then
-		rm -rf /var/cache/*
-	else
-		exit
-	fi
-	echo -e "${GREEN}Done.${NOC}"
-}
-
-
-
 case $2 in
 	"localhost" | "local" | 'l' | '-l' | "--local" | "--localhost")
 		localhostmode="true"
@@ -330,10 +316,6 @@ case $1 in
 		eselect kernel list
 		exit
 	;;
-	'clean' | 'cl' | '-cl' | '--clean')
-		clean_cache
-		exit
-	;;
 	'auto' | 'a' | '-a' | '--auto')
 		build
 		build_initramfs
@@ -362,7 +344,6 @@ case $1 in
 		echo -e "${GREEN}--upgrade${NOC}      -- copy the .config of the current kernel to a new kernel directory."
 		echo -e "${GREEN}--menu${NOC}         -- open menuconfig in /usr/src/linux."
 		echo -e "${GREEN}--current${NOC}      -- print current kernel(s) in eselect and exit."
-		echo -e "${GREEN}--clean${NOC}        -- clean cache directory: /var/cache/*"
 		echo -e "${GREEN}--rmkernels${NOC}    -- remove old kernels and modules using a wildcard."
 		echo -e "${GREEN}--help${NOC}         -- print this help page and exit."
 		exit
@@ -387,6 +368,7 @@ echo -e "\n${NOC}Choose where to move the build files:"
 echo 	"[ (c)ustom ]        /boot/EFI/gentoo/custom"
 echo 	"[ (d)istribution ]  /boot/EFI/gentoo/distribution"
 echo 	"[ (g)it sources  ]  /boot/EFI/gentoo/git"
+echo 	"[ (z)en sources  ]  /boot/EFI/gentoo/zen"
 echo    "[ (r)emove ]        Remove all build files in /boot (NOT recursive). Also removes /boot/EFI/Linux (recursive)."
 echo 	"[ (q|e) ]           Exit program"
 echo 	"[ (m)ove ]          Manually move build files in /boot."
@@ -406,6 +388,11 @@ case $build_dir in
 	'g' | 'git')
 		rename "git"
 		move_build "/boot/EFI/gentoo/git/"
+		regen_grub
+	;;
+	'z' | 'zen')
+		rename "zen"
+		move_build "/boot/EFI/gentoo/zen/"
 		regen_grub
 	;;
 	'r' | 'remove')
