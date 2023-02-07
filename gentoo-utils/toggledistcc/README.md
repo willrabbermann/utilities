@@ -25,7 +25,7 @@ Some things compile fine with distcc opts but its useful being able to turn them
 
 ## Notice ##
 It is important to add/remove ```/usr/lib/distcc/bin:``` from the beginning of your ```PATH``` environment variable when you enable/disable distcc.
-Running toggledistcc can not do this for you, as it is a child process and changes to PATH are not peristant when the program ends.
+Running toggledistcc can not do this for you, as it is a child process and changes to PATH are not persistent when the program ends.
 Restart your shell after using toggledistcc and update PATH in your .shellrc like so:
 ```
 if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
