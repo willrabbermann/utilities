@@ -254,17 +254,20 @@ upgrade_kernel()
 
 clean_kernels()
 {
-    tree -C -L 1 --noreport /lib/modules
 	baseDir="/boot/EFI/gentoo/"
-    cd $baseDir && echo 
+    tree -C -L 1 --noreport /lib/modules
+	echo -e "${LPURPLE}$(du -sh /lib/modules/)${NOC}\n"
 	tree -C --noreport -I '*grub*' -I '*System.*' -I '*initramfs-*' -I '*config-*' $baseDir
-    echo -e "\n${GREEN}Enter part of the full kernel name to remove matching wildcards ${LPURPLE}*${NOC}##.##.##${LPURPLE}*"
+	echo -e "${LPURPLE}$(du -sh $baseDir)${NOC}\n"
+    tree -C -L 1 --noreport /usr/src
+	echo -e "${LPURPLE}$(du -sh /usr/src)${NOC}\n"
+    echo -e "${GREEN}Enter part of the full kernel name to remove matching wildcards ${LPURPLE}*${NOC}##.##.##${LPURPLE}*"
 	echo -e "${GREEN}Or enter nothing to abort.${NOC}"
 	read rkn
 
 	[[ -z $rkn ]] && echo -e "${RED}No input, aborting.${NOC}" && exit 1
 	
-	[[ -z $(tree $baseDir | grep $rkn) && -z $(tree /lib/modules | grep $rkn) ]] &&
+	[[ -z $(tree -L 2 $baseDir | grep $rkn) && -z $(tree -L 1 /lib/modules | grep $rkn) && -z $(tree -L 1 /usr/src/  | grep $rkn) ]] &&
 		echo -e "\n${RED}No kernels or modules matching ${BLUE}\"${NOC}$rkn${BLUE}\"${RED} were found.${NOC}" &&
 		exit 1
    
@@ -272,16 +275,20 @@ clean_kernels()
 
 	if [[ -n $(tree | grep $rkn) ]]; then
 		cd $baseDir && echo -e "${BLUE}$(pwd)/*${NOC}"
-		ls -1 -A custom | grep vmlinuz | grep $rkn	
-		ls -1 -A distribution | grep vmlinuz | grep $rkn
-		ls -1 -A git | grep vmlinuz | grep $rkn
-		ls -1 -A zen | grep vmlinuz | grep $rkn
+		ls -1 -A custom | grep $rkn	
+		ls -1 -A distribution | grep $rkn
+		ls -1 -A git | grep $rkn
+		ls -1 -A zen | grep $rkn
 	fi
 	if [[ -n $(ls -1 -A /lib/modules | grep $rkn) ]]; then
 		cd /lib/modules && echo -e "${BLUE}$(pwd)${NOC}"
 		ls -1 -A | grep $rkn
 	fi
-	
+	if [[ -n $(ls -1 -A /usr/src | grep $rkn) ]]; then
+		cd /usr/src && echo -e "${BLUE}$(pwd)${NOC}"
+		ls -1 -A | grep $rkn
+	fi
+
 	echo -e "\n${RED}Are you sure${NOC} you want to ${RED}remove${NOC} these kernels / modules?"
 	echo -e "(including matching sysmap, initramfs, config)${NOC}\n"	
 
@@ -310,6 +317,11 @@ clean_kernels()
         cd "/lib/modules/"
 		if [[ -n $(ls | grep $rkn) ]]; then
 			echo -e "${GREEN}Cleaning: ${NOC}/lib/modules/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+			rm -Iv *$rkn*
+		fi
+		cd "/usr/src/"
+		if [[ -n $(ls | grep $rkn) ]]; then
+			echo -e "${GREEN}Cleaning: ${NOC}/usr/src/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
 			rm -Iv *$rkn*
 		fi
     else
