@@ -34,3 +34,4 @@ if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
     fi
 fi
 ```
+Or set PATH manually without ```/usr/lib/distcc/bin:```
