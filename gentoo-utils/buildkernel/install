@@ -1,10 +1,40 @@
-#!/bin/sh
+#!/bin/bash
+# buildkernel installer
+#
+# Make sure GRUB is installed on your system.
+#
+# Or just run ./install to install to /usr/local/sbin
+# (optional) Run ./install $1 where $1 is the directory to install.
+# 
+#
 
-if [ -z $1 ] 
-then
-	cp -v buildkernel /usr/local/sbin/buildkernel
+if [ "$EUID" -ne 0 ]; then
+    echo -e "Please run as root."
+    exit
+fi
+
+if [ -d /etc/grub.d/ ]; then
+	echo "Installing buildkernel..."
+else 
+	echo "GRUB is not installed on this system, aborting installation." 
+	exit 1
+fi
+
+if [ -z $1 ]; then
+	cp -v buildkernel /usr/local/sbin
 else
 	cp -v buildkernel $1
 fi
 
+mkdir -pv /boot/EFI/gentoo/custom
+mkdir -pv /boot/EFI/gentoo/distribution
+mkdir -pv /boot/EFI/gentoo/git
+mkdir -pv /boot/EFI/gentoo/zen
 
+# Custom "glob" grub config
+echo -e "\nInstalling 10_gentoo..."
+cp -v 10_gentoo /etc/grub.d/
+
+echo -e "\nInstalling GRUB to /boot..."
+buildkernel --install-efi
+buildkernel --regen

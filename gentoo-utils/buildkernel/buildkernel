@@ -6,12 +6,12 @@
 #	Modify for your setup.
 #
 #	Made for Gentoo openrc.
-#			1. sys-apps/mlocate for its merging locate database.
-#			2. sys-boot/grub as a bootloader (set up /etc/default/grub).
-#				Add: globs="/boot/EFI/gentoo/distribution/vmlinuz-* /boot/EFI/gentoo/custom/vmlinuz-* /boot/EFI/gentoo/git/vmlinuz-*"
-#				to /etc/grub.d/09_custom after copying /etc/grub.d/10_linux to /etc/grub.d/09_custom as a template. Remove the old globs.
-#			3. sys-kernel/dracut for initramfs and unified kernel image generation. (see 'man /etc/dracut.conf' add secure boot key, etc)
-#			4.	(efi-boot) app-crypt/sbctl & app-crypt/sbsigntools for secure boot
+#	Dependencies:
+#			sys-apps/mlocate
+#			app-text/tree
+#			sys-kernel/dracut for initramfs and unified kernel image generation. (see 'man /etc/dracut.conf' add secure boot key, etc)
+#			sys-boot/grub	-	configure /etc/default/grub, /etc/grub.d/10_custom will be copied to your system with custom 'globs'.
+#			(optional) app-crypt/sbctl & app-crypt/sbsigntools for secure boot
 #
 #				Set your /etc/dracut.conf.d/custom.conf with key and uefi_stub location:
 #				-------
@@ -20,11 +20,11 @@
 #				uefi_secureboot_key="/usr/share/secureboot/keys/db/db.key"
 #				-------
 #
-#			5. (efi-boot) sys-apps/systemd-utils +boot USE flag is required for dracut to generate unified kernels images.
+#			(optional) sys-apps/systemd-utils +boot USE flag is required for dracut to generate unified kernels images
+#					   necessary for secure boot.
 #
-#			6. (optional) sys-devel/distcc for distributed compiling across local computers. 
-#				Change hosts and hostsTJ below to reflect host names and thread count respectively. Localhost mode automatically finds
-#				and builds with the thread count of your processor.
+#			(optional) sys-devel/distcc for distributed compiling across local computers. 
+#				Change the "hosts" and "hostsTJ" arrays to reflect host names and thread count.
 #
 #	Change the current symlinked linux source tree with 'eselect kernel list/set'.
 #		
@@ -252,38 +252,71 @@ upgrade_kernel()
 	fi
 }
 
-remove_kernels()
+clean_kernels()
 {
-    baseDir="/boot/EFI/gentoo"
-    echo -e "${GREEN}Kernels in $baseDir/*${NOC}\n"
-    cd $baseDir
-    ls custom/ | grep vmlinuz && ls distribution/ | grep vmlinuz && ls git/ | grep vmlinuz
-    echo -e "\n${GREEN}Enter part of the full kernel name to remove wildcards.${NOC}\n"
-    read rkn
-    echo -e "\n${RED}Are you sure you want to remove these kernels?"
-    echo -e "(including sysmap, initramfs, configs, and modules)${NOC}\n"
-    found=$(ls custom/ | grep vmlinuz | grep $rkn)
-    found=$found"\n$(ls distribution/ | grep vmlinuz | grep $rkn)"
-    found=$found"\n$(ls git/ | grep vmlinuz | grep $rkn)"
-    echo -e "$found\n"
-    if (yes_or_no "$input") then
-        cd $baseDir/custom
-        echo -e "${GREEN}Checking /custom${NOC}"
-        rm -Iv *$rkn*
-        echo -e "${GREEN}Checking /distribution${NOC}"
-        cd $baseDir/distribution
-        rm -Iv *$rkn*
-        echo -e "${GREEN}Checking /git${NOC}"
-        cd $baseDir/git
-        rm -Iv *$rkn*
-        echo -e "${GREEN}Checking /lib/modules${NOC}"
-        cd /lib/modules
-        rm -Ir *$rkn*
+    tree -C -L 1 --noreport /lib/modules
+	baseDir="/boot/EFI/gentoo/"
+    cd $baseDir && echo 
+	tree -C --noreport -I '*grub*' -I '*System.*' -I '*initramfs-*' -I '*config-*' $baseDir
+    echo -e "\n${GREEN}Enter part of the full kernel name to remove matching wildcards ${LPURPLE}*${NOC}##.##.##${LPURPLE}*"
+	echo -e "${GREEN}Or enter nothing to abort.${NOC}"
+	read rkn
+
+	[[ -z $rkn ]] && echo -e "${RED}No input, aborting.${NOC}" && exit 1
+	
+	[[ -z $(tree $baseDir | grep $rkn) && -z $(tree /lib/modules | grep $rkn) ]] &&
+		echo -e "\n${RED}No kernels or modules matching ${BLUE}\"${NOC}$rkn${BLUE}\"${RED} were found.${NOC}" &&
+		exit 1
+   
+	echo
+
+	if [[ -n $(tree | grep $rkn) ]]; then
+		cd $baseDir && echo -e "${BLUE}$(pwd)/*${NOC}"
+		ls -1 -A custom | grep vmlinuz | grep $rkn	
+		ls -1 -A distribution | grep vmlinuz | grep $rkn
+		ls -1 -A git | grep vmlinuz | grep $rkn
+		ls -1 -A zen | grep vmlinuz | grep $rkn
+	fi
+	if [[ -n $(ls -1 -A /lib/modules | grep $rkn) ]]; then
+		cd /lib/modules && echo -e "${BLUE}$(pwd)${NOC}"
+		ls -1 -A | grep $rkn
+	fi
+	
+	echo -e "\n${RED}Are you sure${NOC} you want to ${RED}remove${NOC} these kernels / modules?"
+	echo -e "(including matching sysmap, initramfs, config)${NOC}\n"	
+
+	if ( yes_or_no "$input" ); then
+        echo
+		cd "${baseDir}custom"
+		if [[ -n $(ls | grep $rkn) ]]; then
+			echo -e "${GREEN}Cleaning: ${NOC}${baseDir}custom/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+			rm -Iv *$rkn*
+		fi
+		cd "${baseDir}distribution"
+        if [[ -n $(ls | grep $rkn) ]]; then
+        	echo -e "${GREEN}Cleaning: ${NOC}${baseDir}distribution/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+			rm -Iv *$rkn*
+		fi      
+		cd "${baseDir}git"
+        if [[ -n $(ls | grep $rkn) ]]; then
+			echo -e "${GREEN}Cleaning: ${NOC}${baseDir}git/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}" 
+			rm -Iv *$rkn*
+		fi
+		cd "${baseDir}zen"
+        if [[ -n $(ls | grep $rkn) ]]; then
+			echo -e "${GREEN}Cleaning: ${NOC}${baseDir}zen/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+			rm -Iv *$rkn*
+		fi
+        cd "/lib/modules/"
+		if [[ -n $(ls | grep $rkn) ]]; then
+			echo -e "${GREEN}Cleaning: ${NOC}/lib/modules/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+			rm -Iv *$rkn*
+		fi
     else
         exit 0
     fi
-
-    echo -e "${BLUE}Dont forget to regen grub.cfg!${NOC}"
+	echo
+	regen_grub
 }
 
 case $2 in
@@ -338,29 +371,28 @@ case $1 in
 		menu_config
 		exit
 	;;
-	'rmk' | '-rmk' | '--rmkernels' | '--removekernels')
-		remove_kernels
+	'clean-kernels' | '-clean-kernels' | '--clean-kernels')
+		clean_kernels
 		exit
 	;;
 	*)
 	
 		echo -en \
-		"buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -me -c -cl -rmk -install-efi -h${NOC}] "
+		"buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -me -c clean-kernels install-efi -h${NOC}] "
 		echo -e "[${BLUE}kernel_version,localhost${NOC}]"
-
-		echo -e "${GREEN}--move${NOC}         -- move build files."
-		echo -e "${GREEN}--regen${NOC}        -- regenerate ${LPURPLE}\"/boot/grub/grub.cfg\"${NOC} and exit."
-		echo -e "${GREEN}--build${NOC}        -- build \"${LPURPLE}/usr/src/linux${NOC}\" and exit."
-		echo -e "${GREEN}--auto${NOC}         -- build \"${LPURPLE}/usr/src/linux${NOC}\" & initramfs then continue to automatic moving."
-		echo -e "${BLUE}--localhost${NOC}    -- make in localhost only mode (e.g. \"buildkernel ${GREEN}--auto ${BLUE}--localhost${NOC}\")."
-		echo -e "${GREEN}--i${NOC}   ${BLUE}[kver]${NOC}   -- build initramfs and exit. ${BLUE}[kver]${NOC} is optional."
-		echo -e "${GREEN}--im${NOC}  ${BLUE}[kver]${NOC}   -- build initramfs and continue to moving. ${BLUE}[kver]${NOC} is optional."
-		echo -e "${GREEN}--upgrade${NOC}      -- copy the .config of the current kernel to a new kernel directory."
-		echo -e "${GREEN}--menu${NOC}         -- open menuconfig in \"${LPURPLE}/usr/src/linux${NOC}\"."
-		echo -e "${GREEN}--current${NOC}      -- print current kernel(s) in eselect and exit."
-		echo -e "${GREEN}--rmkernels${NOC}    -- remove old kernels and modules using a wildcard."
-		echo -e "${GREEN}--install-efi${NOC}  -- install GRUB to a GPT EFI System Partition mounted at \"${LPURPLE}/boot${NOC}\"."
-		echo -e "${GREEN}--help${NOC}         -- print this help page and exit."
+		echo -e "${GREEN}--move${NOC}          -- move build files."
+		echo -e "${GREEN}--regen${NOC}         -- regenerate ${LPURPLE}\"/boot/grub/grub.cfg\"${NOC} and exit."
+		echo -e "${GREEN}--build${NOC}         -- build \"${LPURPLE}/usr/src/linux${NOC}\" and exit."
+		echo -e "${GREEN}--auto${NOC}          -- build \"${LPURPLE}/usr/src/linux${NOC}\" & initramfs then continue to automatic moving."
+		echo -e "${BLUE}--localhost${NOC}     -- make in localhost only mode (e.g. \"buildkernel ${GREEN}--auto ${BLUE}--localhost${NOC}\")."
+		echo -e "${GREEN}--i${NOC}   ${BLUE}[kver]${NOC}    -- build initramfs and exit. ${BLUE}[kver]${NOC} is optional."
+		echo -e "${GREEN}--im${NOC}  ${BLUE}[kver]${NOC}    -- build initramfs and continue to moving. ${BLUE}[kver]${NOC} is optional."
+		echo -e "${GREEN}--upgrade${NOC}       -- copy the .config of the current kernel to a new kernel directory."
+		echo -e "${GREEN}--menu${NOC}          -- open menuconfig in \"${LPURPLE}/usr/src/linux${NOC}\"."
+		echo -e "${GREEN}--current${NOC}       -- print current kernel(s) in eselect and exit."
+		echo -e "${GREEN}--clean-kernels${NOC} -- clean up old kernels and kernel modules."
+		echo -e "${GREEN}--install-efi${NOC}   -- install GRUB to a GPT EFI System Partition mounted at \"${LPURPLE}/boot${NOC}\"."
+		echo -e "${GREEN}--help${NOC}          -- print this help page and exit."
 		exit
 	;;
 esac
