@@ -5,6 +5,7 @@ promptinit; prompt gentoo
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' rehash true
 zstyle ':completion:*' insert-tab false
+setopt correctall
 
 [[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
 
@@ -34,11 +35,12 @@ PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '
 bindkey '^[[2~' complete-word
 bindkey '^[[5~' up-history
 bindkey '^[[6~' down-history
+bindkey ' '		magic-space
 # home / end keys
 bindkey '^[[H' beginning-of-line
 bindkey '^[[104;5u' beginning-of-line
 bindkey '^[OH' beginning-of-line
-bindkey '^[[1~'	beginning-of-line
+bindkey '^[[1~' beginning-of-line
 bindkey '^H' beginning-of-line
 bindkey '^[OF' end-of-line
 bindkey '^[[F' end-of-line
@@ -59,6 +61,7 @@ bindkey '^[[1;5A' up-case-word
 bindkey '^[[1;2A' vi-swap-case
 bindkey '^[[1;2B' vi-swap-case
 bindkey '^Z' undo
+bindkey '^[[90;6u' redo
 bindkey '^R' history-incremental-search-backward
 bindkey '^[[3~' delete-char
 # Shift+tab clear screen
