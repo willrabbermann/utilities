@@ -1,5 +1,5 @@
 # buildkernel
-Linux kernel builder, upgrader, mover. Preform Gentoo Linux system administration tasks.
+Linux kernel builder, upgrader, mover, cleaner. Preform Gentoo Linux system administration tasks.
 
 Change ```hosts``` and ```hostsTJ``` to your machine's hostnames/thread counts.
 
