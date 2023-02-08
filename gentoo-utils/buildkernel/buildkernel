@@ -35,6 +35,8 @@
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
+CYAN='\033[00;36m'
+LPURPLE='\033[01;35m'
 NOC='\033[0m'
 
 if [ "$EUID" -ne 0 ]; then
@@ -295,7 +297,7 @@ case $2 in
 esac
 
 case $1 in
-    'move' | 'm' | '-m' | '--move')
+	'move' | 'm' | '-m' | '--move')
 	;;
 	'regen' | 'r' | '-r' | '--regen')
 		regen_grub
@@ -309,7 +311,15 @@ case $1 in
 		build_initramfs
 		exit
 	;;
-	'im' | '-im' | '--im')
+	'install-efi' | '-install-efi' | '--install-efi')
+		if [[ -n $(mount -v | grep "/boot") ]]; then
+			grub-install --efi-directory=/boot
+			[[ $? == 0 ]] && echo -e "${GREEN}GRUB has been added to your EFI boot menu.${NOC}"
+		else
+			echo -e "${RED}/boot is not mounted. Can not install GRUB.${NOC}"
+		fi ; exit
+	;;
+		'im' | '-im' | '--im')
 		build_initramfs
 	;;
 	'current' | 'c' | '-c' | '--current')
@@ -333,18 +343,23 @@ case $1 in
 		exit
 	;;
 	*)
-		echo -e "buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -me -c -cl -rmk -h${NOC}] [${BLUE}kernel_version,localhost${NOC}]"
+	
+		echo -en \
+		"buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -me -c -cl -rmk -install-efi -h${NOC}] "
+		echo -e "[${BLUE}kernel_version,localhost${NOC}]"
+
 		echo -e "${GREEN}--move${NOC}         -- move build files."
-		echo -e "${GREEN}--regen${NOC}        -- regenerate /boot/grub/grub.cfg and exit."
-		echo -e "${GREEN}--build${NOC}        -- build /usr/src/linux and exit."
-		echo -e "${GREEN}--auto${NOC}         -- build /usr/src/linux & initramfs then continue to automatic moving."
+		echo -e "${GREEN}--regen${NOC}        -- regenerate ${LPURPLE}\"/boot/grub/grub.cfg\"${NOC} and exit."
+		echo -e "${GREEN}--build${NOC}        -- build \"${LPURPLE}/usr/src/linux${NOC}\" and exit."
+		echo -e "${GREEN}--auto${NOC}         -- build \"${LPURPLE}/usr/src/linux${NOC}\" & initramfs then continue to automatic moving."
 		echo -e "${BLUE}--localhost${NOC}    -- make in localhost only mode (e.g. \"buildkernel ${GREEN}--auto ${BLUE}--localhost${NOC}\")."
 		echo -e "${GREEN}--i${NOC}   ${BLUE}[kver]${NOC}   -- build initramfs and exit. ${BLUE}[kver]${NOC} is optional."
 		echo -e "${GREEN}--im${NOC}  ${BLUE}[kver]${NOC}   -- build initramfs and continue to moving. ${BLUE}[kver]${NOC} is optional."
 		echo -e "${GREEN}--upgrade${NOC}      -- copy the .config of the current kernel to a new kernel directory."
-		echo -e "${GREEN}--menu${NOC}         -- open menuconfig in /usr/src/linux."
+		echo -e "${GREEN}--menu${NOC}         -- open menuconfig in \"${LPURPLE}/usr/src/linux${NOC}\"."
 		echo -e "${GREEN}--current${NOC}      -- print current kernel(s) in eselect and exit."
 		echo -e "${GREEN}--rmkernels${NOC}    -- remove old kernels and modules using a wildcard."
+		echo -e "${GREEN}--install-efi${NOC}  -- install GRUB to a GPT EFI System Partition mounted at \"${LPURPLE}/boot${NOC}\"."
 		echo -e "${GREEN}--help${NOC}         -- print this help page and exit."
 		exit
 	;;
