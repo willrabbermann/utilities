@@ -5,12 +5,13 @@
 #	regenerating grub.cfg, moving and cleaning up build files. Clean up old distfiles and binpkgs with eclean. 
 #	Modify for your setup.
 #
-#	Made for Gentoo openrc.
+#	Made for Gentoo OpenRC
+#
 #	Dependencies:
 #			sys-apps/mlocate
 #			app-text/tree
-#			sys-kernel/dracut for initramfs and unified kernel image generation. (see 'man /etc/dracut.conf' add secure boot key, etc)
-#			sys-boot/grub	-	configure /etc/default/grub, /etc/grub.d/10_custom will be copied to your system with custom 'globs'.
+#			sys-kernel/dracut - see 'man /etc/dracut.conf' add secure boot key, etc.
+#			sys-boot/grub - configure /etc/default/grub
 #			(optional) app-crypt/sbctl & app-crypt/sbsigntools for secure boot
 #
 #				Set your /etc/dracut.conf.d/custom.conf with key and uefi_stub location:
