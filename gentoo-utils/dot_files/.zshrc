@@ -101,15 +101,13 @@ tab_complete()
 bindkey '^I' tab_complete
 zle -N tab_complete
 
-
 kill_ssh_agent()
 {
 	ssh-agent -k > /dev/null
 }
 
-SSH_AGENT_PID=$(eval 'ssh-agent' | grep PID | cut -f2 -d '=' | cut -f1 -d ';')
+eval "$(ssh-agent)" > /dev/null
 add-zsh-hook -Uz zshexit kill_ssh_agent
-
 
 if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
 	if grep -q  "distcc" <<< "$PATH"; then
