@@ -8,7 +8,7 @@ Change ```hosts``` and ```hostsTJ``` to your machine's hostnames/thread counts.
 ```./install /other/location/``` installs to ```/other/location/```
 
 ```
-buildkernel   [-m -r -b -a -l -i -im -u -me -c clean-kernels install-efi -h] [kernel_version,localhost]
+buildkernel   [-m -r -b -a -l -i -im -u -me -c clean-kernels install-efi -h] [kernel_version, localhost]
 --move          -- move build files.
 --regen         -- regenerate "/boot/grub/grub.cfg" and exit.
 --build         -- build "/usr/src/linux" and exit.
