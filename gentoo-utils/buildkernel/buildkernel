@@ -290,46 +290,51 @@ clean_kernels()
 		ls -1 -A | grep $rkn
 	fi
 
-	echo -e "\n${RED}Are you sure${NOC} you want to ${RED}remove${NOC} these kernels / modules?"
-	echo -e "(including matching sysmap, initramfs, config)${NOC}\n"	
+	[[ -n $(echo "linux" | grep $rkn) ]] && 
+		echo -e "\n${RED}Can not delete symlink "${NOC}/usr/src/linux${RED}" aborting!" && 
+		exit 1
 
-	if ( yes_or_no "$input" ); then
-        echo
-		cd "${baseDir}custom"
-		if [[ -n $(ls | grep $rkn) ]]; then
-			echo -e "${GREEN}Cleaning: ${NOC}${baseDir}custom/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-			rm -Iv *$rkn*
+	echo -e "\n${RED}Are you sure${NOC} you want to ${RED}remove${NOC} these kernels / modules?"
+	if (yes_or_no "$input" ); then
+		echo -e "\n${RED}Are you very sure?${NOC}"
+		if ( yes_or_no "$input" ); then
+			echo
+			cd "${baseDir}custom"
+			if [[ -n $(ls | grep $rkn) ]]; then
+				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}custom/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+				rm -v *$rkn*
+			fi
+			cd "${baseDir}distribution"
+			if [[ -n $(ls | grep $rkn) ]]; then
+				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}distribution/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+				rm -v *$rkn*
+			fi      
+			cd "${baseDir}git"
+			if [[ -n $(ls | grep $rkn) ]]; then
+				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}git/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}" 
+				rm -v *$rkn*
+			fi
+			cd "${baseDir}zen"
+			if [[ -n $(ls | grep $rkn) ]]; then
+				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}zen/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+				rm -v *$rkn*
+			fi
+			cd "/lib/modules/"
+			if [[ -n $(ls | grep $rkn) ]]; then
+				echo -e "${GREEN}Cleaning: ${NOC}/lib/modules/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+				rm -vr *$rkn*
+			fi
+			cd "/usr/src/"
+			if [[ -n $(ls | grep $rkn) ]]; then
+				echo -e "${GREEN}Cleaning: ${NOC}/usr/src/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
+				rm -vr *$rkn*
+			fi
+			echo
+			regen_grub
+		else
+			exit 0
 		fi
-		cd "${baseDir}distribution"
-        if [[ -n $(ls | grep $rkn) ]]; then
-        	echo -e "${GREEN}Cleaning: ${NOC}${baseDir}distribution/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-			rm -Iv *$rkn*
-		fi      
-		cd "${baseDir}git"
-        if [[ -n $(ls | grep $rkn) ]]; then
-			echo -e "${GREEN}Cleaning: ${NOC}${baseDir}git/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}" 
-			rm -Iv *$rkn*
-		fi
-		cd "${baseDir}zen"
-        if [[ -n $(ls | grep $rkn) ]]; then
-			echo -e "${GREEN}Cleaning: ${NOC}${baseDir}zen/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-			rm -Iv *$rkn*
-		fi
-        cd "/lib/modules/"
-		if [[ -n $(ls | grep $rkn) ]]; then
-			echo -e "${GREEN}Cleaning: ${NOC}/lib/modules/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-			rm -Iv *$rkn*
-		fi
-		cd "/usr/src/"
-		if [[ -n $(ls | grep $rkn) ]]; then
-			echo -e "${GREEN}Cleaning: ${NOC}/usr/src/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-			rm -Iv *$rkn*
-		fi
-    else
-        exit 0
-    fi
-	echo
-	regen_grub
+	fi
 }
 
 case $2 in
