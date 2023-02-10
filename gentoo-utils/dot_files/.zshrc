@@ -5,7 +5,7 @@ promptinit; prompt gentoo
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' rehash true
 zstyle ':completion:*' insert-tab false
-setopt correctall
+setopt correct
 
 [[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
 
@@ -81,6 +81,8 @@ alias dir='dir --color=auto'
 alias vdir='vdir --color=auto'
 alias grep='grep --color=auto'
 alias tree='tree -C'
+
+alias tmux='nocorrect tmux'
 
 alias ll='ls -lAFh --group-directories-first'
 alias la='ls -CFA --group-directories-first'

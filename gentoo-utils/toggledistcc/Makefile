@@ -8,7 +8,7 @@ all:
 
 debug:
 	cc $(CFLAGS) -g -o $(BIN) $(SRC) $(LDFLAGS)
-	gdb ./$(BIN)
+	gdb $(BIN)
 
 clean:
 	rm -f $(BIN)

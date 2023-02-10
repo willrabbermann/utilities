@@ -863,20 +863,22 @@ import:
   - ~/.config/alacritty/keys.yml
 
 key_bindings:
-  - { key: Paste,                                       action: Paste          }
-  - { key: Copy,                                        action: Copy           }
   - { key: L,         mods: Control,                    action: ClearLogNotice }
   - { key: L,         mods: Control, mode: ~Vi|~Search, chars: "\x0c"          }
   - { key: PageUp,    mods: Shift,   mode: ~Alt,        action: ScrollPageUp,  }
   - { key: PageDown,  mods: Shift,   mode: ~Alt,        action: ScrollPageDown }
   - { key: Home,      mods: Shift,   mode: ~Alt,        action: ScrollToTop,   }
   - { key: End,       mods: Shift,   mode: ~Alt,        action: ScrollToBottom }
+  - { key: C,         mods: Shift|Control,              action: Copy           }
+  - { key: V,         mods: Shift|Control,              action: Paste          }
   - { key: V,         mods: Control,                    action: Paste          }
+  - { key: Copy,                                        action: ClearSelection }
+  - { key: Paste,                                       action: ClearSelection }
   # Vi Mode
-  - { key: Space,  mods: Control,       mode: ~Search,    action: ToggleViMode            }
+  - { key: Space,  mods: Control,       mode: ~Search, action: ToggleViMode               }
+  - { key: I,                           mode: Vi|~Search, action: ToggleViMode            }
   - { key: Space,  mods: Shift|Control, mode: Vi|~Search, action: ScrollToBottom          }
   - { key: Escape,                      mode: Vi|~Search, action: ClearSelection          }
-  - { key: I,                           mode: Vi|~Search, action: ToggleViMode            }
   - { key: I,                           mode: Vi|~Search, action: ScrollToBottom          }
   - { key: C,      mods: Control,       mode: Vi|~Search, action: ToggleViMode            }
   - { key: Y,      mods: Control,       mode: Vi|~Search, action: ScrollLineUp            }
@@ -922,17 +924,17 @@ key_bindings:
   - { key: N,      mods: Shift,         mode: Vi|~Search, action: SearchPrevious          }
 
   # Search Mode
-  - { key: Return,                mode: Search|Vi,  action: SearchConfirm         }
-  - { key: Escape,                mode: Search,     action: SearchCancel          }
-  - { key: C,      mods: Control, mode: Search,     action: SearchCancel          }
-  - { key: U,      mods: Control, mode: Search,     action: SearchClear           }
-  - { key: W,      mods: Control, mode: Search,     action: SearchDeleteWord      }
-  - { key: P,      mods: Control, mode: Search,     action: SearchHistoryPrevious }
-  - { key: N,      mods: Control, mode: Search,     action: SearchHistoryNext     }
-  - { key: Up,                    mode: Search,     action: SearchHistoryPrevious }
-  - { key: Down,                  mode: Search,     action: SearchHistoryNext     }
-  - { key: Return,                mode: Search|~Vi, action: SearchFocusNext       }
-  - { key: Return, mods: Shift,   mode: Search|~Vi, action: SearchFocusPrevious   }
+  #- { key: Return,                mode: Search|Vi,  action: SearchConfirm         }
+  #- { key: Escape,                mode: Search,     action: SearchCancel          }
+  #- { key: C,      mods: Control, mode: Search,     action: SearchCancel          }
+  #- { key: U,      mods: Control, mode: Search,     action: SearchClear           }
+  #- { key: W,      mods: Control, mode: Search,     action: SearchDeleteWord      }
+  #- { key: P,      mods: Control, mode: Search,     action: SearchHistoryPrevious }
+  #- { key: N,      mods: Control, mode: Search,     action: SearchHistoryNext     }
+  #- { key: Up,                    mode: Search,     action: SearchHistoryPrevious }
+  #- { key: Down,                  mode: Search,     action: SearchHistoryNext     }
+  #- { key: Return,                mode: Search|~Vi, action: SearchFocusNext       }
+  #- { key: Return, mods: Shift,   mode: Search|~Vi, action: SearchFocusPrevious   }
 
   # (Windows, Linux, and BSD only)
   #- { key: V,              mods: Control|Shift, mode: ~Vi,        action: Paste            }
