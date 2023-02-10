@@ -35,7 +35,7 @@ PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '
 bindkey '^[[2~' complete-word
 bindkey '^[[5~' up-history
 bindkey '^[[6~' down-history
-bindkey ' '		magic-space
+bindkey ' ' magic-space
 # home / end keys
 bindkey '^[[H' beginning-of-line
 bindkey '^[[104;5u' beginning-of-line
@@ -66,6 +66,20 @@ bindkey '^R' history-incremental-search-backward
 bindkey '^[[3~' delete-char
 # Shift+tab clear screen
 bindkey '^[[Z' clear-screen
+
+# Function keys
+bindkey '^[OP' end-of-line
+bindkey '^[OQ' end-of-line
+bindkey '^[OR' end-of-line
+bindkey '^[OS' end-of-line
+bindkey '^[[15~' end-of-line
+bindkey '^[[17~' end-of-line
+bindkey '^[[18~' end-of-line
+bindkey '^[[19~' end-of-line
+bindkey '^[[20~' end-of-line
+bindkey '^[[21~' end-of-line
+bindkey '^[[23~' end-of-line
+bindkey '^[[24~' end-of-line
 
 export HISTSIZE=2000
 export HISTFILE="$HOME/.zsh_history" 
