@@ -3,13 +3,13 @@ Miscellaneous libs and utilities.
 
 ## gentoo-utils
 ### buildkernel
-build the Linux kernel from source.
+Build the Linux kernel from source. Clean up old kernels. Change kernel configurations.
 ### toggledistcc
-edits portage make.conf to enable / disable distcc options and use sane MAKEOPTS.
+Edits portage make.conf to enable / disable distcc options and use sane MAKEOPTS.
 ### dot_files
-some of my custom config files including alacritty, zsh, tmux.
+Some of my custom config files including alacritty, zsh, tmux.
 ## gmath
-my C linear algebra library.
+My C linear algebra library.
 ## strutils
-my C string utilities header.
+My C string utilities header.
 
