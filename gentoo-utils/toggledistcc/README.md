@@ -29,9 +29,9 @@ Running toggledistcc can not do this for you, as it is a child process and chang
 Restart your shell after using toggledistcc and update PATH in your .shellrc like so:
 ```
 if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
-    if grep -q  "distcc" <<< "$PATH"; then
-    else export PATH="/usr/lib/distcc/bin:${PATH}"
-    fi
+	if grep -q	"distcc" <<< "$PATH"; then
+	else export PATH="/usr/lib/distcc/bin:${PATH}"
+	fi
 fi
 ```
 Or set PATH manually without ```/usr/lib/distcc/bin:```

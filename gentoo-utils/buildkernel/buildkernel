@@ -41,8 +41,8 @@ LPURPLE='\033[01;35m'
 NOC='\033[0m'
 
 if [ "$EUID" -ne 0 ]; then
-    echo -e "${RED}Please run as root.${NOC}"
-    exit
+	echo -e "${RED}Please run as root.${NOC}"
+	exit
 fi
 
 # sbctl to manage keys
@@ -54,24 +54,24 @@ declare -a hostsTJ=("6" "8" "8")
 
 yes_or_no()
 {
-    while true; do
-        read -p "[Y/n]: " yn
-        case $yn in
-            [Yy]*) return 0  ;;
-            [Nn]*) echo -e "${RED}Aborted${NOC}\n" ; return  1 ;;
-        esac
-    done
+	while true; do
+		read -p "[Y/n]: " yn
+		case $yn in
+			[Yy]*) return 0  ;;
+			[Nn]*) echo -e "${RED}Aborted${NOC}\n" ; return  1 ;;
+		esac
+	done
 }
 
 relocate()
 {
-        updatedb
-        kernel=$(locate /boot/vmlinuz-* | grep "^/boot/")
-        sysmap=$(locate /boot/System.map-* | grep "^/boot/")
-        config=$(locate /boot/config-* | grep "^/boot/")
-        initrd=$(locate /boot/initramfs-* | grep "^/boot/")
-        efi=$(locate Linux | grep "^/boot/EFI/Linux/linux")
-        [[ -z $efi ]] && efi=$(locate /boot/gentoo-linux | grep "^/boot/gentoo")
+		updatedb
+		kernel=$(locate /boot/vmlinuz-* | grep "^/boot/")
+		sysmap=$(locate /boot/System.map-* | grep "^/boot/")
+		config=$(locate /boot/config-* | grep "^/boot/")
+		initrd=$(locate /boot/initramfs-* | grep "^/boot/")
+		efi=$(locate Linux | grep "^/boot/EFI/Linux/linux")
+		[[ -z $efi ]] && efi=$(locate /boot/gentoo-linux | grep "^/boot/gentoo")
 
 }
 
@@ -104,7 +104,7 @@ find_total_threads()
 	distcc_status=$(rc-service distccd status | grep started)
 	[[ -n $distcc_status ]] && distcc="true"
 	[[ -z $distcc_status ]] && distcc="false"
-    hostsLength=${#hosts[@]}
+	hostsLength=${#hosts[@]}
 	hostsOnline=0
 	if [[ $localhostmode == "false" && $distcc == "true" ]]; then
 		tj=0	
@@ -125,19 +125,19 @@ find_total_threads()
 	if [[ $localhostmode == "true" || $distcc == "false" || 
 		  $(echo "$hostsOnline <= 1" | bc) == 1 ]]; then
 		[[ $localhostmode == "false" && $distcc == "false" ]] && echo -e "${RED}Service distccd is not started.${RED}"
-        if [[ $localhostmode == "true" ]]; then
-            for (( i=0; i<${hostsLength}; i++ ))
-            do
-                if [[ ${hosts[$i]} == $(hostname) ]]; then
-                    tj=${hostsTJ[$i]}
-		            echo -e "${GREEN}Localhost mode enabled.${NOC}"
-                    break
-                fi
-            done
-        elif [[ $distcc == "false" || $(echo "$hostsOnline <= 1" | bc) == 1 ]]; then 
-            tj=$(cat /proc/cpuinfo  | grep siblings | sort -u | awk -F ": " '{print $NF}')
+		if [[ $localhostmode == "true" ]]; then
+			for (( i=0; i<${hostsLength}; i++ ))
+			do
+				if [[ ${hosts[$i]} == $(hostname) ]]; then
+					tj=${hostsTJ[$i]}
+					echo -e "${GREEN}Localhost mode enabled.${NOC}"
+					break
+				fi
+			done
+		elif [[ $distcc == "false" || $(echo "$hostsOnline <= 1" | bc) == 1 ]]; then 
+			tj=$(cat /proc/cpuinfo	| grep siblings | sort -u | awk -F ": " '{print $NF}')
 			echo -e "${GREEN}Localhost mode enabled.${NOC}"
-        fi
+		fi
 	fi
 }
 
@@ -146,10 +146,10 @@ make_kernel()
 	find_total_threads
 	echo -e "${GREEN}Making kernel with ${BLUE}$tj${GREEN} threads...${NOC}"
 	if [[ $distcc == "true" ]]; then
-        make -j$tj CC="distcc gcc"
-    else
-        make -j$tj CC="gcc"
-    fi
+		make -j$tj CC="distcc gcc"
+	else
+		make -j$tj CC="gcc"
+	fi
 	echo -e "\n${GREEN}Making and installing modules...${NOC}"
 	make modules_install
 	echo -e "\nInstalling kernel to /boot..."
@@ -237,11 +237,11 @@ upgrade_kernel()
 	[[ -d /usr/src/linux-$upgrade_kver ]] && valid_flag=1	
 	if [[ -z $valid_flag && -n $(echo $upgrade_kver | grep '^[0-9]' | grep -v '-') ]]; then
 		int_filter="^$upgrade_kver:"
-		if  cut_len=$(echo "${#upgrade_kver} + 2" | bc) ; then 
+		if	cut_len=$(echo "${#upgrade_kver} + 2" | bc) ; then 
 			upgrade_kver=$(ls /usr/src/  | grep '^linux-' | cut -c 7- | grep -n '' | grep "$int_filter" | cut -c $cut_len-)
 			[[ -d /usr/src/linux-$upgrade_kver ]] && valid_flag=1
 		fi
-	fi       
+	fi		 
 	
 	[[ -z $valid_flag ]] && echo -e "${RED}Invalid kernel name.${NOC}" && exit
 	[[ $upgrade_kver == $kver ]] && echo -e "${RED}Cannot upgrade current kernel with current kernel.${NOC}" && exit
@@ -256,13 +256,13 @@ upgrade_kernel()
 clean_kernels()
 {
 	baseDir="/boot/EFI/gentoo/"
-    tree -C -L 1 --noreport /lib/modules
+	tree -C -L 1 --noreport /lib/modules
 	echo -e "${LPURPLE}$(du -sh /lib/modules/)${NOC}\n"
 	tree -C --noreport -I '*grub*' -I '*System.*' -I '*initramfs-*' -I '*config-*' $baseDir
 	echo -e "${LPURPLE}$(du -sh $baseDir)${NOC}\n"
-    tree -C -L 1 --noreport /usr/src
+	tree -C -L 1 --noreport /usr/src
 	echo -e "${LPURPLE}$(du -sh /usr/src)${NOC}\n"
-    echo -e "${GREEN}Enter part of the full kernel name to remove matching wildcards ${LPURPLE}*${NOC}##.##.##${LPURPLE}*"
+	echo -e "${GREEN}Enter part of the full kernel name to remove matching wildcards ${LPURPLE}*${NOC}##.##.##${LPURPLE}*"
 	echo -e "${GREEN}Or enter nothing to abort.${NOC}"
 	read rkn
 
@@ -308,7 +308,7 @@ clean_kernels()
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}distribution/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
 				rm -v *$rkn*
-			fi      
+			fi		
 			cd "${baseDir}git"
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}git/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}" 
@@ -424,7 +424,7 @@ echo -e "\nLocated build files:${GREEN}"
 [[ -n $sysmap ]] && echo $sysmap
 [[ -n $config ]] && echo $config
 [[ -n $initrd ]] && echo $initrd
-[[ -n $efi    ]] && echo $efi
+[[ -n $efi	  ]] && echo $efi
 
 [[ -n $old_build_files ]] && echo -e "\n${RED}Old build files detected, its probably not a good idea to move them.
 It is recommended to first remove all build files and then rebuild."

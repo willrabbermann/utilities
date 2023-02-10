@@ -272,23 +272,23 @@ rotatevec3f(vec3f origin, vec3f *vec, float degrees, char axis)
 	{
 		case 'x':
 			memcpy(rot_matrix, &(float3x3){
-					{ 1,            0,          0 },
+					{ 1,			0,			0 },
 					{ 0,   cos(angle), -sin(angle)},
-					{ 0,   sin(angle),  cos(angle)}},
+					{ 0,   sin(angle),	cos(angle)}},
 					sizeof(float3x3));
 			break;
 		case 'y':
 			memcpy(rot_matrix, &(float3x3){
-					{ cos(angle),   0, sin(angle) },
-					{ 0,            1,          0 },
-					{ -sin(angle),  0, cos(angle) }},
+					{ cos(angle),	0, sin(angle) },
+					{ 0,			1,			0 },
+					{ -sin(angle),	0, cos(angle) }},
 					sizeof(float3x3));
 			break;
 		case 'z':
 			memcpy(rot_matrix, &(float3x3){
 					{  cos(angle), -sin(angle), 0 },
-					{  sin(angle),  cos(angle), 0 },
-					{  0,           0,          1 }},
+					{  sin(angle),	cos(angle), 0 },
+					{  0,			0,			1 }},
 					sizeof(float3x3));			
 			break;
 		default:
@@ -609,39 +609,39 @@ dotproduct_4x4_vec4f(float4x4 a, vec4f *b, vec4f *result)
 void 
 calc_global_g_object(g_object *obj) 
 {
-    vert3f rotated_pos;
-    rotated_pos.x = obj->rot.w * obj->localpos.x + obj->rot.y * obj->localpos.z 
+	vert3f rotated_pos;
+	rotated_pos.x = obj->rot.w * obj->localpos.x + obj->rot.y * obj->localpos.z 
 		- obj->rot.z * obj->localpos.y;
-    rotated_pos.y = obj->rot.w * obj->localpos.y + obj->rot.z * obj->localpos.x 
+	rotated_pos.y = obj->rot.w * obj->localpos.y + obj->rot.z * obj->localpos.x 
 		- obj->rot.x * obj->localpos.z;
-    rotated_pos.z = obj->rot.w * obj->localpos.z + obj->rot.x * obj->localpos.y 
+	rotated_pos.z = obj->rot.w * obj->localpos.z + obj->rot.x * obj->localpos.y 
 		- obj->rot.y * obj->localpos.x;
-    float tmp_x = -obj->rot.x * obj->localpos.x - obj->rot.y * obj->localpos.y 
+	float tmp_x = -obj->rot.x * obj->localpos.x - obj->rot.y * obj->localpos.y 
 		- obj->rot.z * obj->localpos.z;
-    rotated_pos.x += tmp_x * obj->rot.x;
-    rotated_pos.y += tmp_x * obj->rot.y;
-    rotated_pos.z += tmp_x * obj->rot.z;
+	rotated_pos.x += tmp_x * obj->rot.x;
+	rotated_pos.y += tmp_x * obj->rot.y;
+	rotated_pos.z += tmp_x * obj->rot.z;
 
-    obj->globalpos = rotated_pos;
+	obj->globalpos = rotated_pos;
 }
 
 void 
 set_quaternion_g_object(g_object *obj, float degree, float x, float y, float z)
 {
-    float angle = deg2rad(fmod(degree, 360.0f));
-    float length = sqrt(x*x + y*y + z*z);
-    float sA = sin(angle);
-    float cA = cos(angle);
-    memcpy(&obj->rot, 
-        &(quaternion)
-        { x * sA / length, y * sA / length, z * sA / length, cA },
-        sizeof(quaternion)); 
-    float norm = sqrt(pow(obj->rot.x, 2) + pow(obj->rot.y, 2) 
+	float angle = deg2rad(fmod(degree, 360.0f));
+	float length = sqrt(x*x + y*y + z*z);
+	float sA = sin(angle);
+	float cA = cos(angle);
+	memcpy(&obj->rot, 
+		&(quaternion)
+		{ x * sA / length, y * sA / length, z * sA / length, cA },
+		sizeof(quaternion)); 
+	float norm = sqrt(pow(obj->rot.x, 2) + pow(obj->rot.y, 2) 
 			+ pow(obj->rot.z, 2) + pow(obj->rot.w, 2));
-    obj->rot.x /= norm;
-    obj->rot.y /= norm;
-    obj->rot.z /= norm;
-    obj->rot.w /= norm;
-    calc_global_g_object(obj);
+	obj->rot.x /= norm;
+	obj->rot.y /= norm;
+	obj->rot.z /= norm;
+	obj->rot.w /= norm;
+	calc_global_g_object(obj);
 }
 

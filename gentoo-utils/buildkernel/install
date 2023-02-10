@@ -9,8 +9,8 @@
 #
 
 if [ "$EUID" -ne 0 ]; then
-    echo -e "Please run as root."
-    exit
+	echo -e "Please run as root."
+	exit
 fi
 
 if [ -d /etc/grub.d/ ]; then
