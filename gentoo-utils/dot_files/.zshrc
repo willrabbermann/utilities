@@ -82,8 +82,6 @@ alias vdir='vdir --color=auto'
 alias grep='grep --color=auto'
 alias tree='tree -C'
 
-alias tmux='nocorrect tmux'
-
 alias ll='ls -lAFh --group-directories-first'
 alias la='ls -CFA --group-directories-first'
 alias l='ls -CF --group-directories-first'
