@@ -9,7 +9,7 @@ Edits portage make.conf to enable / disable distcc options and use sane MAKEOPTS
 ### dot_files
 Some of my custom config files including alacritty, zsh, tmux.
 ## gmath
-My C linear algebra library.
+C linear algebra library.
 ## strutils
-My C string utilities header.
+C string utilities header.
 
