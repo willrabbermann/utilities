@@ -170,7 +170,7 @@ build()
 		fi
 
 		time make_kernel
-		echo ""
+		echo
 	fi
 }
 
@@ -248,7 +248,7 @@ upgrade_kernel()
 	
 	echo -e "Are you sure you want to ${RED}overwrite${NOC} ${GREEN}/usr/src/linux-$upgrade_kver/.config${NOC} with ${GREEN}/usr/src/linux-$kver/.config${NOC}?"
 	if (yes_or_no "$input") then
-		echo ""
+		echo
 		cp -v /usr/src/linux/.config /usr/src/linux-$upgrade_kver
 	fi
 }
