@@ -100,7 +100,7 @@ alias ll='ls -lAFh --group-directories-first'
 alias la='ls -CFA --group-directories-first'
 alias l='ls -CF --group-directories-first'
 alias dus='du -had1 | sort -h'
-alias gitfm='git fetch && git merge'
+alias git-fm='git fetch && git merge'
 
 tab_complete()
 {
