@@ -1,0 +1,24 @@
+#!/bin/bash
+REPOS="$HOME/.config/nvim $HOME/projects/github/utilities"
+
+for repo in ${REPOS}; do
+	cd $repo
+	
+	GIT_M=$(git fetch && git merge)
+	echo -e $GIT_M
+	
+	if [[ $GIT_M =~ "fatal" || $GIT_M =~ "warn" ]]; then
+		echo "$repo :: git fatal/warn, bailing out."
+		break
+	elif [[ $repo =~ "nvim" ]]; then
+		# nothing to install
+		break
+	elif [[ $repo =~ "github/utilities" ]]; then
+		# install dot_files
+		[[ $GIT_M =~ ".zshrc" ]] && cp -v gentoo-utils/dot_files/.zshrc ~ 
+		[[ $GIT_M =~ "alacritty/" ]] && cp -rv gentoo-utils/dot_files/alacritty/* ~/.config/alacritty/
+		[[ $GIT_M =~ "DIR_COLORS" ]] && sudo cp -v gentoo-utils/dot_files/DIR_COLORS /etc/
+		[[ $GIT_M =~ "tmux.conf" ]] && sudo cp -v gentoo-utils/dot_files/tmux.conf /etc/
+		[[ $GIT_M =~ "update-dot-files" ]] && sudo cp -v gentoo-utils/dot_files/update-dot-files /usr/local/bin
+	fi
+done
