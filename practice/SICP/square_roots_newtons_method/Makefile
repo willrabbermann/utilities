@@ -1,4 +1,4 @@
-CFLAGS=-fsanitize=address -pedantic -O2
+CFLAGS=-fsanitize=address -Wall -Wextra -pedantic -O2
 LDFLAGS=
 SRC=test.c
 
