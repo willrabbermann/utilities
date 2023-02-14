@@ -8,8 +8,11 @@ Build the Linux kernel from source. Clean up old kernels. Change kernel configur
 Edits portage make.conf to enable / disable distcc options and use sane MAKEOPTS.
 ### dot_files
 Some of my custom config files including alacritty, zsh, tmux.
-## gmath
+## c-lib
+### gmath
 C linear algebra library.
-## strutils
+### strutils
 C string utilities header.
+## practice
+what it sounds like
 
