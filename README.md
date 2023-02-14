@@ -14,5 +14,5 @@ C linear algebra library.
 ### strutils
 C string utilities header.
 ## practice
-what it sounds like
+
 
