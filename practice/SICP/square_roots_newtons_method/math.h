@@ -6,7 +6,7 @@
 #define square(x) (x * x)
 
 #define improve_guess(guess, x) (average(guess, (x / guess)))
-// iterative preprocessor macros are not possible, unfortunately.
+// iterative preprocessor macros are not possible in C, unfortunately.
 //#define sqrt_iter_float(guess, x) (aprox(square(guess), x, 1e-6f) ? (guess) : (sqrt_iter_float(improve_guess(guess, x)), x))
 
 long double sqrt_iter(long double guess, long double x, long double precision)
