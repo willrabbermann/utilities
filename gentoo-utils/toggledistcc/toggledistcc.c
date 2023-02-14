@@ -103,6 +103,12 @@ void write_makeconfig(char *makeconfig)
 	fclose(fp);
 }
 
+void print_separator()
+{
+	for (int i = 0; i < 50; i++) printf("-");
+	printf("\n");
+}
+
 int main()
 {
 	if (geteuid() != 0)
@@ -115,15 +121,17 @@ int main()
 	{
 		char *cmd = "cat /proc/cpuinfo	| grep siblings | sort -u | \
 					 awk -F \": \" \'{print $NF}\'";
-		char *buf = pipe_cmd(cmd, 50, 1);
+		char *buf = pipe_cmd(cmd, 32, 1);
 		LOCAL_TJ = atoi(buf);
 		free(buf);
 	}	
 	
 	char *makeconfig = get_makeconfig();
 
-	printf("/etc/portage/make.conf\n\
-------------------------\n%s------------------------\n", makeconfig);
+	printf("/etc/portage/make.conf\n");
+	print_separator();
+	printf("%s", makeconfig);
+	print_separator();
 	
 	char *start_makeopts = strstr(makeconfig, "MAKEOPTS=\"") 
 		+ strlen("MAKEOPTS=\"");
@@ -168,7 +176,7 @@ int main()
 	if (distcc)
 	{
 		asprintf(&second, "-j%ld -l%ld", j, l);
-		char *fourth_cpy = malloc(sizeof(fourth));
+		char *fourth_cpy = malloc(sizeof(fourth) + 1);
 		strcpy(fourth_cpy, fourth);
 		free(fourth);
 		if (strlen(fourth_cpy) < 1)
@@ -219,9 +227,11 @@ int main()
 	free(fifth);
 
 	printf("(new) -j = %ld	-l = %ld\n", j, l);
-	printf("(new) make.conf is %ld characters long, %ld bytes\n", size, size);
-	printf("(new) make.conf\n\
-------------------------\n%s------------------------\n", newmakeconfig);
+	printf("(new) make.conf is %ld characters long, %ld bytes\n", size - 1, size);
+	printf("(new) make.conf\n");
+	print_separator();
+	printf("%s", newmakeconfig);
+	print_separator();
 
 	write_makeconfig(newmakeconfig);
 	

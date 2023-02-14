@@ -29,7 +29,7 @@ char *strsplit(char *str,int offset, int length)
 	else if (-1 == offset)
 		newsize = alen - length;
 	
-	char *newstr = calloc(1, (newsize + 1));
+	char *newstr = calloc(1, newsize + 1);
 	
 	if (-1 != offset)
 	{
@@ -88,7 +88,7 @@ char *str_rm(char *str1, char *str2, int limit_spaces)
 // Also removes trailing/beginning space characters.
 {
 	if (strlen(str2) > strlen(str1)) return NULL;
-	char *str1_cpy = calloc(1, strlen(str1)+1);
+	char *str1_cpy = calloc(1, strlen(str1) + 1);
 	strcpy(str1_cpy, str1);
 	size_t occurances = 0;
 	char *found_str2;
