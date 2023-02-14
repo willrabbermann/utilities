@@ -13,7 +13,7 @@
 long double sqrt_iter(long double guess, long double x, long double precision)
 {
 	if aprox(square(guess), x, precision) return guess;
-	return sqrt_iter(improve_guess(guess, x), x, precision);
+	sqrt_iter(improve_guess(guess, x), x, precision);
 }
 
 #define sqrt(x, precision) (sqrt_iter(1.0, x, precision))
