@@ -13,6 +13,5 @@ Some of my custom config files including alacritty, zsh, tmux.
 C linear algebra library.
 ### strutils
 C string utilities header.
-## practice
 
 
