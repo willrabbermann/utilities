@@ -1,5 +1,7 @@
 #pragma once
 
+
+#define abs(a) ((a < 0) ? (-a) : (a))
 #define aprox(a, b, c) ((abs((a - b)) < c) ? (1) : (0))
 #define average(x, y) ((x + y) / 2)
 #define square(x) (x * x)
@@ -14,7 +16,4 @@ long double sqrt_iter(long double guess, long double x, long double precision)
 	sqrt_iter(improve_guess(guess, x), x, precision);
 }
 
-long double sqrt(long double x, long double precision) 
-{
-	return sqrt_iter(1.0, x, precision);
-}
+#define sqrt(x, precision) (sqrt_iter(1.0, x, precision))
