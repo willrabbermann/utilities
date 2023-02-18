@@ -274,12 +274,9 @@ clean_kernels()
    
 	echo
 
-	if [[ -n $(tree | grep $rkn) ]]; then
+	if [[ -n $(tree $baseDir | grep $rkn) ]]; then
 		cd $baseDir && echo -e "${BLUE}$(pwd)/*${NOC}"
-		ls -1 -A custom | grep $rkn	
-		ls -1 -A distribution | grep $rkn
-		ls -1 -A git | grep $rkn
-		ls -1 -A zen | grep $rkn
+		ls -1 -A * | grep $rkn
 	fi
 	if [[ -n $(ls -1 -A /lib/modules | grep $rkn) ]]; then
 		cd /lib/modules && echo -e "${BLUE}$(pwd)${NOC}"
@@ -302,32 +299,32 @@ clean_kernels()
 			cd "${baseDir}custom"
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}custom/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-				rm -v *$rkn*
+				rm *$rkn*
 			fi
 			cd "${baseDir}distribution"
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}distribution/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-				rm -v *$rkn*
+				rm *$rkn*
 			fi		
 			cd "${baseDir}git"
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}git/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}" 
-				rm -v *$rkn*
+				rm *$rkn*
 			fi
 			cd "${baseDir}zen"
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}${baseDir}zen/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-				rm -v *$rkn*
+				rm *$rkn*
 			fi
 			cd "/lib/modules/"
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}/lib/modules/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-				rm -vr *$rkn*
+				rm -r *$rkn*
 			fi
 			cd "/usr/src/"
 			if [[ -n $(ls | grep $rkn) ]]; then
 				echo -e "${GREEN}Cleaning: ${NOC}/usr/src/${LPURPLE}*${RED}$rkn${LPURPLE}*${NOC}"
-				rm -vr *$rkn*
+				rm -r *$rkn*
 			fi
 			echo
 			regen_grub
