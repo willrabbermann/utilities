@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include "strutils.h"
 #include "config.h"
 
@@ -146,11 +147,11 @@ int main()
 	parse_makeconfig(start_makeopts, makeopts_len);
 	printf("(original) -j = %ld  -l = %ld\n", j, l);
 
-	int distcc;
+	bool distcc;
 	if (l == 0)
-		distcc = 1;
+		distcc = true;
 	else
-		distcc = 0;  
+		distcc = false;  
 
 	if (distcc)
 	{
