@@ -35,6 +35,7 @@ dns_servers_eth0="192.168.1.1 6.6.6.6"
 ----------------------------------------
 Restarting network interfaces...
 ----------------------------------------
+$ rc-service net.eth0 restart
  * WARNING: you are stopping a boot service
  * Caching service dependencies ...           [ ok ]
  * Bringing down interface eth0
