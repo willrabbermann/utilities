@@ -1,8 +1,9 @@
 # toggledhcp
 Toggle between DHCP and static addressing in netifrc. Modifies ```/etc/conf.d/net``` to enable/disable DHCP and static configurations.
-Made for Gentoo OpenRC
+Will restart all ```net.interface``` services specified in ```config.h```.
+Made for Gentoo OpenRC.
 ## config.h
-Set the interface name(s) you want to toggle between DHCP and static addressing.
+Set the interface name(s) you want to toggle.
 ## limitations
 For now only static IPs starting with ```192.168``` will be toggled.
 Should be easy to add different addresses if I find it necessary.
