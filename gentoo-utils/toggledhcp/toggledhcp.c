@@ -63,7 +63,7 @@ void write_net(char *new)
 
 void print_sep()
 {
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 40; i++)
 		printf("-");
 	printf("\n");
 }
@@ -134,6 +134,20 @@ void create_new_net_file(const char *iface)
 	write_net(new_net_file);
 }
 
+void restart_ifaces(int iface_size)
+{
+	print_sep();
+	printf("Restarting network interfaces...\n");
+	print_sep();
+	for (int i = 0; i < iface_size; i++)
+	{
+		char *cmd;
+		asprintf(&cmd, "rc-service net.%s restart", dhcp_interfaces[i]);	
+		system(cmd);
+		free(cmd);
+	}
+}
+
 int main()
 {	
 	net_file = get_net();
@@ -144,12 +158,12 @@ int main()
 	
 	
 	int iface_size = 0;
-	while (dhcp_interface[iface_size] != NULL)
+	while (dhcp_interfaces[iface_size] != NULL)
 		iface_size++;
 
 	for (int i = 0; i < iface_size; i++)
 	{
-		create_new_net_file(dhcp_interface[i]);		
+		create_new_net_file(dhcp_interfaces[i]);		
 		if (i < iface_size)
 		{
 			free(net_file);
@@ -162,6 +176,8 @@ int main()
 			printf("%s", new_net_file);
 		}
 	}
+
+	restart_ifaces(iface_size);
 	
 
 	free(search_term_dhcp);
