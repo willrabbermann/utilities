@@ -14,6 +14,15 @@ char *search_term_static;
 size_t index_dhcp;
 size_t index_static;
 
+void 
+free_globals()
+{
+	free(search_term_dhcp);
+	free(search_term_static);
+	free(net_file);
+	free(new_net_file);
+}
+
 char
 *get_net()
 {
@@ -92,9 +101,7 @@ check_config(const char *iface)
 			fprintf(stderr, "ERROR: Could not find `%s`\n", search_term_dhcp);
 		if (!strstr(net_file, search_term_static)) 
 			fprintf(stderr, "ERROR: Could not find `%s`\n", search_term_static);
-		free(search_term_dhcp);
-		free(search_term_static);
-		free(net_file);
+		free_globals();
 		exit(1);
 	}
 }
@@ -134,8 +141,10 @@ create_new_net_file(const char *iface)
 			new_net_file[a++] = net_file[i];
 	}
 	else exit(1);
-	//printf("index_dhcp = %ld\n", index_dhcp);
-	//printf("index_static = %ld\n", index_static);
+#	ifdef _DEBUG_MESSAGES_
+		printf("index_dhcp = %ld\n", index_dhcp);
+		printf("index_static = %ld\n", index_static);
+#	endif
 	write_net(new_net_file);
 }
 
@@ -148,7 +157,8 @@ restart_ifaces(size_t iface_size)
 	for (size_t i = 0; i < iface_size; i++)
 	{
 		char *cmd;
-		asprintf(&cmd, "rc-service net.%s restart", dhcp_interfaces[i]);	
+		asprintf(&cmd, "rc-service net.%s restart", dhcp_interfaces[i]);
+		printf("$ %s\n", cmd);
 		system(cmd);
 		free(cmd);
 	}
@@ -186,10 +196,7 @@ main()
 
 	restart_ifaces(iface_size);
 	
-	free(search_term_dhcp);
-	free(search_term_static);
-	free(net_file);
-	free(new_net_file);
+	free_globals();
 
 	return 0;
 }

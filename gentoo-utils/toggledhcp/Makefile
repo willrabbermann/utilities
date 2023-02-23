@@ -7,7 +7,7 @@ all:
 	cc $(CFLAGS) -o $(BIN) $(SRC) $(INCLUDE)
 
 debug:
-	cc $(CFLAGS) -g -o $(BIN) $(SRC) $(INCLUDE)
+	cc $(CFLAGS) -g -D_DEBUG_MESSAGES_ -o $(BIN) $(SRC) $(INCLUDE)
 	gdb $(BIN)
 
 clean:
