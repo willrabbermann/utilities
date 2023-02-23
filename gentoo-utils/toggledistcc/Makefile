@@ -12,6 +12,7 @@ debug:
 
 clean:
 	rm -f $(BIN)
+
 install:
 	test -f $(BIN) || make all
 	cp -v $(BIN) /usr/local/sbin/
