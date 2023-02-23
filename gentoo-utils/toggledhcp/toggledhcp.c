@@ -11,7 +11,6 @@ char *net_file;
 char *new_net_file;
 char *search_term_dhcp;
 char *search_term_static;
-bool bad_config;
 size_t index_dhcp;
 size_t index_static;
 
@@ -70,7 +69,8 @@ void print_sep()
 
 void check_config(const char *iface)
 {
-	bad_config = false;
+	bool bad_config = false;
+
 	if (search_term_dhcp) free(search_term_dhcp);
 	asprintf(&search_term_dhcp, "config_%s=\"dhcp\"", iface);
 	if (!strstr(net_file, search_term_dhcp)) bad_config = true;
@@ -179,7 +179,6 @@ int main()
 
 	restart_ifaces(iface_size);
 	
-
 	free(search_term_dhcp);
 	free(search_term_static);
 	free(net_file);
