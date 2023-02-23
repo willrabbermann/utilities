@@ -1,4 +1,5 @@
 # toggledhcp
+Toggle between DHCP and static addressing in netifrc. Modifies /etc/conf.d/net with comments/uncomments DHCP and static configurations.
 ## config.h
 Set the interface name(s) you want to toggle between DHCP and static addressing.
 ## limitations
