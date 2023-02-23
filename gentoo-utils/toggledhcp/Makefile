@@ -1,5 +1,4 @@
 CFLAGS=-Wall -fsanitize=address --pedantic -O2
-
 INCLUDE=-I .
 SRC=toggledhcp.c
 BIN=toggledhcp
