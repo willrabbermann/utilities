@@ -15,7 +15,8 @@ bool bad_config;
 size_t index_dhcp;
 size_t index_static;
 
-char *get_net()
+char
+*get_net()
 {
 	FILE *fptr = fopen("/etc/conf.d/net", "r");
 	if (!fptr) 
@@ -30,7 +31,7 @@ char *get_net()
 	
 	char *buf = malloc(size);
 	buf[size-1] = 0;
-	
+
 	size_t i = 0;
 	char f_char = fgetc(fptr);
 	while (f_char != EOF) 
@@ -42,7 +43,8 @@ char *get_net()
 	return buf;
 }
 
-void write_net(char *new)
+void
+write_net(char *new)
 {
 	FILE *fptr = fopen("/etc/conf.d/net", "w");
 	if (!fptr)
@@ -54,21 +56,23 @@ void write_net(char *new)
 	size_t length = strlen(new);
 	new[length] = EOF;
 	
-	for (int i = 0; i < length; i++)
+	for (size_t i = 0; i < length; i++)
 	{
 		fputc(new[i], fptr);
 	}
 	fclose(fptr);
 }
 
-void print_sep()
+void
+print_sep()
 {
-	for (int i = 0; i < 40; i++)
+	for (size_t i = 0; i < 40; i++)
 		printf("-");
 	printf("\n");
 }
 
-void check_config(const char *iface)
+void
+check_config(const char *iface)
 {
 	bad_config = false;
 	if (search_term_dhcp) free(search_term_dhcp);
@@ -95,7 +99,8 @@ void check_config(const char *iface)
 	}
 }
 
-void create_new_net_file(const char *iface)
+void
+create_new_net_file(const char *iface)
 {
 	check_config(iface);
 	print_sep();
@@ -104,28 +109,28 @@ void create_new_net_file(const char *iface)
 	if (index_dhcp && net_file[index_dhcp - 1] == '#')
 	{
 		printf("**Enabling dhcp for interface %s**\n", iface);
-		int a = 0;
+		size_t a = 0;
 		if (index_dhcp > 1)
-			for (int i = 0; i < index_dhcp - 1; i++)
+			for (size_t i = 0; i < index_dhcp - 1; i++)
 				new_net_file[a++] = net_file[i];
-		for (int i = index_dhcp; i < index_static - 1; i++)
+		for (size_t i = index_dhcp; i < index_static - 1; i++)
 			new_net_file[a++] = net_file[i];
 		new_net_file[a++] = '\n';
 		new_net_file[a++] = '#';
-		for (int i = index_static; i < strlen(net_file); i++)
+		for (size_t i = index_static; i < strlen(net_file); i++)
 			new_net_file[a++] = net_file[i];
 	}
 	else if (index_static && net_file[index_static - 1] == '#')
 	{
 		printf("**Disabling dhcp for interface %s**\n", iface);
-		int a = 0;
+		size_t a = 0;
 		if (index_dhcp > 1)
-			for (int i = 0; i < index_dhcp; i++)
+			for (size_t i = 0; i < index_dhcp; i++)
 				new_net_file[a++] = net_file[i];
 		new_net_file[a++] = '#';
-		for (int i = index_dhcp; i < index_static - 1; i++)
+		for (size_t i = index_dhcp; i < index_static - 1; i++)
 			new_net_file[a++] = net_file[i];
-		for (int i = index_static; i < strlen(net_file); i++)
+		for (size_t i = index_static; i < strlen(net_file); i++)
 			new_net_file[a++] = net_file[i];
 	}
 	else exit(1);
@@ -134,12 +139,13 @@ void create_new_net_file(const char *iface)
 	write_net(new_net_file);
 }
 
-void restart_ifaces(int iface_size)
+void
+restart_ifaces(size_t iface_size)
 {
 	print_sep();
 	printf("Restarting network interfaces...\n");
 	print_sep();
-	for (int i = 0; i < iface_size; i++)
+	for (size_t i = 0; i < iface_size; i++)
 	{
 		char *cmd;
 		asprintf(&cmd, "rc-service net.%s restart", dhcp_interfaces[i]);	
@@ -148,7 +154,8 @@ void restart_ifaces(int iface_size)
 	}
 }
 
-int main()
+int 
+main()
 {	
 	net_file = get_net();
 	print_sep();
@@ -157,11 +164,11 @@ int main()
 	printf("%s", net_file);
 	
 	
-	int iface_size = 0;
+	size_t iface_size = 0;
 	while (dhcp_interfaces[iface_size] != NULL)
 		iface_size++;
 
-	for (int i = 0; i < iface_size; i++)
+	for (size_t i = 0; i < iface_size; i++)
 	{
 		create_new_net_file(dhcp_interfaces[i]);		
 		if (i < iface_size)
