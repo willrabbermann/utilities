@@ -8,7 +8,6 @@
 #	Made for Gentoo OpenRC
 #
 #	Dependencies:
-#			sys-apps/mlocate
 #			app-text/tree
 #			sys-kernel/dracut - see 'man /etc/dracut.conf' add secure boot key, etc.
 #			sys-boot/grub - configure /etc/default/grub
@@ -65,19 +64,18 @@ yes_or_no()
 
 relocate()
 {
-		updatedb
-		kernel=$(locate /boot/vmlinuz-* | grep "^/boot/")
-		sysmap=$(locate /boot/System.map-* | grep "^/boot/")
-		config=$(locate /boot/config-* | grep "^/boot/")
-		initrd=$(locate /boot/initramfs-* | grep "^/boot/")
-		efi=$(locate Linux | grep "^/boot/EFI/Linux/linux")
-		[[ -z $efi ]] && efi=$(locate /boot/gentoo-linux | grep "^/boot/gentoo")
-
+		kernel=$(ls -1A /boot | grep "^vmlinuz")
+		sysmap=$(ls -1A /boot | grep "^System.map")
+		config=$(ls -1A /boot | grep "^config")
+		initrd=$(ls -1A /boot | grep "^initramfs")
+		[[ -d /boot/EFI/Linux ]] &&
+			efi=$(ls -1A /boot/EFI/Linux | grep "^linux")
+		[[ -z $efi ]] && efi=$(ls -1A /boot | grep "^gentoo-linux")
 }
 
 getKernelVersion() 
 {
-	kver=$(eselect kernel show | grep src | awk '{print $NF}' | cut -c 16-)
+	kver=$(ls -l /usr/src/linux | cut -f5,6 -d'-')
 }
 
 build_initramfs()
@@ -396,7 +394,7 @@ case $1 in
 		"buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -me -c clean-kernels install-efi -h${NOC}] "
 		echo -e "[${BLUE}kernel_version,localhost${NOC}]"
 		echo -e "${GREEN}--move${NOC}          -- move build files."
-		echo -e "${GREEN}--regen${NOC}         -- regenerate ${LPURPLE}\"/boot/grub/grub.cfg\"${NOC} and exit."
+		echo -e "${GREEN}--regen${NOC}         -- regenerate \"${LPURPLE}/boot/grub/grub.cfg${NOC}\" and exit."
 		echo -e "${GREEN}--build${NOC}         -- build \"${LPURPLE}/usr/src/linux${NOC}\" and exit."
 		echo -e "${GREEN}--auto${NOC}          -- build \"${LPURPLE}/usr/src/linux${NOC}\" & initramfs then continue to automatic moving."
 		echo -e "${BLUE}--localhost${NOC}     -- make in localhost only mode (e.g. \"buildkernel ${GREEN}--auto ${BLUE}--localhost${NOC}\")."
@@ -416,24 +414,29 @@ relocate
 
 [[ -n $(echo "$kernel $sysmap $config $initrd $efi" | grep .old) ]] && old_build_files="true"
 
-echo -e "\nLocated build files:${GREEN}"
-[[ -n $kernel ]] && echo $kernel
-[[ -n $sysmap ]] && echo $sysmap
-[[ -n $config ]] && echo $config
-[[ -n $initrd ]] && echo $initrd
-[[ -n $efi	  ]] && echo $efi
+if [[ -n "$kernel$sysmap$config$initrd$efi$kernel" ]]; then
+	echo -e "\nLocated build files:${GREEN}"
+	[[ -n $kernel ]] && echo $kernel
+	[[ -n $sysmap ]] && echo $sysmap
+	[[ -n $config ]] && echo $config
+	[[ -n $initrd ]] && echo $initrd
+	[[ -n $efi	  ]] && echo $efi
+else
+	echo -e "No build files found in /boot/* to move."
+	exit 0
+fi
 
-[[ -n $old_build_files ]] && echo -e "\n${RED}Old build files detected, its probably not a good idea to move them.
-It is recommended to first remove all build files and then rebuild."
+[[ -n $old_build_files ]] && echo -e "\n${RED}Old build files detected, it is not a good idea to move them.
+It is recommended to remove all build files and then rebuild. Or delete the .old files manually and try --move again."
 
 echo -e "\n${NOC}Choose where to move the build files:"
-echo 	"[ (c)ustom ]        /boot/EFI/gentoo/custom"
-echo 	"[ (d)istribution ]  /boot/EFI/gentoo/distribution"
-echo 	"[ (g)it sources  ]  /boot/EFI/gentoo/git"
-echo 	"[ (z)en sources  ]  /boot/EFI/gentoo/zen"
-echo    "[ (r)emove ]        Remove all build files in /boot (NOT recursive). Also removes /boot/EFI/Linux (recursive)."
-echo 	"[ (q|e) ]           Exit program"
-echo 	"[ (m)ove ]          Manually move build files in /boot."
+echo -e "[ (c)ustom ]        ${GREEN}/boot/EFI/gentoo/custom${NOC}"
+echo -e	"[ (d)istribution ]  ${GREEN}/boot/EFI/gentoo/distribution${NOC}"
+echo -e	"[ (g)it sources  ]  ${GREEN}/boot/EFI/gentoo/git${NOC}"
+echo -e	"[ (z)en sources  ]  ${GREEN}/boot/EFI/gentoo/zen${NOC}"
+echo -e "\n[ (r)emove ]        ${RED}Remove all build files${NOC} in /boot (non-recursive) and /boot/EFI/Linux (recursive)."
+echo -e "[ (m)ove ]          Drop to root shell in /boot and move build files manually."
+echo -e "[ (q|e) ]           Exit program"
 read -p ": " build_dir
 
 case $build_dir in
@@ -458,7 +461,7 @@ case $build_dir in
 		regen_grub
 	;;
 	'r' | 'remove')
-		echo -e "\n${RED}Removing build files...${NOC}"
+		echo -e "\n${RED}Removing build files.${NOC}"
 		rm -v /boot/System.map-*
 		rm -v /boot/config-*
 		rm -v /boot/initramfs-*
