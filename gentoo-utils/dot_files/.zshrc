@@ -66,6 +66,7 @@ bindkey '^R' history-incremental-search-backward
 bindkey '^[[3~' delete-char
 # Shift+tab clear screen
 bindkey '^[[Z' clear-screen
+bindkey '^[	'  clear-screen
 
 # Function keys
 bindkey '^[OP' end-of-line
