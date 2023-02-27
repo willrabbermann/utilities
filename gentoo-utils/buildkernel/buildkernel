@@ -75,15 +75,18 @@ relocate()
 
 getKernelVersion() 
 {
-	kver=$(ls -l /usr/src/linux | cut -f5,6 -d'-')
+	kver=$(eselect kernel show | grep src | awk '{print $NF}' | cut -c 16-)
 }
 
 build_initramfs()
 {
 	relocate
 	[[ -n $initrd ]] && echo -e "Found: ${GREEN}$initrd${NOC}"
-	[[ -n $(echo $initrd | grep "dist.img") ]] && kver=$(echo $initrd | cut -c 17- | cut -c -19)
-	[[ -z $kver ]] && getKernelVersion
+	if [[ -n $(echo $initrd | grep "dist.img") ]]; then
+		kver=$(echo $initrd | cut -c 17- | cut -c -19)
+	else
+		getKernelVersion
+	fi
 	echo -e "Kernel version: ${GREEN}$kver${NOC}"
 	echo "Build initramfs?"
 	if (yes_or_no "$input") then
