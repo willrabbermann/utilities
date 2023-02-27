@@ -472,7 +472,6 @@ case $build_dir in
 		rm -v /boot/config-*
 		rm -v /boot/initramfs-*
 		rm -v /boot/vmlinuz-*
-		rm -vrf /boot/EFI/Linux/
 	;;
 	'e' | 'exit' | 'q' | 'quit')
 		exit
