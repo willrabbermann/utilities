@@ -64,13 +64,16 @@ yes_or_no()
 
 relocate()
 {
-		kernel=$(ls -1A /boot | grep "^vmlinuz")
-		sysmap=$(ls -1A /boot | grep "^System.map")
-		config=$(ls -1A /boot | grep "^config")
-		initrd=$(ls -1A /boot | grep "^initramfs")
-		[[ -d /boot/EFI/Linux ]] &&
-			efi=$(ls -1A /boot/EFI/Linux | grep "^linux")
-		[[ -z $efi ]] && efi=$(ls -1A /boot | grep "^gentoo-linux")
+	
+	kernel=$(ls -1A /boot | grep "^vmlinuz")
+	sysmap=$(ls -1A /boot | grep "^System.map")
+	config=$(ls -1A /boot | grep "^config")
+	initrd=$(ls -1A /boot | grep "^initramfs")
+	[[ -d /boot/EFI/Linux ]] &&
+		efi=$(ls -1A /boot/EFI/Linux | grep "^linux")
+	[[ -z $efi ]] && efi=$(ls -1A /boot | grep "^gentoo-linux")
+	[[ -n $(echo "$kernel $sysmap $config $initrd $efi" | grep .old) ]] && old_build_files="true"
+	[[ $MOVING != "true" && $old_build_files = "true" ]] && echo -e "${RED}Old build files detected, aborting. Go to /boot and delete any ${NOC}\".old\"${RED} files!${NOC}" && exit 1
 }
 
 getKernelVersion() 
@@ -82,9 +85,10 @@ build_initramfs()
 {
 	relocate
 	[[ -n $initrd ]] && echo -e "Found: ${GREEN}$initrd${NOC}"
-	if [[ -n $(echo $kver | grep "-dist") ]]; then
-		kver=$(echo $kver | cut -f2- -d-)
+	if [[ -n $kernel ]]; then
+		kver=$(echo $kernel | cut -f2- -d-)
 	else
+		echo -e "No kernel found in /boot, defaulting to symlinked kernel at /usr/src/linux"
 		getKernelVersion
 	fi
 	echo -e "Kernel version: ${GREEN}$kver${NOC}"
@@ -193,8 +197,7 @@ rename()
 	if [ -n "$efi" ]; then
 		newName="gentoo-linux-$1.efi"
 		echo -e "\nRenaming ${GREEN}$efi${NOC} to ${GREEN}$newName${NOC}"
-		mv $efi $newName
-		rm -rf /boot/EFI/Linux/
+		mv /boot/EFI/Linux/$efi $newName
 	fi
 }
 
@@ -413,9 +416,9 @@ case $1 in
 	;;
 esac
 
-relocate
+MOVING="true"
 
-[[ -n $(echo "$kernel $sysmap $config $initrd $efi" | grep .old) ]] && old_build_files="true"
+relocate
 
 if [[ -n "$kernel$sysmap$config$initrd$efi$kernel" ]]; then
 	echo -e "\nLocated build files:${GREEN}"
