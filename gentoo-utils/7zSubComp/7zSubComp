@@ -1,11 +1,13 @@
 #!/bin/bash
-
-# 7zSubComp [    -c -x ] [directory] 
+# 7zSubComp [ -c [-x -e] -r -v ] [directory A] 
+# 7zip subdirectory compressor and subdirectory archive extractor.
+# 
+#   -c --compress           -   enter directory A to compress all subdirectories of A into new archives in A. 
+#                               Checks archive integrity after creation.
+#   -x -e --extract         -   enter directory A to extract all archives of A into subdirectories in A.
+#   -r --remove             -   enter directory A to remove all subdirectories of A but save the archives.
+#   -v --view               -   enter directory A to view all subdirectories and archives of it.
 #
-#   [default] -c --compress -	enter a directory A to compress all subdirectories of A into new archives in A.
-#   -x -e --extract			-   enter a directory A to extract all archives of A into subdirectories in A.
-#	-r --remove				-	enter a directory A to remove all subdirectories of A but save the archives.
-#   -v --view               -   enter a directory A to view all subdirectories and archives of it.
 
 # Color definitions
 RED='\033[0;31m'
@@ -13,7 +15,6 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 CYAN='\033[00;36m'
 NOC='\033[0m'
-
 
 accurate_sizeof()
 # $1 = bytes input
@@ -130,30 +131,25 @@ print_info()
     accurate_sizeof $(du -bs "$MASTER_PATH"/ | cut -f1)
 }
 
-# stores the newly created archives inside MASTER_PATH and checks archive integrity after creation.
-
 # options used to compress
 DEFAULT_COMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on "
 [[ -z $2 ]] && MASTER_PATH=$2
 
 case $1 in
     "-h"|"-help"|"--help")
-        echo -e "7zSubComp  [    -c -x ] [directory]"
-        echo
-        echo -e "   [default]"
-        echo -e "   -c --compress       -   enter a directory A to compress all subdirectories of A into new archives in A."
-        echo
-        echo -e "   -x -e --extract     -   enter a directory A to extract all archives of A into subdirectories in A."
-        echo -e "   -r --remove         -   enter a directory A to remove all subdirectories of A but save the archives."
-        echo -e "   -v --view           -   enter a directory A to view all subdirectories and archives of it."
-
+        echo -e "7zSubComp [ -c [-x -e] -r -v ] [directory A]"
+        echo -e "\n7zip subdirectory compressor and subdirectory archive extractor.\n"
+        echo -e "   -c --compress       -   enter directory A to compress all subdirectories of A into new archives in A."
+        echo -e "                           Checks archive integrity after creation."
+        echo -e "   -x -e --extract     -   enter directory A to extract all archives of A into subdirectories in A."
+        echo -e "   -r --remove         -   enter directory A to remove all subdirectories of A but save the archives."
+        echo -e "   -v --view           -   enter directory A to view all subdirectories and archives of it."
     ;;
     "-v"|"--view")
         echo -e "${CYAN}Enter a directory to view all subdirectories and archives.${NOC}"
 		echo
         [[ -z $2 ]] && read -e -p ': ' MASTER_PATH	
  		check_master_path "all"
-
     ;;
 	"-r"|"--remove")
 		echo -e "${CYAN}Enter a directory to remove all separate subdirectories only.
@@ -280,6 +276,6 @@ case $1 in
     	fi
     ;;
     *)
-    echo -e "invalid input \"$1\"\nTry -h or --help"
+        echo -e "invalid input \"$1\"\nTry -h or --help"
     ;;
 esac
