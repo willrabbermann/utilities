@@ -6,7 +6,7 @@ It verifies archives after creating them with Ultra LZMA compression.
 '''7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on'''
 It can also perform extraction, viewing, size information, and removal of subdirectories under a master directory.
 
-7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
+```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
 7zip subdirectory compressor and subdirectory archive extractor.
 
@@ -30,7 +30,7 @@ Examples:
    7zSubComp -v .      View subdirectories and archives under current directory "." .
 
    "." above can be replaced with any directory. Not providing one will ask you for one.
-
+```
 ### Sample usage
 ```
 will@gentoo /mnt/WD40EFPX-68C/roms/PlayStation λ sudo 7zSubComp -v .
@@ -70,8 +70,8 @@ Archives size				:		3.66160771400000000000 GB
 Delta (Archives - Subdirectories)	:		-3.09930690000000000000 GB
 Master directory size			:		10.42252642400000000000 GB
 
-
-
+```
+```
 will@gentoo /mnt/WD40EFPX-68C/roms/PlayStation λ sudo 7zSubComp -c .
 
 'Castlevania - Symphony of the Night (USA)/'
@@ -217,9 +217,9 @@ Subdirectories size			:		6.76091461400000000000 GB
 Archives size				:		3.66160771400000000000 GB
 Delta (Archives - Subdirectories)	:		-3.09930690000000000000 GB
 Master directory size			:		10.42252642400000000000 GB
+```
 
-
-
+```
 will@gentoo /mnt/WD40EFPX-68C/roms/Super Nintendo λ sudo 7zSubComp -r -y .
 
 	Archives
