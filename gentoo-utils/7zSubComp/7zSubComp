@@ -258,7 +258,7 @@ case $1 in
 		show_master_path "all"
 	
 		echo -e "\n${BLUE}Information${NOC}\n-----------"
-		echo -e "${GREEN}$TARGETS_NO${CYAN} archives removed in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
+		echo -e "${GREEN}$TARGETS_NO${CYAN} subdirectories removed in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
 		print_info REMOVE
 	;;
 	"-x"|"-e"|"--extract") 

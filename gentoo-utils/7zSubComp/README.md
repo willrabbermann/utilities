@@ -2,19 +2,21 @@
 
 ## 7zSubComp stands for 7zip Subdirectory Compression tool
 
-7zSubComp verifies archives after creating them with Ultra LZMA compression. 
+7zSubComp verifies integrity of archives after creating them with Ultra LZMA compression. 
+
 ```7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on```
-7zSubComp can perform extraction, viewing, size information, and removal of subdirectories under a master directory.
+
+7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory.
 
 ```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
-7zip subdirectory compressor and subdirectory archive extractor.
+7zip subdirectory compressor and archive extractor for 7z archives.
 
    -c --compress           -   enter directory A to compress all subdirectories of A into new archives in A.
                                Verifies archive integrity after each archive creation.
    -x -e --extract         -   enter directory A to extract all archives of A into subdirectories in A.
-   -r --remove             -   enter directory A to remove all subdirectories of A but save the archives.
-   -v --view               -   enter directory A to view all subdirectories and archives of it.
+   -r --remove             -   enter directory A to remove only subdirectories under A.
+   -v --view               -   enter directory A to view size info and all subdirectories and archives of A.
    -y --yes                -   confirm without asking.
 
 
@@ -32,6 +34,7 @@ Examples:
    "." above can be replaced with any directory. Not providing one will ask you for one.
 ```
 ### Sample usage
+### Viewing a master directory
 ```
 will@gentoo /mnt/WD40EFPX-68C/roms/PlayStation λ sudo 7zSubComp -v .
 
@@ -71,6 +74,7 @@ Delta (Archives - Subdirectories)	:		-3.09930690000000000000 GB
 Master directory size			:		10.42252642400000000000 GB
 
 ```
+### Compression
 ```
 will@gentoo /mnt/WD40EFPX-68C/roms/PlayStation λ sudo 7zSubComp -c .
 
@@ -218,7 +222,7 @@ Archives size				:		3.66160771400000000000 GB
 Delta (Archives - Subdirectories)	:		-3.09930690000000000000 GB
 Master directory size			:		10.42252642400000000000 GB
 ```
-
+### Remove subdirectories
 ```
 will@gentoo /mnt/WD40EFPX-68C/roms/Super Nintendo λ sudo 7zSubComp -r -y .
 
@@ -436,7 +440,7 @@ removed directory 'Super Metroid (Japan, USA) (En,Ja)/'
 
 Information
 -----------
-24 archives removed in 0 seconds.
+24 subdirectories removed in 0 seconds.
 Subdirectories size			:		0 bytes
 Archives size				:		27.55324000000000000000 MB
 Original Master directory size		:		78.53650200000000000000 MB
