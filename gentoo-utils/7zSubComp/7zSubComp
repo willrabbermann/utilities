@@ -177,16 +177,16 @@ then
 fi
 
 case $1 in
-	"-h"|"-help"|"--help")
+    "-h"|"-help"|"--help")
         echo -e "${CYAN}7zSubComp ${BLUE}[ -c [-x -e] -r -v ] [ -y ] [directory A]${NOC}"
         echo
-        echo -e "7zip subdirectory compressor and subdirectory archive extractor."
+        echo -e "7zip subdirectory compressor and archive extractor for 7z archives."
         echo
         echo -e "   ${BLUE}-c --compress${NOC}           -   enter directory A to compress all subdirectories of A into new archives in A."
         echo -e "                               Verifies archive integrity after each archive creation."
         echo -e "   ${BLUE}-x -e --extract${NOC}         -   enter directory A to extract all archives of A into subdirectories in A."
-        echo -e "   ${BLUE}-r --remove${NOC}             -   enter directory A to remove all subdirectories of A but save the archives."
-        echo -e "   ${BLUE}-v --view${NOC}               -   enter directory A to view all subdirectories and archives of it."
+        echo -e "   ${BLUE}-r --remove${NOC}             -   enter directory A to remove only subdirectories under A."
+        echo -e "   ${BLUE}-v --view${NOC}               -   enter directory A to view size info and all subdirectories and archives of A."
         echo -e "   ${BLUE}-y --yes${NOC}                -   confirm without asking."
         echo 
         echo
@@ -201,9 +201,9 @@ case $1 in
         echo
         echo -e "   7zSubComp -v .      View subdirectories and archives under current directory \".\" ."
         echo
-		echo -e "   \".\" above can be replaced with any directory. Not providing one will ask you for one."
+        echo -e "   \".\" above can be replaced with any directory. Not providing one will ask you for one."
         echo
-	;;
+    ;;
 	"-v"|"--view")
 		if [[ -z $MASTER_PATH ]]
 		then
