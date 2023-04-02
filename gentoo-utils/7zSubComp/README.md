@@ -15,7 +15,7 @@
    -c --compress           -   enter directory A to compress all subdirectories of A into new archives in A.
                                Verifies archive integrity after each archive creation.
    -x -e --extract         -   enter directory A to extract all archives of A into subdirectories in A.
-   -r --remove             -   enter directory A to remove all subdirectories of A but save the archives.
+   -r --remove             -   enter directory A to remove only subdirectories under A.
    -v --view               -   enter directory A to view size info and all subdirectories and archives of A.
    -y --yes                -   confirm without asking.
 
