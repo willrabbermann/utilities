@@ -4,11 +4,11 @@
 
 7zSubComp verifies archives after creating them with Ultra LZMA compression. 
 ```7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on```
-7zSubComp can perform extraction, viewing, size information, and removal of subdirectories under a master directory.
+7zSubComp can perform compression, extraction, viewing, size information, and removal of subdirectories under a master directory.
 
 ```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
-7zip subdirectory compressor and subdirectory archive extractor.
+7zip subdirectory compressor and archive extractor.
 
    -c --compress           -   enter directory A to compress all subdirectories of A into new archives in A.
                                Verifies archive integrity after each archive creation.
