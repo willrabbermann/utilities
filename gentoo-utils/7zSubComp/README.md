@@ -32,6 +32,7 @@ Examples:
    "." above can be replaced with any directory. Not providing one will ask you for one.
 ```
 ### Sample usage
+### Viewing a master directory
 ```
 will@gentoo /mnt/WD40EFPX-68C/roms/PlayStation λ sudo 7zSubComp -v .
 
@@ -71,6 +72,7 @@ Delta (Archives - Subdirectories)	:		-3.09930690000000000000 GB
 Master directory size			:		10.42252642400000000000 GB
 
 ```
+### Compression
 ```
 will@gentoo /mnt/WD40EFPX-68C/roms/PlayStation λ sudo 7zSubComp -c .
 
@@ -218,7 +220,7 @@ Archives size				:		3.66160771400000000000 GB
 Delta (Archives - Subdirectories)	:		-3.09930690000000000000 GB
 Master directory size			:		10.42252642400000000000 GB
 ```
-
+### Remove subdirectories
 ```
 will@gentoo /mnt/WD40EFPX-68C/roms/Super Nintendo λ sudo 7zSubComp -r -y .
 
