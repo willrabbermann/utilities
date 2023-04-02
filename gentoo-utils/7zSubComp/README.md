@@ -3,8 +3,10 @@
 ## 7zSubComp stands for 7zip Subdirectory Compression tool
 
 7zSubComp verifies integrity of archives after creating them with Ultra LZMA compression. 
+
 ```7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on```
-7zSubComp can perform compression, extraction, viewing, size information, and removal of subdirectories under a master directory.
+
+7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory.
 
 ```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
