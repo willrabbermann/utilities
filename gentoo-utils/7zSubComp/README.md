@@ -8,7 +8,7 @@
 
 ```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
-7zip subdirectory compressor and archive extractor.
+7zip subdirectory compressor and archive extractor for 7z archives.
 
    -c --compress           -   enter directory A to compress all subdirectories of A into new archives in A.
                                Verifies archive integrity after each archive creation.
