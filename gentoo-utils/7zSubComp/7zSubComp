@@ -1,13 +1,5 @@
 #!/bin/bash
-# 7zSubComp [ -c [-x -e] -r -v ] [directory A] 
 # 7zip subdirectory compressor and subdirectory archive extractor.
-# 
-#   -c --compress           -   enter directory A to compress all subdirectories of A into new archives in A. 
-#                               Verifies archive integrity after creation.
-#   -x -e --extract         -   enter directory A to extract all archives of A into subdirectories in A.
-#   -r --remove             -   enter directory A to remove all subdirectories of A but save the archives.
-#   -v --view               -   enter directory A to view all subdirectories and archives of it.
-#
 
 # Color definitions
 RED='\033[0;31m'
@@ -69,8 +61,10 @@ yes_or_no()
 	while true; do
 		read -p "[Y/n]: " yn
 		case $yn in
-			[Yy]*) return 0  ;;
-			[Nn]*) echo -e "${RED}Aborted${NOC}\n" ; return  1 ;;
+			[Yy]*) 
+				return 0;;
+			[Nn]*) 
+				return 1;;
 		esac
 	done
 }
@@ -87,15 +81,15 @@ show_master_path()
 		;;
 		*|"all")
 			[[ -n $(ls -1 | grep .7z) ]] && 
-                echo -e "\t${NOC}Archives${BLUE}\n" && ls -1 *.7z
+				echo -e "\t${NOC}Archives${BLUE}\n" && ls -1 *.7z
 			[[ -n $(ls -dp1 * | grep /) ]] &&
-   		        echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
+				echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
 		;;
 	esac	
 
 	echo -ne "\n${NOC}$MASTER_PATH\t"
-	accurate_sizeof $(du -bs "$MASTER_PATH"/ | cut -f1)
-
+	SIZE_MASTER=$(du -bsc "$MASTER_PATH"/ | grep total | cut -f1)
+	accurate_sizeof $SIZE_MASTER
 }
 
 check_exit_status()
@@ -119,11 +113,11 @@ check_master_path()
 {
 	if [[ -d $MASTER_PATH ]]
 	then
-        cd "$MASTER_PATH"
-        check_exit_status PATH
-        show_master_path $1
-    else
-        echo "That directory does not exist." && exit 1
+		cd "$MASTER_PATH"
+		check_exit_status PATH
+		show_master_path $1
+	else
+		echo "That directory does not exist." && exit 1
 	fi
 }
 
@@ -143,38 +137,79 @@ print_info()
 		SIZE_SUBDIR=0
 	fi
 	
+	SIZE_MASTER=$(du -bsc "$MASTER_PATH"/ | grep total | cut -f1)
+
 	echo -ne "${CYAN}Subdirectories size\t\t\t:\t\t${NOC}"
 	accurate_sizeof $SIZE_SUBDIR
 
 	echo -ne "${CYAN}Archives size\t\t\t\t:\t\t${NOC}"
 	accurate_sizeof $SIZE_ARCHIVES
 
-	SIZE_DELTA=$(echo "$SIZE_SUBDIR - $SIZE_ARCHIVES" | bc -l)
-    echo -ne "${CYAN}(Subdirectories - Archives)\t\t:\t\t${NOC}"
-	accurate_sizeof $SIZE_DELTA
-	
-	echo -ne "${CYAN}Master directory size\t\t\t:\t\t${NOC}"
-    accurate_sizeof $(du -bs "$MASTER_PATH"/ | cut -f1)
+	if [[ REMOVE = $1 ]] 
+	then
+		echo -ne "${CYAN}Original Master directory size\t\t:\t\t${NOC}"
+		accurate_sizeof $SIZE_ORIG_MASTER
+		echo -ne "${CYAN}New Master directory size\t\t:\t\t${NOC}"
+		accurate_sizeof $SIZE_MASTER
+		SIZE_DELTA=$(echo "$SIZE_MASTER - $SIZE_ORIG_MASTER" | bc -l)
+		echo -ne "${CYAN}Delta\t\t\t\t\t:\t\t${NOC}"
+		accurate_sizeof $SIZE_DELTA
+	else
+		SIZE_DELTA=$(echo "$SIZE_ARCHIVES - $SIZE_SUBDIR" | bc -l)
+		echo -ne "${CYAN}Delta (Archives - Subdirectories)\t:\t\t${NOC}"
+		accurate_sizeof $SIZE_DELTA
+		echo -ne "${CYAN}Master directory size\t\t\t:\t\t${NOC}"
+		accurate_sizeof $SIZE_MASTER	
+	fi
 }
 
-[[ -n $2 ]] && MASTER_PATH=$2
+if [[ -n $2 ]] 
+then
+	case $2 in
+		"-y"|"--yes")
+			[[ -n $3 ]] && MASTER_PATH=$3
+			YES_ALL=1
+		;;
+		*)
+			MASTER_PATH=$2
+		;;
+	esac
+fi
 
 case $1 in
-    "-h"|"-help"|"--help")
-        echo -e "7zSubComp [ -c [-x -e] -r -v ] [directory A]"
-        echo -e "\n7zip subdirectory compressor and subdirectory archive extractor.\n"
-        echo -e "   -c --compress       -   enter directory A to compress all subdirectories of A into new archives in A."
-        echo -e "                           Verifies archive integrity after creation."
-        echo -e "   -x -e --extract     -   enter directory A to extract all archives of A into subdirectories in A."
-        echo -e "   -r --remove         -   enter directory A to remove all subdirectories of A but save the archives."
-        echo -e "   -v --view           -   enter directory A to view all subdirectories and archives of it."
-    ;;
-    "-v"|"--view")
-        if [[ -z $2 ]]
+	"-h"|"-help"|"--help")
+        echo -e "${CYAN}7zSubComp ${BLUE}[ -c [-x -e] -r -v ] [ -y ] [directory A]${NOC}"
+        echo
+        echo -e "7zip subdirectory compressor and subdirectory archive extractor."
+        echo
+        echo -e "   ${BLUE}-c --compress${NOC}           -   enter directory A to compress all subdirectories of A into new archives in A."
+        echo -e "                               Verifies archive integrity after each archive creation."
+        echo -e "   ${BLUE}-x -e --extract${NOC}         -   enter directory A to extract all archives of A into subdirectories in A."
+        echo -e "   ${BLUE}-r --remove${NOC}             -   enter directory A to remove all subdirectories of A but save the archives."
+        echo -e "   ${BLUE}-v --view${NOC}               -   enter directory A to view all subdirectories and archives of it."
+        echo -e "   ${BLUE}-y --yes${NOC}                -   confirm without asking."
+        echo 
+        echo
+        echo -e "Examples:"
+        echo        
+        echo -e "   7zSubComp -c .      Compress all subdirectories under current directory \".\" ."
+        echo
+        echo -e "   7zSubComp -x .      Extract all archives under current directory \".\" ."
+        echo 
+        echo -e "   7zSubComp -r -y .   Remove only subdirectories under current directory \".\" ."
+        echo -e "                       Without asking for confirmation (CAREFUL)."
+        echo
+        echo -e "   7zSubComp -v .      View subdirectories and archives under current directory \".\" ."
+        echo
+		echo -e "   \".\" above can be replaced with any directory. Not providing one will ask you for one."
+        echo
+	;;
+	"-v"|"--view")
+		if [[ -z $MASTER_PATH ]]
 		then
 			echo -e "${CYAN}Enter a directory to view all subdirectories and archives.${NOC}"
 			echo
-        	read -e -p ': ' MASTER_PATH	
+			read -e -p ': ' MASTER_PATH	
 		fi
 		check_master_path "all"
 
@@ -182,30 +217,33 @@ case $1 in
 		print_info
 	;;
 	"-r"|"--remove")
-		if [[ -z $2 ]]
+		if [[ -z $MASTER_PATH ]]
 		then
 			echo -e "${CYAN}Enter a directory to remove all separate subdirectories only.
-			\nThis will not remove anything other than sub directories.${NOC}"
+			\nThis will not remove anything other than subdirectories under this path.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
 		fi	
-        
+		
 		check_master_path "all"
 
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to remove.${NOC}" && exit
 
-		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found." 	
+		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."	
+		
+		SIZE_ORIG_MASTER=$(du -bsc "$MASTER_PATH"/ | grep total | cut -f1)
 
-		echo -e "\n${RED}Delete${CYAN} all the subdirectories only?${NOC}"
-		if (yes_or_no "$input") then
+		[[ -z $YES_ALL ]] && echo -e "\n${RED}Delete${CYAN} all the subdirectories only?${NOC}" && $(yes_or_no "$input")
+		if [[ 0 = $? || -n $YES_ALL ]]
+		then
 			echo -e "\n${RED}Are you sure?${NOC}"
 			if (yes_or_no "$input") then
-	            START_TIME=$SECONDS
+				START_TIME=$SECONDS
 				i=1
 				while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
 				do
-                    SED_EXP=$i'p'
+					SED_EXP=$i'p'
 					x=$(ls -d1 */ | head -n1)
 					x=${x::-1}
 					echo -e "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t\"$x\"/${NOC}"
@@ -221,103 +259,103 @@ case $1 in
 	
 		echo -e "\n${BLUE}Information${NOC}\n-----------"
 		echo -e "${GREEN}$TARGETS_NO${CYAN} archives removed in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
-		print_info
+		print_info REMOVE
 	;;
-    "-x"|"-e"|"--extract") 
-   		if [[ -z $2 ]]
+	"-x"|"-e"|"--extract") 
+		if [[ -z $MASTER_PATH ]]
 		then
 			echo -e "${CYAN}Enter a directory to target and extract all archives into separate subdirectories.
 			\nThis will ${RED}overwrite${CYAN} whatever is already in the subdirectories or create them if they dont exist.${NOC}"
 			echo
-        	read -e -p ': ' MASTER_PATH
+			read -e -p ': ' MASTER_PATH
 		fi
 
 		check_master_path "archives"
 		[[ -n $(ls -1 | grep .7z) ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
-        [[ -z $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"$MASTER_PATH\" to extract.${NOC}" && exit
-        
-		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found." 	
+		[[ -z $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"$MASTER_PATH\" to extract.${NOC}" && exit
 		
-		echo -e "\n${CYAN}Start extracting?${NOC}"
-        if (yes_or_no "$input") then
-            START_TIME=$SECONDS
-            i=1
-            while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
-            do
-                SED_EXP=$i'p'
-                x=$(ls -1 *.7z | sed -n "$SED_EXP")
-                EXTRACT_EXP="7z x -y \"$x\""
+		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."	
+		
+		[[ -z $YES_ALL ]] && echo -e "\n${CYAN}Start extracting?${NOC}" && $(yes_or_no "$input")
+		if [[ 0 = $? || -n $YES_ALL ]]
+		then
+			START_TIME=$SECONDS
+			i=1
+			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
+			do
+				SED_EXP=$i'p'
+				x=$(ls -1 *.7z | sed -n "$SED_EXP")
+				EXTRACT_EXP="7z x -y \"$x\""
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x" | cut -f1)
-                
-                echo -e "${CYAN}Extracting archive...${NOC}"
-                echo $EXTRACT_EXP
-                eval $EXTRACT_EXP
-                check_exit_status
-                
-                ((i++))
-            done
-            
-            echo -e "\n${BLUE}Information${NOC}\n-----------"
-            echo -e "${GREEN}$TARGETS_NO${CYAN} archives extracted in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
+				
+				echo -e "${CYAN}Extracting archive...${NOC}"
+				echo $EXTRACT_EXP
+				eval $EXTRACT_EXP
+				check_exit_status
+				
+				((i++))
+			done
+			
+			echo -e "\n${BLUE}Information${NOC}\n-----------"
+			echo -e "${GREEN}$TARGETS_NO${CYAN} archives extracted in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
 			print_info
 		fi		
-    ;;    
-    "-c"|"--compress")
-
-   		if [[ -z $2 ]]
+	;;	  
+	"-c"|"--compress")
+		if [[ -z $MASTER_PATH ]]
 		then
 			echo -e "${CYAN}Enter a directory to target and compress all subdirectories into separate 7z archives.
 			\nThis will ${RED}overwrite${CYAN} whatever is already in the archives or create them if they dont exist.${NOC}"
-        	echo
+			echo
 			read -e -p ': ' MASTER_PATH
 		fi
 
-        check_master_path "subdirs"
+		check_master_path "subdirs"
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
-        [[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to compress.${NOC}" && exit
+		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to compress.${NOC}" && exit
 
-        echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
+		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
 
-        echo -e "\n${CYAN}Current compression settings: ${NOC}$DEFAULT_COMPRESS_EXP"
-        echo -e "\n${CYAN}Start compressing?${NOC}"
-        if (yes_or_no "$input") then
-            START_TIME=$SECONDS
-            i=1
-            while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
-            do
-                COMPRESS_EXP=$DEFAULT_COMPRESS_EXP
-                SED_EXP=$i'p'
-                x=$(ls -d1 */ | sed -n "$SED_EXP")
-                x=${x::-1}
+		echo -e "\n${CYAN}Current compression settings: ${NOC}$DEFAULT_COMPRESS_EXP"
+		[[ -z $YES_ALL ]] && echo -e "\n${CYAN}Start compressing?${NOC}" && $(yes_or_no "$input")
+		if [[ 0 = $? || -n $YES_ALL ]]
+		then
+			START_TIME=$SECONDS
+			i=1
+			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
+			do
+				COMPRESS_EXP=$DEFAULT_COMPRESS_EXP
+				SED_EXP=$i'p'
+				x=$(ls -d1 */ | sed -n "$SED_EXP")
+				x=${x::-1}
 				
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
-                COMPRESS_EXP+="\"$x.7z\" \"$x\"/"
-                
-                echo -e "${CYAN}Creating archive...${NOC}"
-                echo $COMPRESS_EXP
-                eval $COMPRESS_EXP
-                check_exit_status
-                
-                echo -e "\n${CYAN}Verifing integrity of archive...${NOC}"
-                INTEGRITY_EXP="7z t \"$x.7z\""
-            
-                echo $INTEGRITY_EXP
-                eval $INTEGRITY_EXP
-                check_exit_status INTEGRITY
-                
-                ((i++))
-            done
+				COMPRESS_EXP+="\"$x.7z\" \"$x\"/"
+				
+				echo -e "${CYAN}Creating archive...${NOC}"
+				echo $COMPRESS_EXP
+				eval $COMPRESS_EXP
+				check_exit_status
+				
+				echo -e "\n${CYAN}Verifying integrity of archive...${NOC}"
+				INTEGRITY_EXP="7z t \"$x.7z\""
+			
+				echo $INTEGRITY_EXP
+				eval $INTEGRITY_EXP
+				check_exit_status INTEGRITY
+				
+				((i++))
+			done
 
-            echo -e "\n${BLUE}Information${NOC}\n-----------"
-            echo -e "${GREEN}$TARGETS_NO${CYAN} archives created and verified in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
+			echo -e "\n${BLUE}Information${NOC}\n-----------"
+			echo -e "${GREEN}$TARGETS_NO${CYAN} archives created and verified in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
 			print_info
-            
-    	fi
-    ;;
-    *)
-        echo -e "invalid input \"$1\"\nTry -h or --help"
-    ;;
+		fi
+	;;
+	*)
+		echo -e "invalid input \"$1\"\nTry -h or --help"
+	;;
 esac
