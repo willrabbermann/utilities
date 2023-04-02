@@ -16,7 +16,7 @@
                                Verifies archive integrity after each archive creation.
    -x -e --extract         -   enter directory A to extract all archives of A into subdirectories in A.
    -r --remove             -   enter directory A to remove all subdirectories of A but save the archives.
-   -v --view               -   enter directory A to view all subdirectories and archives of it.
+   -v --view               -   enter directory A to view size info and all subdirectories and archives of A.
    -y --yes                -   confirm without asking.
 
 
