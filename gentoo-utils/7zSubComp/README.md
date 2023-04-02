@@ -440,7 +440,7 @@ removed directory 'Super Metroid (Japan, USA) (En,Ja)/'
 
 Information
 -----------
-24 archives removed in 0 seconds.
+24 subdirectories removed in 0 seconds.
 Subdirectories size			:		0 bytes
 Archives size				:		27.55324000000000000000 MB
 Original Master directory size		:		78.53650200000000000000 MB
