@@ -220,7 +220,7 @@ case $1 in
         echo -e "   7zSubComp -x .      Extract all archives under current directory \".\" ."
         echo 
         echo -e "   7zSubComp -r -y .   Remove only subdirectories under current directory \".\""
-        echo -e "                       without asking for confirmation. With \" 7zSubComp -r -y\" it will still ask once."
+        echo -e "                       without asking for confirmation. With \"7zSubComp -r -y\" it will still ask once."
         echo
         echo -e "   7zSubComp -v .      View subdirectories and archives under current directory \".\" ."
         echo
