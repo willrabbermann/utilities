@@ -133,7 +133,7 @@ bar()
 
 begin_info_header()
 {
-	echo -e "\n${BLUE}information${NOC}"
+	echo -e "\n${BLUE}Information${NOC}"
 	bar
 }
 
@@ -166,22 +166,24 @@ print_info()
 	echo -ne "${CYAN}archives size\t\t\t\t:\t${NOC}"
 	accurate_sizeof $SIZE_ARCHIVES
 
-	if [[ REMOVE = $1 ]] 
-	then
-		echo -ne "${CYAN}master directory size before\t\t:\t${NOC}"
-		accurate_sizeof $SIZE_ORIG_MASTER
-		echo -ne "${CYAN}master directory size after\t\t:\t${NOC}"
-		accurate_sizeof $SIZE_MASTER
-		SIZE_DELTA=$(echo "$SIZE_MASTER - $SIZE_ORIG_MASTER" | bc -l)
-		echo -ne "${CYAN}master directory size delta:\t\t:\t${NOC}"
-		accurate_sizeof $SIZE_DELTA
-	else
+	case $1 in
+		REMOVE)
+			echo -ne "${CYAN}master directory size before\t\t:\t${NOC}"
+			accurate_sizeof $SIZE_ORIG_MASTER
+			echo -ne "${CYAN}master directory size after\t\t:\t${NOC}"
+			accurate_sizeof $SIZE_MASTER
+			SIZE_DELTA=$(echo "$SIZE_MASTER - $SIZE_ORIG_MASTER" | bc -l)
+			echo -ne "${CYAN}master directory size delta:\t\t:\t${NOC}"
+			accurate_sizeof $SIZE_DELTA
+		;;
+		*)
 		SIZE_DELTA=$(echo "$SIZE_ARCHIVES - $SIZE_SUBDIR" | bc -l)
 		echo -ne "${CYAN}(archives - subdirectories)\t\t:\t${NOC}"
 		accurate_sizeof $SIZE_DELTA
 		echo -ne "${CYAN}master directory size\t\t\t:\t${NOC}"
 		accurate_sizeof $SIZE_MASTER	
-	fi
+		;;
+	esac
 }
 
 if [[ -n $2 ]] 
