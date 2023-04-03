@@ -27,7 +27,7 @@ Examples:
    7zSubComp -x .      Extract all archives under current directory "." .
 
    7zSubComp -r -y .   Remove only subdirectories under current directory "." .
-                       without asking for confirmation. With " 7zSubComp -r -y" it will still ask once.
+                       without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
 
    7zSubComp -v .      View subdirectories and archives under current directory "." .
 
