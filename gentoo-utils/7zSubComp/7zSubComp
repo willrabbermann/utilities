@@ -242,7 +242,7 @@ case $1 in
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to remove.${NOC}" && exit
 
-		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."	
+		echo -e "\n${GREEN}$TARGETS_NO${CYAN} target subdirectories found."	
 		
 		SIZE_ORIG_MASTER=$(du -bsc "$MASTER_PATH"/ | grep total | cut -f1)
 
