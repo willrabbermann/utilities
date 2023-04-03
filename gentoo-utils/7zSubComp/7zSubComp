@@ -9,7 +9,8 @@ CYAN='\033[00;36m'
 NOC='\033[0m'
 
 # options used to compress
-DEFAULT_COMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on "
+DEFAULT_COMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
+DEFAULT_EXTRACT_EXP="7z x -y"
 
 accurate_sizeof()
 # $1 = bytes input
@@ -71,17 +72,17 @@ yes_or_no()
 
 show_master_path()
 {
-	echo -e "${BLUE}"
+	echo -ne "${BLUE}"
 	case $1 in
-		"archives")
+		ARCHIVES)
 			ls -1 *.7z
 		;;
-		"subdirs")
+		SUBDIRS)
 			ls -d1 */
 		;;
-		*|"all")
+		ALL)
 			[[ -n $(ls -1 | grep .7z) ]] && 
-				echo -e "\t${NOC}Archives${BLUE}\n" && ls -1 *.7z
+				echo -e "\n\t${NOC}Archives${BLUE}\n" && ls -1 *.7z
 			[[ -n $(ls -dp1 * | grep /) ]] &&
 				echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
 		;;
@@ -117,8 +118,28 @@ check_master_path()
 		check_exit_status PATH
 		show_master_path $1
 	else
-		echo "That directory does not exist." && exit 1
+		echo -e "${RED}That directory does not exist.${NOC}" && exit 1
 	fi
+}
+
+bar()
+{
+	for ((i = 0; i < 39; i++ ));
+	do 
+			echo -n "--"
+	done
+	echo
+}
+
+begin_info_header()
+{
+	echo -e "\n${BLUE}information${NOC}"
+	bar
+}
+
+close_info_header()
+{
+	bar
 }
 
 print_info()
@@ -139,26 +160,26 @@ print_info()
 	
 	SIZE_MASTER=$(du -bsc "$MASTER_PATH"/ | grep total | cut -f1)
 
-	echo -ne "${CYAN}Subdirectories size\t\t\t:\t\t${NOC}"
+	echo -ne "${CYAN}subdirectories size\t\t\t:\t${NOC}"
 	accurate_sizeof $SIZE_SUBDIR
 
-	echo -ne "${CYAN}Archives size\t\t\t\t:\t\t${NOC}"
+	echo -ne "${CYAN}archives size\t\t\t\t:\t${NOC}"
 	accurate_sizeof $SIZE_ARCHIVES
 
 	if [[ REMOVE = $1 ]] 
 	then
-		echo -ne "${CYAN}Original Master directory size\t\t:\t\t${NOC}"
+		echo -ne "${CYAN}master directory size before\t\t:\t${NOC}"
 		accurate_sizeof $SIZE_ORIG_MASTER
-		echo -ne "${CYAN}New Master directory size\t\t:\t\t${NOC}"
+		echo -ne "${CYAN}master directory size after\t\t:\t${NOC}"
 		accurate_sizeof $SIZE_MASTER
 		SIZE_DELTA=$(echo "$SIZE_MASTER - $SIZE_ORIG_MASTER" | bc -l)
-		echo -ne "${CYAN}Delta\t\t\t\t\t:\t\t${NOC}"
+		echo -ne "${CYAN}master directory size delta:\t\t:\t${NOC}"
 		accurate_sizeof $SIZE_DELTA
 	else
 		SIZE_DELTA=$(echo "$SIZE_ARCHIVES - $SIZE_SUBDIR" | bc -l)
-		echo -ne "${CYAN}Delta (Archives - Subdirectories)\t:\t\t${NOC}"
+		echo -ne "${CYAN}(archives - subdirectories)\t\t:\t${NOC}"
 		accurate_sizeof $SIZE_DELTA
-		echo -ne "${CYAN}Master directory size\t\t\t:\t\t${NOC}"
+		echo -ne "${CYAN}master directory size\t\t\t:\t${NOC}"
 		accurate_sizeof $SIZE_MASTER	
 	fi
 }
@@ -196,8 +217,8 @@ case $1 in
         echo
         echo -e "   7zSubComp -x .      Extract all archives under current directory \".\" ."
         echo 
-        echo -e "   7zSubComp -r -y .   Remove only subdirectories under current directory \".\" ."
-        echo -e "                       Without asking for confirmation. With --remove it will ask once instead of twice."
+        echo -e "   7zSubComp -r -y .   Remove only subdirectories under current directory \".\""
+        echo -e "                       without asking for confirmation. With \" 7zSubComp -r -y\" it will still ask once."
         echo
         echo -e "   7zSubComp -v .      View subdirectories and archives under current directory \".\" ."
         echo
@@ -211,10 +232,11 @@ case $1 in
 			echo
 			read -e -p ': ' MASTER_PATH	
 		fi
-		check_master_path "all"
+		check_master_path ALL
 
-		echo -e "\n${BLUE}Information${NOC}\n-----------"		
+		begin_info_header
 		print_info
+		close_info_header
 	;;
 	"-r"|"--remove")
 		if [[ -z $MASTER_PATH ]]
@@ -225,7 +247,7 @@ case $1 in
 			read -e -p ': ' MASTER_PATH
 		fi	
 		
-		check_master_path "all"
+		check_master_path ALL
 
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to remove.${NOC}" && exit
@@ -255,11 +277,12 @@ case $1 in
 				done
 			fi
 		fi
-		show_master_path "all"
+		show_master_path ALL
 	
-		echo -e "\n${BLUE}Information${NOC}\n-----------"
+		begin_info_header
 		echo -e "${GREEN}$TARGETS_NO${CYAN} subdirectories removed in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
 		print_info REMOVE
+		close_info_header
 	;;
 	"-x"|"-e"|"--extract") 
 		if [[ -z $MASTER_PATH ]]
@@ -270,7 +293,7 @@ case $1 in
 			read -e -p ': ' MASTER_PATH
 		fi
 
-		check_master_path "archives"
+		check_master_path ARCHIVES
 		[[ -n $(ls -1 | grep .7z) ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"$MASTER_PATH\" to extract.${NOC}" && exit
 		
@@ -283,9 +306,10 @@ case $1 in
 			i=1
 			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
 			do
+				EXTRACT_EXP=$DEFAULT_EXTRACT_EXP
 				SED_EXP=$i'p'
 				x=$(ls -1 *.7z | sed -n "$SED_EXP")
-				EXTRACT_EXP="7z x -y \"$x\""
+				EXTRACT_EXP+=" \"$x\""
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x" | cut -f1)
 				
@@ -297,9 +321,10 @@ case $1 in
 				((i++))
 			done
 			
-			echo -e "\n${BLUE}Information${NOC}\n-----------"
+			begin_info_header
 			echo -e "${GREEN}$TARGETS_NO${CYAN} archives extracted in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
 			print_info
+			close_info_header
 		fi		
 	;;	  
 	"-c"|"--compress")
@@ -311,7 +336,7 @@ case $1 in
 			read -e -p ': ' MASTER_PATH
 		fi
 
-		check_master_path "subdirs"
+		check_master_path SUBDIRS
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to compress.${NOC}" && exit
 
@@ -333,7 +358,7 @@ case $1 in
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
-				COMPRESS_EXP+="\"$x.7z\" \"$x\"/"
+				COMPRESS_EXP+=" \"$x.7z\" \"$x\"/"
 				
 				echo -e "${CYAN}Creating archive...${NOC}"
 				echo $COMPRESS_EXP
@@ -350,9 +375,10 @@ case $1 in
 				((i++))
 			done
 
-			echo -e "\n${BLUE}Information${NOC}\n-----------"
+			begin_info_header
 			echo -e "${GREEN}$TARGETS_NO${CYAN} archives created and verified in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
 			print_info
+			close_info_header
 		fi
 	;;
 	*)
