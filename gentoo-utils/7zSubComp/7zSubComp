@@ -23,35 +23,23 @@ accurate_sizeof()
 		val=$1
 		neg=0
 	fi
-
 	if [[ 1 == $(echo "($val / 10^12) >= 1" | bc -l) ]]; then
 		SIZE_T="TB"
+		MAGNITUDE=12
 	elif [[ 1 == $(echo "($val / 10^9) >= 1" | bc -l) ]]; then
 		SIZE_T="GB"
+		MAGNITUDE=9
 	elif [[ 1 == $(echo "($val / 10^6) >= 1" | bc -l) ]]; then
 		SIZE_T="MB"
+		MAGNITUDE=6
 	elif [[ 1 == $(echo "($val / 1000) >= 1" | bc -l) ]]; then
 		SIZE_T="KB"
+		MAGNITUDE=3
 	else
 		SIZE_T="bytes"
+		MAGNITUDE=0
 	fi
-	case $SIZE_T in
-		"TB")
-			MAGNITUDE=12
-		;;
-		"GB")
-			MAGNITUDE=9
-		;;
-		"MB")
-			MAGNITUDE=6
-		;;
-		"KB")
-			MAGNITUDE=3
-		;;
-		*)	
-			MAGNITUDE=0
-		;;
-	esac
+	
 	SIZE_VAL=$(echo "$val / 10^$MAGNITUDE" | bc -l) 
 	[[ 1 = $neg ]] && SIZE_VAL=$(echo "$SIZE_VAL * -1" | bc -l)
 	echo -e "$SIZE_VAL $SIZE_T"
