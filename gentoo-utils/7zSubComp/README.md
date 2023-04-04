@@ -6,7 +6,7 @@
 
 ```7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on```
 
-7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. At the current time it dumps everything into subdirectories without full paths. Good for large single file directories but it wont extract nested directory structure.
+7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. At the current time it dumps everything into subdirectories without full paths. Good for large single file directories but it wont extract nested directory structures.
 
 ```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
