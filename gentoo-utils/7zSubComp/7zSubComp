@@ -58,25 +58,33 @@ yes_or_no()
 	done
 }
 
+print_archives()
+{
+	[[ -n $(ls -1 | grep .7z) ]] && 
+		echo -e "\n\t${NOC}7z Archives${BLUE}\n" && ls -1 *.7z
+	[[ -n $(ls -1 | grep .zip) ]] &&
+		echo -e "\n\t${NOC}ZIP Archives${BLUE}\n" && ls -1 *.zip
+}
+
+print_subdirectories()
+{
+	[[ -n $(ls -dp1 * | grep /) ]] &&
+		echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
+}
+
 show_master_path()
 {
 	echo -ne "${BLUE}"
 	case $1 in
 		ARCHIVES)
-			[[ -n $(ls -1 | grep .zip) ]] && ls -1 *.zip
-			[[ -n $(ls -1 | grep .7z) ]] && ls -1 *.7z
+			print_archives
 		;;
-		SUBDIRS)
-			ls -d1 */
+		SUBDIRS)	
+			print_subdirectories
 		;;
 		ALL)
-			[[ -n $(ls -1 | grep .7z) ]] && 
-				echo -e "\n\t${NOC}7z Archives${BLUE}\n" && ls -1 *.7z
-			[[ -n $(ls -1 | grep .zip) ]] &&
-				echo -e "\n\t${NOC}ZIP Archives${BLUE}\n" && ls -1 *.zip
-
-			[[ -n $(ls -dp1 * | grep /) ]] &&
-				echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
+			print_archives
+			print_subdirectories
 		;;
 	esac	
 
@@ -397,20 +405,29 @@ case $1 in
 			read -e -p ': ' MASTER_PATH
 		fi
 
-		check_master_path SUBDIRS
+		check_master_path ALL
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to compress.${NOC}" && exit
 
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
 
 		echo -e "\n${CYAN}Current compression settings: ${NOC}$DEFAULT_COMPRESS_EXP"
-		[[ -z $YES_ALL ]] && echo -e "\n${CYAN}Start compressing?${NOC}" && $(yes_or_no "$input")
+		if [[ -z $YES_ALL ]] 
+		then
+			echo -e "\n${CYAN}Overwrite old 7z archives?${NOC}" && $(yes_or_no "$input")
+			OVERWRITE_FLAG=$?
+			echo -e "\n${CYAN}Start compressing?${NOC}" && $(yes_or_no "$input")
+		else
+			OVERWRITE_FLAG=0
+		fi
+
 		if [[ 0 = $? || -n $YES_ALL ]]
 		then
 			START_TIME=$SECONDS
 			i=1
 			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
 			do
+				COMPRESS_FLAG=0
 				SED_EXP=$i'p'
 				x=$(ls -d1 */ | sed -n "$SED_EXP")
 				x=${x::-1}
@@ -418,27 +435,37 @@ case $1 in
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
-				COMPRESS_EXP="$DEFAULT_COMPRESS_EXP \"$x.7z\" \"$x\"/"
 				
-				# delete the old archive if it exists
-				if [[ -e "$x.7z" ]]; then
-					echo -e "${CYAN}Deleting old archive...${NOC}"
-					rm -v "$x.7z"
-					echo
+				if [[ -e "$x.7z" ]]
+				then
+					if [[ 0 = $OVERWRITE_FLAG ]]
+					then
+						echo -e "${CYAN}Deleting old archive...${NOC}"
+						rm -v "$x.7z"
+						echo
+					else
+						COMPRESS_FLAG=1
+					fi
 				fi
-				
-				echo -e "${CYAN}Creating new archive...${NOC}"
-				echo $COMPRESS_EXP
-				eval $COMPRESS_EXP
-				check_exit_status COMPRESS
-				
-				echo -e "\n${CYAN}Verifying integrity of archive...${NOC}"
-				INTEGRITY_EXP="7z t \"$x.7z\""
 			
-				echo $INTEGRITY_EXP
-				eval $INTEGRITY_EXP
-				check_exit_status INTEGRITY
 				
+				if [[ 0 = $COMPRESS_FLAG ]]
+				then
+					echo -e "${CYAN}Creating new archive...${NOC}"
+					COMPRESS_EXP="$DEFAULT_COMPRESS_EXP \"$x.7z\" \"$x\"/"
+					echo $COMPRESS_EXP
+					eval $COMPRESS_EXP
+					check_exit_status COMPRESS
+				
+					echo -e "\n${CYAN}Verifying integrity of archive...${NOC}"
+					INTEGRITY_EXP="7z t \"$x.7z\""
+			
+					echo $INTEGRITY_EXP
+					eval $INTEGRITY_EXP
+					check_exit_status INTEGRITY
+				else
+					echo -e "${CYAN}Not overwriting existing 7z archive, skipping.${NOC}"
+				fi
 				((i++))
 			done
 
