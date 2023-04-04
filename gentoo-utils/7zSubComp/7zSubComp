@@ -10,7 +10,7 @@ NOC='\033[0m'
 
 # options used to compress
 DEFAULT_COMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
-DEFAULT_EXTRACT_EXP="7z x -y"
+DEFAULT_EXTRACT_EXP="7z e -y"
 
 accurate_sizeof()
 # $1 = bytes input
@@ -63,14 +63,18 @@ show_master_path()
 	echo -ne "${BLUE}"
 	case $1 in
 		ARCHIVES)
-			ls -1 *.7z
+			[[ -n $(ls -1 | grep .zip) ]] && ls -1 *.zip
+			[[ -n $(ls -1 | grep .7z) ]] && ls -1 *.7z
 		;;
 		SUBDIRS)
 			ls -d1 */
 		;;
 		ALL)
 			[[ -n $(ls -1 | grep .7z) ]] && 
-				echo -e "\n\t${NOC}Archives${BLUE}\n" && ls -1 *.7z
+				echo -e "\n\t${NOC}7z Archives${BLUE}\n" && ls -1 *.7z
+			[[ -n $(ls -1 | grep .zip) ]] &&
+				echo -e "\n\t${NOC}ZIP Archives${BLUE}\n" && ls -1 *.zip
+
 			[[ -n $(ls -dp1 * | grep /) ]] &&
 				echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
 		;;
@@ -93,6 +97,12 @@ check_exit_status()
 			PATH)
 				echo -e "${RED}Invalid directory.${NOC}"
 			;;
+			EXTRACT)
+				echo -e "${RED}Extraction has failed.${NOC}"
+			;;
+			COMPRESS)
+				echo -e "${RED}Compression has failed.${NOC}"
+			;;
 		esac
 		exit $exitCode
 	fi
@@ -102,8 +112,13 @@ check_master_path()
 {
 	if [[ -d $MASTER_PATH ]]
 	then
-		cd "$MASTER_PATH"
+		if [[ -n $(echo $MASTER_PATH | cut -c 1 | grep /) ]]
+		then
+			cd "$MASTER_PATH"
+		else cd "$(pwd)/$MASTER_PATH"
+		fi
 		check_exit_status PATH
+		MASTER_PATH=$(pwd)
 		show_master_path $1
 	else
 		echo -e "${RED}That directory does not exist.${NOC}" && exit 1
@@ -132,11 +147,12 @@ close_info_header()
 
 print_info()
 {
-	if [[ -n $(ls -1 | grep .7z) ]]
+	SIZE_ARCHIVES=0
+	if [[ -n $(ls -1 | egrep ".7z|.zip") ]]
 	then
-		SIZE_ARCHIVES=$(du -bc *.7z | grep total | cut -f1)	
-	else
-		SIZE_ARCHIVES=0
+		[[ -n $(ls -1 | grep ".7z") ]] && SIZE_ARCHIVES=$(du -bc *.7z | grep total | cut -f1)	
+		[[ -n $(ls -1 | grep ".zip") ]] && 
+			SIZE_ARCHIVES=$(echo "$(du -bc *.zip | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
 	fi
 	
 	if [[ -n $(ls -dp1 * | grep /) ]]
@@ -172,6 +188,41 @@ print_info()
 		accurate_sizeof $SIZE_MASTER	
 		;;
 	esac
+}
+
+check_illegal_chars()
+# $1 = string input (filename)
+{
+	ILLEGAL=""
+	str_len=$(($(echo $1 | wc -m)))
+	for ((char_i = 0 ; char_i < $str_len - 1 ; char_i++ )); do 
+		c=${MYVAR:$char_i:1}
+		case $c in
+			'['|']') 
+				ILLEGAL+=$c
+			;;
+		esac
+	done
+	if [[ -n $ILLEGAL ]]
+	then
+		echo -e "\n${RED}Illegal file name containing all of \"${NOC}$ILLEGAL${RED}\"."
+		echo -e "Rename \"${NOC}$1${RED}\" without any of these characters and try again."
+		ILLEGAL_EXIT=1
+	fi
+}
+
+check_archives()
+{
+	b=1
+	while [[ 1 = $(echo "$b <= $TARGETS_NO" | bc) ]];
+	do
+		cd "$MASTER_PATH"
+		SED_EXP=$b'p'
+		x=$(ls -1 | egrep ".7z|.zip" | sed -n "$SED_EXP")	
+		check_illegal_chars "$x"
+		((b++))
+	done
+	[[ -n $ILLEGAL_EXIT ]] && exit 1
 }
 
 if [[ -n $2 ]] 
@@ -277,18 +328,21 @@ case $1 in
 	"-x"|"-e"|"--extract") 
 		if [[ -z $MASTER_PATH ]]
 		then
-			echo -e "${CYAN}Enter a directory to target and extract all archives into separate subdirectories.
+			echo -e "${CYAN}Enter a directory to target and extract all 7z/ZIP archives into separate subdirectories.
 			\nThis will ${RED}overwrite${CYAN} whatever is already in the subdirectories or create them if they dont exist.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
 		fi
 
 		check_master_path ARCHIVES
+		TARGETS_NO=0
 		[[ -n $(ls -1 | grep .7z) ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
+		[[ -n $(ls -1 | grep .zip) ]] && TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"$MASTER_PATH\" to extract.${NOC}" && exit
 		
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."	
-		
+		check_archives
+
 		[[ -z $YES_ALL ]] && echo -e "\n${CYAN}Start extracting?${NOC}" && $(yes_or_no "$input")
 		if [[ 0 = $? || -n $YES_ALL ]]
 		then
@@ -296,18 +350,35 @@ case $1 in
 			i=1
 			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
 			do
-				EXTRACT_EXP=$DEFAULT_EXTRACT_EXP
 				SED_EXP=$i'p'
-				x=$(ls -1 *.7z | sed -n "$SED_EXP")
-				EXTRACT_EXP+=" \"$x\""
+				x=$(ls -1 | egrep ".7z|.zip" | sed -n "$SED_EXP")
+				
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
-				accurate_sizeof $(du -bs "$x" | cut -f1)
+				file_size=$(du -bs * | grep "$x")
+				accurate_sizeof $file_size
+				
+				dot_i=${x//[^.]}
+				dot_i=${#dot_i}
+				abs_name=$(echo "$x" | cut -d"." -f1-$dot_i)
+				mkdir -p "$abs_name"/
+				cd "$abs_name"/ 
+
+				if [[ $x =~ "7z" ]]; then
+					EXTRACT_EXP="$DEFAULT_EXTRACT_EXP \"$MASTER_PATH/$x\""
+				elif [[ $x =~ "zip" ]]; then
+					EXTRACT_EXP="unzip -o \"$MASTER_PATH/$x\""
+				fi	
 				
 				echo -e "${CYAN}Extracting archive...${NOC}"
 				echo $EXTRACT_EXP
 				eval $EXTRACT_EXP
-				check_exit_status
+				check_exit_status EXTRACT
+
+				# dump everything directly into a new subdir named "abs_name"/
+				# remove the empty subdir it would possibly make.
+				rm -rf "$abs_name"/
 				
+				cd "$MASTER_PATH"
 				((i++))
 			done
 			
@@ -353,7 +424,7 @@ case $1 in
 				echo -e "${CYAN}Creating archive...${NOC}"
 				echo $COMPRESS_EXP
 				eval $COMPRESS_EXP
-				check_exit_status
+				check_exit_status COMPRESS
 				
 				echo -e "\n${CYAN}Verifying integrity of archive...${NOC}"
 				INTEGRITY_EXP="7z t \"$x.7z\""
