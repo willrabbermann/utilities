@@ -411,7 +411,6 @@ case $1 in
 			i=1
 			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
 			do
-				COMPRESS_EXP=$DEFAULT_COMPRESS_EXP
 				SED_EXP=$i'p'
 				x=$(ls -d1 */ | sed -n "$SED_EXP")
 				x=${x::-1}
@@ -419,9 +418,16 @@ case $1 in
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
-				COMPRESS_EXP+=" \"$x.7z\" \"$x\"/"
+				COMPRESS_EXP="$DEFAULT_COMPRESS_EXP \"$x.7z\" \"$x\"/"
 				
-				echo -e "${CYAN}Creating archive...${NOC}"
+				# delete the old archive if it exists
+				if [[ -e "$x.7z" ]]; then
+					echo -e "${CYAN}Deleting old archive...${NOC}"
+					rm -v "$x.7z"
+					echo
+				fi
+				
+				echo -e "${CYAN}Creating new archive...${NOC}"
 				echo $COMPRESS_EXP
 				eval $COMPRESS_EXP
 				check_exit_status COMPRESS
