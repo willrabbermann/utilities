@@ -135,16 +135,19 @@ check_master_path()
 
 bar()
 {
-	for ((i = 0; i < 39; i++ ));
+	echo -ne "${BLUE}"
+	for ((i = 0; i < 37; i++ ));
 	do 
 			echo -n "--"
 	done
-	echo
+	echo -e "${NOC}"
 }
 
 begin_info_header()
 {
-	echo -e "\n${BLUE}Information${NOC}"
+	echo
+	bar
+	echo -e "${BLUE}Information${NOC}"
 	bar
 }
 
