@@ -13,6 +13,7 @@ DEFAULT_7zCOMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
 # options used to extract
 DEFAULT_7zEXTRACT_EXP="7z x -y"
 DEFAULT_ZIPEXTRACT_EXP="unzip -o"
+DEFAULT_RAREXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
 
 accurate_sizeof()
 # $1 = bytes input
@@ -66,6 +67,8 @@ print_archives()
 		echo -e "\n\t${NOC}7z Archives${BLUE}\n" && ls -1 *.7z
 	[[ -n $(ls -1 | grep .zip) ]] &&
 		echo -e "\n\t${NOC}ZIP Archives${BLUE}\n" && ls -1 *.zip
+	[[ -n $(ls -1 | grep .rar) ]] &&
+		echo -e "\n\t${NOC}RAR Archives${BLUE}\n" && ls -1 *.rar
 }
 
 print_subdirectories()
@@ -161,11 +164,14 @@ close_info_header()
 print_info()
 {
 	SIZE_ARCHIVES=0
-	if [[ -n $(ls -1 | egrep ".7z|.zip") ]]
+	if [[ -n $(ls -1 | egrep ".7z|.zip|.rar") ]]
 	then
-		[[ -n $(ls -1 | grep ".7z") ]] && SIZE_ARCHIVES=$(du -bc *.7z | grep total | cut -f1)	
+		[[ -n $(ls -1 | grep ".7z") ]] && 
+			SIZE_ARCHIVES=$(du -bc *.7z | grep total | cut -f1)	
 		[[ -n $(ls -1 | grep ".zip") ]] && 
 			SIZE_ARCHIVES=$(echo "$(du -bc *.zip | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
+		[[ -n $(ls -1 | grep ".rar") ]] && 
+			SIZE_ARCHIVES=$(echo "$(du -bc *.rar | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
 	fi
 	
 	if [[ -n $(ls -dp1 * | grep /) ]]
@@ -231,7 +237,7 @@ check_archives()
 	do
 		cd "$MASTER_PATH"
 		SED_EXP=$b'p'
-		x=$(ls -1 | egrep ".7z|.zip" | sed -n "$SED_EXP")	
+		x=$(ls -1 | egrep ".7z|.zip|.rar" | sed -n "$SED_EXP")	
 		check_illegal_chars "$x"
 		((b++))
 	done
@@ -348,8 +354,10 @@ case $1 in
 
 		check_master_path ALL
 		TARGETS_NO=0
+
 		[[ -n $(ls -1 | grep .7z) ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
 		[[ -n $(ls -1 | grep .zip) ]] && TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
+		[[ -n $(ls -1 | grep .rar) ]] && TARGETS_NO=$(echo "$(ls -1 *.rar | wc -l) + $TARGETS_NO" | bc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"$MASTER_PATH\" to extract.${NOC}" && exit
 		
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."	
@@ -370,7 +378,7 @@ case $1 in
 			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
 			do
 				SED_EXP=$i'p'
-				x=$(ls -1 | egrep ".7z|.zip" | sed -n "$SED_EXP")
+				x=$(ls -1 | egrep ".7z|.zip|.rar" | sed -n "$SED_EXP")
 				
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				file_size=$(du -bs * | grep "$x")
@@ -385,12 +393,15 @@ case $1 in
 				cd "$abs_name"/ 
 
 				# filetype specific extraction method
-				if [[ $x =~ "7z" ]]
+				if [[ $x =~ ".7z" ]]
 				then
 					EXTRACT_EXP="$DEFAULT_7zEXTRACT_EXP \"$MASTER_PATH/$x\""
-				elif [[ $x =~ "zip" ]]
+				elif [[ $x =~ ".zip" ]]
 				then
 					EXTRACT_EXP="$DEFAULT_ZIPEXTRACT_EXP \"$MASTER_PATH/$x\""
+				elif [[ $x =~ ".rar" ]]
+				then
+					EXTRACT_EXP="$DEFAULT_RAREXTRACT_EXP \"$MASTER_PATH/$x\""
 				fi
 				
 				EXTRACT_FLAG=0
