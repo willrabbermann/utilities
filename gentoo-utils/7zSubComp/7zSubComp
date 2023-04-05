@@ -8,12 +8,24 @@ BLUE='\033[0;34m'
 CYAN='\033[00;36m'
 NOC='\033[0m'
 
+# get MiB free memory (not including swap)
+get_mem_free()
+{
+	MEMFREE=$(free -m | grep Mem:)
+	MEMFREE=$(echo $MEMFREE | cut -d' ' -f4)
+}
+
+# get max thread jobs (CPU THREADS)
+tj=$(cat /proc/cpuinfo	| grep siblings | sort -u | awk -F ": " '{print $NF}')
+
 # options used to compress
 DEFAULT_7zCOMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
+DEFAULT_ZSTDCOMPRESS_EXP="time tar -I 'zstd -v -T$tj -M$MEMFREE --ultra -22' -cf"
 # options used to extract
 DEFAULT_7zEXTRACT_EXP="7z x -y"
 DEFAULT_ZIPEXTRACT_EXP="unzip -o"
 DEFAULT_RAREXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
+DEFAULT_ZSTDEXTRACT_EXP="tar -I 'zstd -dv -M$MEMFREE --long=31' -xvf"
 
 accurate_sizeof()
 # $1 = bytes input
@@ -63,12 +75,14 @@ yes_or_no()
 
 print_archives()
 {
-	[[ -n $(ls -1 | grep .7z) ]] && 
-		echo -e "\n\t${NOC}7z Archives${BLUE}\n" && ls -1 *.7z
-	[[ -n $(ls -1 | grep .zip) ]] &&
+	[[ -n $(ls -1 | egrep ".zip") ]] &&
 		echo -e "\n\t${NOC}ZIP Archives${BLUE}\n" && ls -1 *.zip
-	[[ -n $(ls -1 | grep .rar) ]] &&
+	[[ -n $(ls -1 | egrep ".rar") ]] &&
 		echo -e "\n\t${NOC}RAR Archives${BLUE}\n" && ls -1 *.rar
+	[[ -n $(ls -1 | egrep ".7z") ]] && 
+		echo -e "\n\t${NOC}7z Archives${BLUE}\n" && ls -1 *.7z
+	[[ -n $(ls -1 | egrep ".tar.zst") ]] &&
+		echo -e "\n\t${NOC}ZSTD Archives${BLUE}\n" && ls -1 *.tar.zst
 }
 
 print_subdirectories()
@@ -263,13 +277,16 @@ case $1 in
         echo
         echo -e "7zip subdirectory compressor and archive extractor for 7z archives."
         echo
-        echo -e "   ${BLUE}-c --compress${NOC}           -   enter directory A to compress all subdirectories of A into new archives in A."
-        echo -e "                               Verifies archive integrity after each archive creation."
+        echo -e "Compressing"
+        echo -e "   ${BLUE}-c={${NOC}type${BLUE}} --compress={${NOC}type${BLUE}}${NOC}    -   enter directory A to compress all subdirectories of A into new archives in A."
+        echo -e "   type={ 7z, zstd }                  Verifies archive integrity after each archive creation."
+        echo
+        echo -e "Decompressing"
         echo -e "   ${BLUE}-x -e --extract${NOC}         -   enter directory A to extract all archives of A into subdirectories in A."
+        echo    "                               Can be any of 7z, zip, rar, or zstd."
         echo -e "   ${BLUE}-r --remove${NOC}             -   enter directory A to remove only subdirectories under A."
         echo -e "   ${BLUE}-v --view${NOC}               -   enter directory A to view size info and all subdirectories and archives of A."
         echo -e "   ${BLUE}-y --yes${NOC}                -   confirm without asking."
-        echo 
         echo
         echo -e "Examples:"
         echo        
@@ -384,7 +401,7 @@ case $1 in
 			while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
 			do
 				SED_EXP=$i'p'
-				x=$(ls -1 | egrep ".7z|.zip|.rar" | sed -n "$SED_EXP")
+				x=$(ls -1 | egrep ".7z|.zip|.rar|.tar.zst" | sed -n "$SED_EXP")
 				
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				file_size=$(du -bs * | grep "$x")
@@ -408,6 +425,9 @@ case $1 in
 				elif [[ $x =~ ".rar" ]]
 				then
 					EXTRACT_EXP="$DEFAULT_RAREXTRACT_EXP \"$MASTER_PATH/$x\""
+				elif [[ $x =~ ".tar.zst" ]]
+				then
+					EXTRACT_EXP="$DEFAULT_ZSTDEXTRACT_EXP \"$MASTER_PATH/$x\""
 				fi
 				
 				EXTRACT_FLAG=0
@@ -457,7 +477,7 @@ case $1 in
 			close_info_header
 		fi		
 	;;	  
-	"c"|"-c"|"--compress")
+	"-c=7z"|"-c=zstd"|"--compress=7z"|"--compress=zstd")
 		if [[ -z $MASTER_PATH ]]
 		then
 			echo -e "${CYAN}Enter a directory to target and compress all subdirectories into separate 7z archives.${NOC}"
@@ -465,22 +485,36 @@ case $1 in
 			read -e -p ': ' MASTER_PATH
 		fi
 
+		COMPRESS_TYPE=$(echo $1 | cut -d'=' -f2)
+		OVERWRITE_FLAG=0
 		check_master_path ALL
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to compress.${NOC}" && exit
 
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
-
-		echo -e "\n${CYAN}Current compression settings: ${NOC}$DEFAULT_7zCOMPRESS_EXP"
+		
+		[[ 7z = $COMPRESS_TYPE ]] && echo -e "\n${CYAN}Current 7z compression settings: ${NOC}$DEFAULT_7zCOMPRESS_EXP"
+		[[ zstd = $COMPRESS_TYPE ]] && echo -e "\n${CYAN}Current zstd compression settings: ${NOC}$DEFAULT_ZSTDCOMPRESS_EXP"
+		
 		if [[ -z $YES_ALL ]] 
 		then
-			echo -e "\n${CYAN}Overwrite old 7z archives?${NOC}"
-			yes_or_no "$input"
-			OVERWRITE_FLAG=$?
+			case $COMPRESS_TYPE in
+				7z)
+					[[ -z $(ls -A * | egrep ".7z") ]] && NEW_WRITE=0
+				;;
+				zstd)
+					[[ -z $(ls -A * | egrep ".tar.zst") ]] && NEW_WRITE=0
+				;;
+			esac
+			if [[ -z $NEW_WRITE ]] 
+			then
+				echo -e "\n${CYAN}Overwrite old $COMPRESS_TYPE archives?${NOC}"
+				yes_or_no "$input"
+				OVERWRITE_FLAG=$?
+			fi
+
 			echo -e "\n${CYAN}Start compressing?${NOC}" 
 			yes_or_no "$input"
-		else
-			OVERWRITE_FLAG=0
 		fi
 
 		if [[ 0 = $? || -n $YES_ALL ]]
@@ -497,34 +531,71 @@ case $1 in
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
-				if [[ -e "$x.7z" ]]
-				then
-					if [[ 0 = $OVERWRITE_FLAG ]]
-					then
-						echo -e "${CYAN}Deleting old archive...${NOC}"
-						rm -v "$x.7z"
-						echo
-					else
-						COMPRESS_FLAG=1
-					fi
-				fi
-			
+				# check for existing archives
+				case $COMPRESS_TYPE in
+					7z)
+						if [[ -e "$x.7z" ]]
+						then
+							if [[ 0 = $OVERWRITE_FLAG ]]
+							then
+								echo -e "${CYAN}Deleting old 7z archive...${NOC}"
+								rm -v "$x.7z"
+								echo
+							else
+								COMPRESS_FLAG=1
+							fi
+						fi
+					;;
+					zstd)
+						if [[ -e "$x.tar.zst" ]]
+						then
+							if [[ 0 = $OVERWRITE_FLAG ]]
+							then
+								echo -e "${CYAN}Deleting old zstd archive...${NOC}"
+								rm -v "$x.tar.zst"
+								echo
+							else
+								COMPRESS_FLAG=1
+							fi
+						fi
+					;;
+				esac	
+
 				if [[ 0 = $COMPRESS_FLAG ]]
 				then
-					echo -e "${CYAN}Creating new archive...${NOC}"
-					COMPRESS_EXP="$DEFAULT_7zCOMPRESS_EXP \"$x.7z\" \"$x\"/"
+					case $COMPRESS_TYPE in
+						7z)
+							echo -e "${CYAN}Creating new 7z archive...${NOC}"
+							COMPRESS_EXP="$DEFAULT_7zCOMPRESS_EXP \"$x.7z\" \"$x\"/"
+						;;
+						zstd)
+							echo -e "${CYAN}Creating new ZSTD archive...${NOC}"
+							COMPRESS_EXP="$DEFAULT_ZSTDCOMPRESS_EXP \"$x.tar.zst\" \"$x\"/"
+						;;
+						*)
+							exit 1
+						;;
+					esac
+					
 					echo $COMPRESS_EXP
 					eval $COMPRESS_EXP
 					check_exit_status COMPRESS
 				
 					echo -e "\n${CYAN}Verifying integrity of archive...${NOC}"
-					INTEGRITY_EXP="7z t \"$x.7z\""
-			
+					case $COMPRESS_TYPE in
+						7z)
+							INTEGRITY_EXP="7z t \"$x.7z\""
+						;;
+						zstd)
+							INTEGRITY_EXP="zstd --test \"$x.tar.zst\""
+						;;
+					esac
+
 					echo $INTEGRITY_EXP
 					eval $INTEGRITY_EXP
 					check_exit_status INTEGRITY
 				else
-					echo -e "${CYAN}Not overwriting existing 7z archive, skipping.${NOC}"
+					echo -e "${CYAN}Not overwriting existing $COMPRESS_TYPE archive, skipping.${NOC}"
 				fi
 				((i++))
 			done
@@ -536,6 +607,6 @@ case $1 in
 		fi
 	;;
 	*)
-		echo -e "${RED}Invalid input.\nTry ${NOC}-h${RED} or ${NOC}--help"
+		echo -e "Invalid input.\nTry -h or --help"
 	;;
 esac
