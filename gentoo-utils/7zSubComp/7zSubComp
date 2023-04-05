@@ -275,7 +275,7 @@ case $1 in
     "h"|"-h"|"-help"|"--help")
         echo -e "${CYAN}7zSubComp ${BLUE}[ -c [-x -e] -r -v ] [ -y ] [directory A]${NOC}"
         echo
-        echo -e "7zip subdirectory compressor and archive extractor for 7z archives."
+        echo -e "7zip subdirectory compressor and archive extractor for 7z and zstd archives."
         echo
         echo -e "Compressing"
         echo -e "   ${BLUE}-c={${NOC}type${BLUE}} --compress={${NOC}type${BLUE}}${NOC}    -   enter directory A to compress all subdirectories of A into new archives in A."
@@ -478,14 +478,14 @@ case $1 in
 		fi		
 	;;	  
 	"-c=7z"|"-c=zstd"|"--compress=7z"|"--compress=zstd")
+		COMPRESS_TYPE=$(echo $1 | cut -d'=' -f2)
 		if [[ -z $MASTER_PATH ]]
 		then
-			echo -e "${CYAN}Enter a directory to target and compress all subdirectories into separate 7z archives.${NOC}"
+			echo -e "${CYAN}Enter a directory to target and compress all subdirectories into separate $COMPRESS_TYPE archives.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
 		fi
 
-		COMPRESS_TYPE=$(echo $1 | cut -d'=' -f2)
 		OVERWRITE_FLAG=0
 		check_master_path ALL
 		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
@@ -569,7 +569,7 @@ case $1 in
 							COMPRESS_EXP="$DEFAULT_7zCOMPRESS_EXP \"$x.7z\" \"$x\"/"
 						;;
 						zstd)
-							echo -e "${CYAN}Creating new ZSTD archive...${NOC}"
+							echo -e "${CYAN}Creating new zstd archive...${NOC}"
 							COMPRESS_EXP="$DEFAULT_ZSTDCOMPRESS_EXP \"$x.tar.zst\" \"$x\"/"
 						;;
 						*)
