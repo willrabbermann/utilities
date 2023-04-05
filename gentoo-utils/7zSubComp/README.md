@@ -12,25 +12,37 @@
 ```app-arch/p7zip rar``` use flag is required if you want to be able to extract those files, but it is proprietary.
 7zSubComp will extract 7z, zip, or rar archives. It may create zstd archives as alternative to lzma compression soon.
 
-```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
+```
+7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
-7zip subdirectory compressor and archive extractor for 7z archives.
+7zip/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor.
 
-   -c --compress           -   enter directory A to compress all subdirectories of A into new archives in A.
-                               Verifies archive integrity after each archive creation.
-   -x -e --extract         -   enter directory A to extract all archives of A into subdirectories in A.
+Compressing
+   -c={type} --compress={type}    -   enter directory A to compress all subdirectories of A into new archives in A.
+   type={ 7z, zstd }                  Verifies archive integrity after each archive creation.
+
+Decompressing
+   -x -e --extract                -   enter directory A to extract all archives of A into subdirectories in A.
+   -e={type} --extract={type}     "-x -e --extract" will extract ALL archives. Pick a type with "-e={type}" or "--extract={type}" .
+   type={ 7z, zip, rar, zstd }
+
+Removing
    -r --remove             -   enter directory A to remove only subdirectories under A.
-   -v --view               -   enter directory A to view size info and all subdirectories and archives of A.
-   -y --yes                -   confirm without asking.
 
+Viewing
+   -v --view               -   enter directory A to view size info and all subdirectories and archives of A.
+
+Other
+   -y --yes                -   confirm without asking.
 
 Examples:
 
-   7zSubComp -c .      Compress all subdirectories under current directory "." .
+   7zSubComp -c=7z .      Compress all subdirectories under current directory "." into 7z archives.
 
    7zSubComp -x .      Extract all archives under current directory "." .
+   7zSubComp -x=zstd .      Extract all zstd archives under current directory "." .
 
-   7zSubComp -r -y .   Remove only subdirectories under current directory "." .
+   7zSubComp -r -y .   Remove only subdirectories under current directory "."
                        without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
 
    7zSubComp -v .      View subdirectories and archives under current directory "." .
