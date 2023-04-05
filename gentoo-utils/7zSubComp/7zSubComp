@@ -463,7 +463,6 @@ case $1 in
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
-				
 				if [[ -e "$x.7z" ]]
 				then
 					if [[ 0 = $OVERWRITE_FLAG ]]
@@ -476,7 +475,6 @@ case $1 in
 					fi
 				fi
 			
-				
 				if [[ 0 = $COMPRESS_FLAG ]]
 				then
 					echo -e "${CYAN}Creating new archive...${NOC}"
