@@ -320,7 +320,9 @@ case $1 in
 		if [[ 0 = $? || -n $YES_ALL ]]
 		then
 			echo -e "\n${RED}Are you sure?${NOC}"
-			if (yes_or_no "$input") then
+			yes_or_no "$input"
+			if [[ 0 = $? ]]
+			then
 				START_TIME=$SECONDS
 				i=1
 				while [[ 1 = $(echo "$i <= $TARGETS_NO" | bc) ]];
@@ -362,14 +364,18 @@ case $1 in
 		
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."	
 		check_archives
-		
 		OVERWRITE_FLAG=0
 		if [[ -z $YES_ALL ]] 
 		then
-			[[ -z $(ls -pA | grep /) ]] && NEW_WRITE=1
-			[[ -z $NEW_WRITE ]] && echo -e "\n${CYAN}Overwrite subdirectories?${NOC}" && 
-				$(yes_or_no "$input") && OVERWRITE_FLAG=$?
-			echo -e "\n${CYAN}Start extracting?${NOC}" && $(yes_or_no "$input")
+			[[ -z $(ls -pA | grep /) ]] && NEW_WRITE=0
+			if [[ -z $NEW_WRITE ]] 
+			then
+				echo -e "\n${CYAN}Overwrite subdirectories?${NOC}"
+				yes_or_no "$input"
+				OVERWRITE_FLAG=$?
+			fi
+			echo -e "\n${CYAN}Start extracting?${NOC}" 
+			yes_or_no "$input"
 		fi 
 		if [[ 0 = $? || -n $YES_ALL ]]
 		then
@@ -468,9 +474,11 @@ case $1 in
 		echo -e "\n${CYAN}Current compression settings: ${NOC}$DEFAULT_7zCOMPRESS_EXP"
 		if [[ -z $YES_ALL ]] 
 		then
-			echo -e "\n${CYAN}Overwrite old 7z archives?${NOC}" && $(yes_or_no "$input")
+			echo -e "\n${CYAN}Overwrite old 7z archives?${NOC}"
+			yes_or_no "$input"
 			OVERWRITE_FLAG=$?
-			echo -e "\n${CYAN}Start compressing?${NOC}" && $(yes_or_no "$input")
+			echo -e "\n${CYAN}Start compressing?${NOC}" 
+			yes_or_no "$input"
 		else
 			OVERWRITE_FLAG=0
 		fi
