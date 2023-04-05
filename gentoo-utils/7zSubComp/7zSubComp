@@ -241,7 +241,7 @@ check_archives()
 if [[ -n $2 ]] 
 then
 	case $2 in
-		"-y"|"--yes")
+		"y"|"-y"|"--yes")
 			[[ -n $3 ]] && MASTER_PATH=$3
 			YES_ALL=1
 		;;
@@ -408,6 +408,14 @@ case $1 in
 
 				if [[ 0 = $EXTRACT_FLAG ]]
 				then
+					# remove any old files under $MASTERPATH/"$abs_name"/* 
+					if [[ 0 = $OVERWRITE_FLAG && -n $(ls -A) ]]
+					then
+						echo -e "${CYAN}Removing old files under $(pwd)/*${NOC}"
+						rm -rfv *
+						echo
+					fi
+
 					echo -e "${CYAN}Extracting archive...${NOC}"
 					echo $EXTRACT_EXP
 					eval $EXTRACT_EXP
