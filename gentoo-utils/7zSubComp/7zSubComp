@@ -9,8 +9,10 @@ CYAN='\033[00;36m'
 NOC='\033[0m'
 
 # options used to compress
-DEFAULT_COMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
-DEFAULT_EXTRACT_EXP="7z e -y"
+DEFAULT_7zCOMPRESS_EXP="7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
+# options used to extract
+DEFAULT_7zEXTRACT_EXP="7z x -y"
+DEFAULT_ZIPEXTRACT_EXP="unzip -o"
 
 accurate_sizeof()
 # $1 = bytes input
@@ -209,7 +211,7 @@ check_illegal_chars()
 	for ((char_i = 0 ; char_i < $str_len - 1 ; char_i++ )); do 
 		c=${MYVAR:$char_i:1}
 		case $c in
-			'['|']') 
+			'['|']') # grep hates these chars
 				ILLEGAL+=$c
 			;;
 		esac
@@ -250,7 +252,7 @@ then
 fi
 
 case $1 in
-    "-h"|"-help"|"--help")
+    "h"|"-h"|"-help"|"--help")
         echo -e "${CYAN}7zSubComp ${BLUE}[ -c [-x -e] -r -v ] [ -y ] [directory A]${NOC}"
         echo
         echo -e "7zip subdirectory compressor and archive extractor for 7z archives."
@@ -277,7 +279,7 @@ case $1 in
         echo -e "   \".\" above can be replaced with any directory. Not providing one will ask you for one."
         echo
     ;;
-	"-v"|"--view")
+	"v"|"-v"|"--view")
 		if [[ -z $MASTER_PATH ]]
 		then
 			echo -e "${CYAN}Enter a directory to view all subdirectories and archives.${NOC}"
@@ -290,7 +292,7 @@ case $1 in
 		print_info
 		close_info_header
 	;;
-	"-r"|"--remove")
+	"r"|"-r"|"--remove")
 		if [[ -z $MASTER_PATH ]]
 		then
 			echo -e "${CYAN}Enter a directory to remove all separate subdirectories only.
@@ -336,16 +338,15 @@ case $1 in
 		print_info REMOVE
 		close_info_header
 	;;
-	"-x"|"-e"|"--extract") 
+	"x"|"e"|"-x"|"-e"|"--extract") 
 		if [[ -z $MASTER_PATH ]]
 		then
-			echo -e "${CYAN}Enter a directory to target and extract all 7z/ZIP archives into separate subdirectories.
-			\nThis will ${RED}overwrite${CYAN} whatever is already in the subdirectories or create them if they dont exist.${NOC}"
+			echo -e "${CYAN}Enter a directory to target and extract all 7z/ZIP archives into separate subdirectories.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
 		fi
 
-		check_master_path ARCHIVES
+		check_master_path ALL
 		TARGETS_NO=0
 		[[ -n $(ls -1 | grep .7z) ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
 		[[ -n $(ls -1 | grep .zip) ]] && TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
@@ -378,20 +379,23 @@ case $1 in
 				dot_i=${x//[^.]}
 				dot_i=${#dot_i}
 				abs_name=$(echo "$x" | cut -d"." -f1-$dot_i)
+				
+				# make sure we are in the new subdir
 				mkdir -p "$abs_name"/
 				cd "$abs_name"/ 
 
+				# filetype specific extraction method
 				if [[ $x =~ "7z" ]]
 				then
-					EXTRACT_EXP="$DEFAULT_EXTRACT_EXP \"$MASTER_PATH/$x\""
+					EXTRACT_EXP="$DEFAULT_7zEXTRACT_EXP \"$MASTER_PATH/$x\""
 				elif [[ $x =~ "zip" ]]
 				then
-					EXTRACT_EXP="unzip -o \"$MASTER_PATH/$x\""
+					EXTRACT_EXP="$DEFAULT_ZIPEXTRACT_EXP \"$MASTER_PATH/$x\""
 				fi
 				
 				EXTRACT_FLAG=0
-				# check if "$abs_name"/ size of all files is > archive file.
-				if [[ 1 = $(echo "$(echo "$(du -b . | cut -f1) - 4096" | bc) > $(du -b "../$x" | cut -f1)" | bc) ]]
+				# check if "$abs_name"/ size of all files is >= archive file.
+				if [[ 1 = $(echo "$(echo "$(du -bc . | grep total | cut -f1) - 4096" | bc) >= $(du -b "../$x" | cut -f1)" | bc) ]]
 				then
 					if [[ 0 = $OVERWRITE_FLAG ]]
 					then
@@ -400,7 +404,7 @@ case $1 in
 						echo -e "${CYAN}Not overwriting existing subdirectory, skipping...${NOC}"
 						EXTRACT_FLAG=1
 					fi
-				fi
+				fi	
 
 				if [[ 0 = $EXTRACT_FLAG ]]
 				then
@@ -408,11 +412,15 @@ case $1 in
 					echo $EXTRACT_EXP
 					eval $EXTRACT_EXP
 					check_exit_status EXTRACT
+
+					if [[ -d "$abs_name"/ ]]
+					then
+						cd "$abs_name"/ 
+						[[ -n $(ls -A) ]] && mv * ..
+						cd ..
+						rm -rf "$abs_name"/
+					fi
 				fi
-				
-				# dump everything directly into a new subdir named "abs_name"/
-				# remove the empty subdir it would possibly make.
-				rm -rf "$abs_name"/
 				
 				cd "$MASTER_PATH"
 				((i++))
@@ -424,11 +432,10 @@ case $1 in
 			close_info_header
 		fi		
 	;;	  
-	"-c"|"--compress")
+	"c"|"-c"|"--compress")
 		if [[ -z $MASTER_PATH ]]
 		then
-			echo -e "${CYAN}Enter a directory to target and compress all subdirectories into separate 7z archives.
-			\nThis will ${RED}overwrite${CYAN} whatever is already in the archives or create them if they dont exist.${NOC}"
+			echo -e "${CYAN}Enter a directory to target and compress all subdirectories into separate 7z archives.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
 		fi
@@ -439,7 +446,7 @@ case $1 in
 
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
 
-		echo -e "\n${CYAN}Current compression settings: ${NOC}$DEFAULT_COMPRESS_EXP"
+		echo -e "\n${CYAN}Current compression settings: ${NOC}$DEFAULT_7zCOMPRESS_EXP"
 		if [[ -z $YES_ALL ]] 
 		then
 			echo -e "\n${CYAN}Overwrite old 7z archives?${NOC}" && $(yes_or_no "$input")
@@ -478,7 +485,7 @@ case $1 in
 				if [[ 0 = $COMPRESS_FLAG ]]
 				then
 					echo -e "${CYAN}Creating new archive...${NOC}"
-					COMPRESS_EXP="$DEFAULT_COMPRESS_EXP \"$x.7z\" \"$x\"/"
+					COMPRESS_EXP="$DEFAULT_7zCOMPRESS_EXP \"$x.7z\" \"$x\"/"
 					echo $COMPRESS_EXP
 					eval $COMPRESS_EXP
 					check_exit_status COMPRESS
@@ -502,6 +509,6 @@ case $1 in
 		fi
 	;;
 	*)
-		echo -e "invalid input \"$1\"\nTry -h or --help"
+		echo -e "${RED}Invalid input.\nTry ${NOC}-h${RED} or ${NOC}--help"
 	;;
 esac
