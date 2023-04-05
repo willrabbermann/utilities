@@ -362,15 +362,15 @@ case $1 in
 		
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."	
 		check_archives
-
+		
+		OVERWRITE_FLAG=0
 		if [[ -z $YES_ALL ]] 
 		then
-			echo -e "\n${CYAN}Overwrite subdirectories?${NOC}" && $(yes_or_no "$input")
-			OVERWRITE_FLAG=$?
+			[[ -z $(ls -pA | grep /) ]] && NEW_WRITE=1
+			[[ -z $NEW_WRITE ]] && echo -e "\n${CYAN}Overwrite subdirectories?${NOC}" && 
+				$(yes_or_no "$input") && OVERWRITE_FLAG=$?
 			echo -e "\n${CYAN}Start extracting?${NOC}" && $(yes_or_no "$input")
-		else
-			OVERWRITE_FLAG=0
-		fi	
+		fi 
 		if [[ 0 = $? || -n $YES_ALL ]]
 		then
 			START_TIME=$SECONDS
