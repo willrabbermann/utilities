@@ -192,11 +192,11 @@ print_info()
 			accurate_sizeof $SIZE_DELTA
 		;;
 		*)
-		SIZE_DELTA=$(echo "$SIZE_ARCHIVES - $SIZE_SUBDIR" | bc -l)
-		echo -ne "${CYAN}(archives - subdirectories)\t\t:\t${NOC}"
-		accurate_sizeof $SIZE_DELTA
-		echo -ne "${CYAN}master directory size\t\t\t:\t${NOC}"
-		accurate_sizeof $SIZE_MASTER	
+			SIZE_DELTA=$(echo "$SIZE_ARCHIVES - $SIZE_SUBDIR" | bc -l)
+			echo -ne "${CYAN}(archives - subdirectories)\t\t:\t${NOC}"
+			accurate_sizeof $SIZE_DELTA
+			echo -ne "${CYAN}master directory size\t\t\t:\t${NOC}"
+			accurate_sizeof $SIZE_MASTER	
 		;;
 	esac
 }
@@ -354,7 +354,14 @@ case $1 in
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."	
 		check_archives
 
-		[[ -z $YES_ALL ]] && echo -e "\n${CYAN}Start extracting?${NOC}" && $(yes_or_no "$input")
+		if [[ -z $YES_ALL ]] 
+		then
+			echo -e "\n${CYAN}Overwrite subdirectories?${NOC}" && $(yes_or_no "$input")
+			OVERWRITE_FLAG=$?
+			echo -e "\n${CYAN}Start extracting?${NOC}" && $(yes_or_no "$input")
+		else
+			OVERWRITE_FLAG=0
+		fi	
 		if [[ 0 = $? || -n $YES_ALL ]]
 		then
 			START_TIME=$SECONDS
@@ -374,17 +381,35 @@ case $1 in
 				mkdir -p "$abs_name"/
 				cd "$abs_name"/ 
 
-				if [[ $x =~ "7z" ]]; then
+				if [[ $x =~ "7z" ]]
+				then
 					EXTRACT_EXP="$DEFAULT_EXTRACT_EXP \"$MASTER_PATH/$x\""
-				elif [[ $x =~ "zip" ]]; then
+				elif [[ $x =~ "zip" ]]
+				then
 					EXTRACT_EXP="unzip -o \"$MASTER_PATH/$x\""
-				fi	
+				fi
 				
-				echo -e "${CYAN}Extracting archive...${NOC}"
-				echo $EXTRACT_EXP
-				eval $EXTRACT_EXP
-				check_exit_status EXTRACT
+				EXTRACT_FLAG=0
+				# check if "$abs_name"/ size of all files is > archive file.
+				if [[ 1 = $(echo "$(echo "$(du -b . | cut -f1) - 4096" | bc) > $(du -b "../$x" | cut -f1)" | bc) ]]
+				then
+					if [[ 0 = $OVERWRITE_FLAG ]]
+					then
+						echo -e "${CYAN}Overwriting existing subdirectory...${NOC}"
+					else
+						echo -e "${CYAN}Not overwriting existing subdirectory, skipping...${NOC}"
+						EXTRACT_FLAG=1
+					fi
+				fi
 
+				if [[ 0 = $EXTRACT_FLAG ]]
+				then
+					echo -e "${CYAN}Extracting archive...${NOC}"
+					echo $EXTRACT_EXP
+					eval $EXTRACT_EXP
+					check_exit_status EXTRACT
+				fi
+				
 				# dump everything directly into a new subdir named "abs_name"/
 				# remove the empty subdir it would possibly make.
 				rm -rf "$abs_name"/
