@@ -6,7 +6,10 @@
 
 ```7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on```
 
-7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. Retain full directory paths when extracting from 7z or zip.
+7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. Retain full directory paths when extracting from 7z, zipm or rar.
+
+```app-arch/p7zip rar``` use flag is required if you want to be able to extract those files, but it is proprietary.
+7zSubComp will extract 7z, zip, or rar archives. It may create zstd archives as alternative to lzma compression soon.
 
 ```7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
