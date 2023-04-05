@@ -411,7 +411,7 @@ case $1 in
 					# remove any old files under $MASTERPATH/"$abs_name"/* 
 					if [[ 0 = $OVERWRITE_FLAG && -n $(ls -A) ]]
 					then
-						echo -e "${CYAN}Removing old files under $(pwd)/*${NOC}"
+						echo -e "${CYAN}Removing old files under \"${NOC}$(pwd)/*${CYAN}\"${NOC}"
 						rm -rfv *
 						echo
 					fi
