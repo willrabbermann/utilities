@@ -82,7 +82,7 @@ print_archives()
 	[[ -n $(ls -1 | egrep ".7z") ]] && 
 		echo -e "\n\t${NOC}7z Archives${BLUE}\n" && ls -1 *.7z
 	[[ -n $(ls -1 | egrep ".tar.zst") ]] &&
-		echo -e "\n\t${NOC}ZSTD Archives${BLUE}\n" && ls -1 *.tar.zst
+		echo -e "\n\t${NOC}zstd Archives${BLUE}\n" && ls -1 *.tar.zst
 }
 
 print_subdirectories()
@@ -374,12 +374,13 @@ case $1 in
 		check_master_path ALL
 		TARGETS_NO=0
 
-		[[ -n $(ls -1 | grep .7z) ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
-		[[ -n $(ls -1 | grep .zip) ]] && TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
-		[[ -n $(ls -1 | grep .rar) ]] && TARGETS_NO=$(echo "$(ls -1 *.rar | wc -l) + $TARGETS_NO" | bc -l)
+		[[ -n $(ls -1 | egrep ".7z") ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
+		[[ -n $(ls -1 | egrep ".zip") ]] && TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
+		[[ -n $(ls -1 | egrep ".rar") ]] && TARGETS_NO=$(echo "$(ls -1 *.rar | wc -l) + $TARGETS_NO" | bc -l)
+		[[ -n $(ls -1 | egrep ".tar.zst") ]] && TARGETS_NO=$(echo "$(ls -1 *.tar.zst | wc -l) + $TARGETS_NO" | bc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"$MASTER_PATH\" to extract.${NOC}" && exit
 		
-		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."	
+		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."
 		check_archives
 		OVERWRITE_FLAG=0
 		if [[ -z $YES_ALL ]] 
@@ -409,7 +410,12 @@ case $1 in
 				
 				dot_i=${x//[^.]}
 				dot_i=${#dot_i}
-				abs_name=$(echo "$x" | cut -d"." -f1-$dot_i)
+				
+				if [[ $x =~ ".tar.zst" ]]
+				then
+					dot_i=$((dot_i - 1))
+				fi
+				abs_name=$(echo "$x" | cut -d"." -f1-$dot_i)	
 				
 				# make sure we are in the new subdir
 				mkdir -p "$abs_name"/
