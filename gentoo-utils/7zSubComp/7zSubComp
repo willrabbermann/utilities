@@ -20,7 +20,7 @@ DEFAULT_ZSTDCOMPRESS_EXP="time tar -I 'zstd -v -T$tj -M$(echo "$MEMFREE * 1/2" |
 DEFAULT_7zEXTRACT_EXP="7z x -y"
 DEFAULT_ZIPEXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
 DEFAULT_RAREXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
-DEFAULT_ZSTDEXTRACT_EXP="time tar -I 'zstd -dv -M$(echo "$MEMFREE * 3/7" | bc) --long=31' -xvf"
+DEFAULT_ZSTDEXTRACT_EXP="time tar -I 'zstd -dv -M$(echo "$MEMFREE * 1/2" | bc) --long=31' -xvf"
 
 accurate_sizeof()
 # $1 = bytes input
