@@ -336,15 +336,15 @@ case $1 in
         echo
         echo -e "Examples:"
         echo        
-        echo -e "   7zSubComp -c=7z .      Compress all subdirectories under current directory \".\" into 7z archives."
+        echo -e "   7zSubComp -c=7z .       -   Compress all subdirectories under current directory \".\" into 7z archives."
         echo
-        echo -e "   7zSubComp -x .      Extract all archives under current directory \".\" ."
-        echo -e "   7zSubComp -x=zstd .      Extract all zstd archives under current directory \".\" ."
+        echo -e "   7zSubComp -x .          -   Extract all archives under current directory \".\" ."
+        echo -e "   7zSubComp -x=zstd .     -   Extract all zstd archives under current directory \".\" ."
         echo 
-        echo -e "   7zSubComp -r -y .   Remove only subdirectories under current directory \".\""
-        echo -e "                       without asking for confirmation. With \"7zSubComp -r -y\" it will still ask once."
+        echo -e "   7zSubComp -r -y .       -   Remove only subdirectories under current directory \".\""
+        echo -e "                               without asking for confirmation. With \"7zSubComp -r -y\" it will still ask once."
         echo
-        echo -e "   7zSubComp -v .      View subdirectories and archives under current directory \".\" ."
+        echo -e "   7zSubComp -v .          -   View subdirectories and archives under current directory \".\" ."
         echo
         echo -e "   \".\" above can be replaced with any directory. Not providing one will ask you for one."
         echo

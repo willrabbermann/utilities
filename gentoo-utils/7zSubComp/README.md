@@ -33,15 +33,15 @@ Other
 
 Examples:
 
-   7zSubComp -c=7z .      Compress all subdirectories under current directory "." into 7z archives.
+   7zSubComp -c=7z .       -   Compress all subdirectories under current directory "." into 7z archives.
 
-   7zSubComp -x .      Extract all archives under current directory "." .
-   7zSubComp -x=zstd .      Extract all zstd archives under current directory "." .
+   7zSubComp -x .          -   Extract all archives under current directory "." .
+   7zSubComp -x=zstd .     -   Extract all zstd archives under current directory "." .
 
-   7zSubComp -r -y .   Remove only subdirectories under current directory "."
-                       without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
+   7zSubComp -r -y .       -   Remove only subdirectories under current directory "."
+                               without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
 
-   7zSubComp -v .      View subdirectories and archives under current directory "." .
+   7zSubComp -v .          -   View subdirectories and archives under current directory "." .
 
    "." above can be replaced with any directory. Not providing one will ask you for one.
 
