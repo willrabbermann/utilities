@@ -322,7 +322,7 @@ case $1 in
         echo
         echo -e "Decompressing"
         echo -e "   ${BLUE}-x -e --extract${NOC}                -   enter directory A to extract all archives of A into subdirectories in A."
-        echo -e "   ${BLUE}-e=${NOC}{type}${BLUE} --extract=${NOC}{type}     Extract only one type with \"-e={type}\" or \"--extract={type}\" ."
+        echo -e "   ${BLUE}-e=${NOC}{type}${BLUE} --extract=${NOC}{type}         Extract only one type with \"-e={type}\" or \"--extract={type}\" ."
         echo    "   type={ 7z, zip, rar, zstd }"
         echo
         echo -e "Removing"
