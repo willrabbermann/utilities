@@ -2,11 +2,7 @@
 
 ## 7zSubComp stands for 7zip Subdirectory Compression tool
 
-7zSubComp verifies integrity of archives after creating them with Ultra LZMA compression. 
-
-```7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on```
-
-7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. Retain full directory paths when extracting from 7z, zipm or rar.
+7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. Retain full directory paths when extracting from 7z, zip, rar, or zstd.
 
 ### gentoo dependencies
 ```app-arch/p7zip rar``` use flag is required if you want to be able to extract those files, but it is proprietary.
