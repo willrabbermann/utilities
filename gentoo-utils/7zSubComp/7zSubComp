@@ -11,7 +11,7 @@ NOC='\033[0m'
 # get MiB free memory (not including swap)
 get_mem_free()
 {
-	MEMFREE=$(free -m | grep Mem:)
+	MEMFREE=$(free -m | grep Mem: | xargs)
 	MEMFREE=$(echo $MEMFREE | cut -d' ' -f4)
 }
 
