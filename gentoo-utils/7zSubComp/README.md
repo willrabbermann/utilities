@@ -15,7 +15,7 @@
 ```
 7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
 
-7zip/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor.
+7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor.
 
 Compressing
    -c={type} --compress={type}    -   enter directory A to compress all subdirectories of A into new archives in A.
@@ -23,7 +23,7 @@ Compressing
 
 Decompressing
    -x -e --extract                -   enter directory A to extract all archives of A into subdirectories in A.
-   -e={type} --extract={type}     "-x -e --extract" will extract ALL archives. Pick a type with "-e={type}" or "--extract={type}" .
+   -e={type} --extract={type}     Extract only one type with "-e={type}" or "--extract={type}" .
    type={ 7z, zip, rar, zstd }
 
 Removing
@@ -48,4 +48,5 @@ Examples:
    7zSubComp -v .      View subdirectories and archives under current directory "." .
 
    "." above can be replaced with any directory. Not providing one will ask you for one.
+
 ```

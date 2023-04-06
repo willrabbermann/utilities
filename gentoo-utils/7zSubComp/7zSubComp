@@ -314,25 +314,25 @@ case $1 in
     "h"|"-h"|"-help"|"--help")
         echo -e "${CYAN}7zSubComp ${BLUE}[ -c [-x -e] -r -v ] [ -y ] [directory A]${NOC}"
         echo
-        echo -e "7zip/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor."
+        echo -e "7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor."
         echo
         echo -e "Compressing"
         echo -e "   ${BLUE}-c=${NOC}{type}${BLUE} --compress={${NOC}type${BLUE}}${NOC}    -   enter directory A to compress all subdirectories of A into new archives in A."
-        echo 	"   type={ 7z, zstd }                  Verifies archive integrity after each archive creation."
+        echo    "   type={ 7z, zstd }                  Verifies archive integrity after each archive creation."
         echo
         echo -e "Decompressing"
         echo -e "   ${BLUE}-x -e --extract${NOC}                -   enter directory A to extract all archives of A into subdirectories in A."
-        echo -e "   ${BLUE}-e=${NOC}{type}${BLUE} --extract=${NOC}{type}     \"-x -e --extract\" will extract ALL archives. Pick a type with \"-e={type}\" or \"--extract={type}\" ."
-		echo    "   type={ 7z, zip, rar, zstd }"
-		echo
-		echo -e "Removing"
-		echo -e "   ${BLUE}-r --remove${NOC}             -   enter directory A to remove only subdirectories under A."
-		echo
-		echo    "Viewing"
-		echo -e "   ${BLUE}-v --view${NOC}               -   enter directory A to view size info and all subdirectories and archives of A."
+        echo -e "   ${BLUE}-e=${NOC}{type}${BLUE} --extract=${NOC}{type}     Extract only one type with \"-e={type}\" or \"--extract={type}\" ."
+        echo    "   type={ 7z, zip, rar, zstd }"
         echo
-		echo    "Other"
-		echo -e "   ${BLUE}-y --yes${NOC}                -   confirm without asking."
+        echo -e "Removing"
+        echo -e "   ${BLUE}-r --remove${NOC}             -   enter directory A to remove only subdirectories under A."
+        echo
+        echo    "Viewing"
+        echo -e "   ${BLUE}-v --view${NOC}               -   enter directory A to view size info and all subdirectories and archives of A."
+        echo
+        echo    "Other"
+        echo -e "   ${BLUE}-y --yes${NOC}                -   confirm without asking."
         echo
         echo -e "Examples:"
         echo        
