@@ -312,16 +312,16 @@ fi
 
 case $1 in
     "h"|"-h"|"-help"|"--help")
-        echo -e "${CYAN}7zSubComp ${BLUE}[ -c [-x -e] -r -v ] [ -y ] [directory A]${NOC}"
+        echo -e "${CYAN}7zSubComp ${BLUE}[ [ -c=${NOC}{type}${BLUE} ] [-e -e=${NOC}{type}${BLUE} ] -r -v ] [ -y ] [directory A]${NOC}"
         echo
         echo -e "7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor."
         echo
         echo -e "Compressing"
-        echo -e "   ${BLUE}-c=${NOC}{type}${BLUE} --compress={${NOC}type${BLUE}}${NOC}    -   enter directory A to compress all subdirectories of A into new archives in A."
+        echo -e "   ${BLUE}-c=${NOC}{type}${BLUE} --compress=${NOC}{type}${NOC}    -   enter directory A to compress all subdirectories of A into new archives in A."
         echo    "   type={ 7z, zstd }                  Verifies archive integrity after each archive creation."
         echo
         echo -e "Decompressing"
-        echo -e "   ${BLUE}-x -e --extract${NOC}                -   enter directory A to extract all archives of A into subdirectories in A."
+        echo -e "   ${BLUE}-e --extract${NOC}                  -   enter directory A to extract all archives of A into subdirectories in A."
         echo -e "   ${BLUE}-e=${NOC}{type}${BLUE} --extract=${NOC}{type}         Extract only one type with \"-e={type}\" or \"--extract={type}\" ."
         echo    "   type={ 7z, zip, rar, zstd }"
         echo
@@ -338,8 +338,8 @@ case $1 in
         echo        
         echo -e "   7zSubComp -c=7z .       -   Compress all subdirectories under current directory \".\" into 7z archives."
         echo
-        echo -e "   7zSubComp -x .          -   Extract all archives under current directory \".\" ."
-        echo -e "   7zSubComp -x=zstd .     -   Extract all zstd archives under current directory \".\" ."
+        echo -e "   7zSubComp -e .          -   Extract all archives under current directory \".\" ."
+        echo -e "   7zSubComp -e=zstd .     -   Extract all zstd archives under current directory \".\" ."
         echo 
         echo -e "   7zSubComp -r -y .       -   Remove only subdirectories under current directory \".\""
         echo -e "                               without asking for confirmation. With \"7zSubComp -r -y\" it will still ask once."
@@ -410,7 +410,7 @@ case $1 in
 		print_info REMOVE
 		close_info_header
 	;;
-	"x"|"e"|"-x"|"-e"|"--extract"|"-e=7z"|"-e=zip"|"-e=rar"|"-e=zstd"|"--extract=7z"|"--extract=zip"|"--extract=rar"|"--extract=zstd") 
+	"e"|"-e"|"--extract"|"-e=7z"|"-e=zip"|"-e=rar"|"-e=zstd"|"--extract=7z"|"--extract=zip"|"--extract=rar"|"--extract=zstd") 
 		if [[ $1 =~ "=" ]] 
 		then
 			EXTRACT_TYPE=$(echo $1 | cut -d'=' -f2)

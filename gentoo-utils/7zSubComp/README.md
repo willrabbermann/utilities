@@ -12,7 +12,7 @@
 7zSubComp will compress subdirectories into either 7zip ```.7z``` or ZSTD ```.tar.zstd``` archives.
 
 ```
-7zSubComp [ -c [-x -e] -r -v ] [ -y ] [directory A]
+7zSubComp [ [ -c={type} ] [-e -e={type} ] -r -v ] [ -y ] [directory A]
 
 7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor.
 
@@ -21,7 +21,7 @@ Compressing
    type={ 7z, zstd }                  Verifies archive integrity after each archive creation.
 
 Decompressing
-   -x -e --extract                -   enter directory A to extract all archives of A into subdirectories in A.
+   -e --extract                  -   enter directory A to extract all archives of A into subdirectories in A.
    -e={type} --extract={type}         Extract only one type with "-e={type}" or "--extract={type}" .
    type={ 7z, zip, rar, zstd }
 
@@ -38,8 +38,8 @@ Examples:
 
    7zSubComp -c=7z .       -   Compress all subdirectories under current directory "." into 7z archives.
 
-   7zSubComp -x .          -   Extract all archives under current directory "." .
-   7zSubComp -x=zstd .     -   Extract all zstd archives under current directory "." .
+   7zSubComp -e .          -   Extract all archives under current directory "." .
+   7zSubComp -e=zstd .     -   Extract all zstd archives under current directory "." .
 
    7zSubComp -r -y .       -   Remove only subdirectories under current directory "."
                                without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
