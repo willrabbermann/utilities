@@ -22,7 +22,7 @@ Compressing
 
 Decompressing
    -e --extract                  -   enter directory A to extract all archives of A into subdirectories in A.
-   -e={type} --extract={type}         Extract only one type with "-e={type}" or "--extract={type}" .
+   -e={type} --extract={type}        Extract only one type with "-e={type}" or "--extract={type}" .
    type={ 7z, zip, rar, zstd }
 
 Removing
