@@ -8,14 +8,9 @@ BLUE='\033[0;34m'
 CYAN='\033[00;36m'
 NOC='\033[0m'
 
-# get MiB free memory (not including swap)
-get_mem_free()
-{
-	MEMFREE=$(free -m | grep Mem: | xargs)
-	MEMFREE=$(echo $MEMFREE | cut -d' ' -f4)
-}
-
-# get max thread jobs (CPU THREADS)
+# get MiB free memory
+MEMFREE=$(free -m | grep Mem: | xargs | cut -d' ' -f4)
+# get max thread jobs
 tj=$(cat /proc/cpuinfo	| grep siblings | sort -u | awk -F ": " '{print $NF}')
 
 # options used to compress
