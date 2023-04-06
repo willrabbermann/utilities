@@ -7,7 +7,7 @@
 ### gentoo dependencies
 ```app-arch/p7zip rar``` use flag is required if you want to be able to extract ```rar``` files, but it is proprietary.
 
-7zSubComp will extract 7z, zip, or rar archives.
+7zSubComp will extract 7z, zip, rar, or zstd archives.
 
 7zSubComp will compress subdirectories into either 7zip ```.7z``` or ZSTD ```.tar.zstd``` archives.
 
