@@ -5,10 +5,10 @@ Miscellaneous libs and utilities.
 ### buildkernel
 Build the Linux kernel from source. Clean up old kernels. Change kernel configurations.
 ### 7zSubComp
-7zSubComp stands for 7zip Subdirectory Compression tool. 
-It verifies the integrity of archives after creating them with either LZMA Ultra or ZSTD Ultra compression.
-7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information,
-accurate size differential after operations, and removal of subdirectories under a master directory.
+7zSubComp can perform compression, extraction, viewing the directory 
+structure, accurate size information, accurate size differential after 
+operations, and removal of subdirectories under a master directory. 
+Retain full directory paths when extracting from 7z, zip, rar, or zstd.
 ### toggledistcc
 Edits portage make.conf to enable / disable distcc options and use sane MAKEOPTS.
 ### toggledhcp
