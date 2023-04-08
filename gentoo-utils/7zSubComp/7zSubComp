@@ -222,7 +222,7 @@ close_info_header()
 print_info()
 {
 	SIZE_ARCHIVES=0
-	if [[ -n $(ls -1 | egrep ".7z|.zip|.rar") ]]
+	if [[ -n $(ls -1 | egrep ".7z|.zip|.rar|.tar.zst") ]]
 	then
 		[[ -n $(ls -1 | grep ".7z") ]] && 
 			SIZE_ARCHIVES=$(du -bc *.7z | grep total | cut -f1)	
@@ -230,6 +230,8 @@ print_info()
 			SIZE_ARCHIVES=$(echo "$(du -bc *.zip | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
 		[[ -n $(ls -1 | grep ".rar") ]] && 
 			SIZE_ARCHIVES=$(echo "$(du -bc *.rar | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
+		[[ -n $(ls -1 | grep ".tar.zst") ]] && 
+			SIZE_ARCHIVES=$(echo "$(du -bc *.tar.zst | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
 	fi
 	
 	if [[ -n $(ls -dp1 * | grep /) ]]
@@ -295,7 +297,7 @@ check_archives()
 	do
 		cd "$MASTER_PATH"
 		SED_EXP=$b'p'
-		x=$(ls -1 | egrep ".7z|.zip|.rar" | sed -n "$SED_EXP")	
+		x=$(ls -1 | egrep ".7z|.zip|.rar|.tar.zst" | sed -n "$SED_EXP")	
 		check_illegal_chars "$x"
 		((b++))
 	done
