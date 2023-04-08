@@ -15,6 +15,7 @@ View current directory structure, archives, and size differential information wi
 
 ### gentoo dependencies
 ```app-arch/p7zip rar``` use flag is required if you want to be able to extract ```rar``` files, however, it is proprietary.
+
 Other dependencies required:
 ```bash``` ```grep``` ```egrep``` ```bc``` ```app-arch/zstd``` 
 
