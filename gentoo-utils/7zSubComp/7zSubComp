@@ -15,12 +15,12 @@ tj=$(cat /proc/cpuinfo	| grep siblings | sort -u | awk -F ": " '{print $NF}')
 
 # options used to compress
 DEFAULT_7zCOMPRESS_EXP="time 7z a -t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
-DEFAULT_ZSTDCOMPRESS_EXP="time tar -I 'zstd -v -T$tj -M$(echo "$MEMFREE * 1/2" | bc) --ultra -22' -cf"
+DEFAULT_ZSTDCOMPRESS_EXP="time tar -I 'zstd -v -T$tj -M$(echo "$MEMFREE * 2/3" | bc) --ultra -22' -cf"
 # options used to extract
 DEFAULT_7zEXTRACT_EXP="7z x -y"
 DEFAULT_ZIPEXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
 DEFAULT_RAREXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
-DEFAULT_ZSTDEXTRACT_EXP="time tar -I 'zstd -dv -M$(echo "$MEMFREE * 1/2" | bc) --long=31' -xvf"
+DEFAULT_ZSTDEXTRACT_EXP="time tar -I 'zstd -dv -M$(echo "$MEMFREE * 2/3" | bc) --long=31' -xvf"
 
 accurate_sizeof()
 # $1 = bytes input
