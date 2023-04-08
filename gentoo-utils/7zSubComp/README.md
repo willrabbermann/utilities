@@ -5,7 +5,7 @@ Made for Gentoo Linux.
 
 7zSubComp can preform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. 
 
-Retain full directory paths when compressing/extracting from/to 7z, zip, rar, and zstd.
+Retain full directory paths when compressing/extracting to/from 7z, zip, rar, and zstd.
 
 Create either 7z or zstd archives with ```--compress=7z``` or ```--compress=zstd```
 Extract with ```--extract``` or ```--extract={type}``` to extract only a type of archive.
