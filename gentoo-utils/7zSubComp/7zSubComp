@@ -10,7 +10,7 @@ NOC='\033[0m'
 
 # get MiB free memory
 MEMFREE=$(free -m | grep Mem: | xargs | cut -d' ' -f4)
-MEMFREE=$(echo "$MEMFREE * 3/4" | bc) 
+MEMFREE=$(echo "$MEMFREE * 7/10" | bc) 
 # zstd does not like using > 2048 MiB during extractions
 if [[ 1 = $(echo "$MEMFREE > 2048" | bc) ]] 
 then
