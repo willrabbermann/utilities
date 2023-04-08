@@ -2,7 +2,7 @@
 
 ## 7zSubComp stands for 7zip Subdirectory Compression tool
 
-7zSubComp can perform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. 
+7zSubComp can preform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. 
 
 Retain full directory paths when extracting from 7z, zip, rar, and zstd.
 
