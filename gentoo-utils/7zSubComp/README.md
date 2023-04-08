@@ -8,6 +8,7 @@ Made for Gentoo Linux.
 Retain full directory paths when compressing/extracting to/from 7z, zip, rar, and zstd.
 
 Create either 7z or zstd archives with ```--compress=7z``` or ```--compress=zstd```
+
 Extract all archives with ```--extract``` or ```--extract={type}``` to extract only a single type of archive.
 
 View current directory structure, archives, and size differential information with ```--view```.
