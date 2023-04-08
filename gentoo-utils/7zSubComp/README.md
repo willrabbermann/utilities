@@ -1,5 +1,5 @@
 # 7zSubComp
-version 1.0
+version 1.01
 
 ## 7zSubComp stands for 7zip Subdirectory Compression tool
 Made for Gentoo Linux.
