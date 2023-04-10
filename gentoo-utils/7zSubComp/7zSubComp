@@ -36,6 +36,7 @@ DEFAULT_RAREXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
 DEFAULT_ZSTDEXTRACT_EXP="time tar -I 'zstd -dv -M$ZSTD_EXTRACT_MEMFREE --long=31' -xvf"
 
 sig_figs()
+# significant figures to 3 decimal places on $SIZE_VAL
 {
 	MAX_FIG=3
 	zero_count=0
