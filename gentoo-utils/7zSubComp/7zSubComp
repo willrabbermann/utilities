@@ -40,7 +40,6 @@ sig_figs()
 	MAX_FIG=3
 	zero_count=0
 	dec_flag=0
-	unit=0
 	val_len=${#SIZE_VAL}
 	for ((i = 0 ; i < $val_len; i++)); do
 		c=${SIZE_VAL:$i:1}
