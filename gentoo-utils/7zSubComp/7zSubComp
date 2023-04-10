@@ -722,7 +722,7 @@ case $1 in
 
 		cd "$MASTER_PATH"
 		OVERWRITE_FLAG=0
-		[[ -n $(ls -1Ap | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
+		[[ -n $(ls -1Ap | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l) || TARGETS_NO=0
 		[[ 0 = $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to compress.${NOC}" && exit
 
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
