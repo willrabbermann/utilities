@@ -14,6 +14,8 @@ Extract all archives with ```--extract``` or ```--extract={type}``` to extract o
 
 View current directory structure, archives, and size differential information with ```--view```.
 
+7zSubComp always asks the user if they want to overwrite the subdirectory (extracting) or archive (compressing) unless the ```--yes``` operator is  given.
+
 ### gentoo dependencies
 ```app-arch/p7zip rar``` use flag is required if you want to be able to extract ```rar``` files, however, it is proprietary.
 
