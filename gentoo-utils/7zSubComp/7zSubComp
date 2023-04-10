@@ -30,10 +30,31 @@ tj=$(cat /proc/cpuinfo	| grep siblings | sort -u | awk -F ": " '{print $NF}')
 DEFAULT_7zCOMPRESS_EXP="time 7z a -t7z -m0=lzma -mx=9 -mfb=128 -md=32m -ms=on"
 DEFAULT_ZSTDCOMPRESS_EXP="time tar -I 'zstd -v -T$tj -M$MEMFREE --ultra -22' -cf"
 # options used to extract
-DEFAULT_7zEXTRACT_EXP="7z x -y"
+DEFAULT_7zEXTRACT_EXP="time 7z x -y"
 DEFAULT_ZIPEXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
 DEFAULT_RAREXTRACT_EXP=$DEFAULT_7zEXTRACT_EXP
 DEFAULT_ZSTDEXTRACT_EXP="time tar -I 'zstd -dv -M$ZSTD_EXTRACT_MEMFREE --long=31' -xvf"
+
+sig_figs()
+{
+	MAX_FIG=3
+	zero_count=0
+	dec_flag=0
+	unit=0
+	val_len=${#SIZE_VAL}
+	for ((i = 0 ; i < $val_len; i++)); do
+		c=${SIZE_VAL:$i:1}
+		[[ 1 = $dec_flag ]]
+		[[ 1 = $dec_flag && 0 = $c ]] && zero_count=$((zero_count + 1))
+		[[ '.' = $c ]] && dec_flag=1
+		[[ "123456789" =~ $c ]] && zero_count=0
+		if (($zero_count >= $MAX_FIG))
+		then
+			SIZE_VAL=${SIZE_VAL:0:i-MAX_FIG+1}
+			break
+		fi
+	done
+}
 
 accurate_sizeof()
 # $1 = bytes input
@@ -65,6 +86,7 @@ accurate_sizeof()
 	
 	SIZE_VAL=$(echo "$val / 10^$MAGNITUDE" | bc -l) 
 	[[ 1 = $neg ]] && SIZE_VAL=$(echo "$SIZE_VAL * -1" | bc -l)
+	sig_figs
 	echo -e "$SIZE_VAL $SIZE_T"
 }
 
@@ -555,17 +577,20 @@ case $1 in
 			if [[ "ALL" == $EXTRACT_TYPE || "7z" == $EXTRACT_TYPE ]]
 			then TARGETS_NO=$(echo "$(ls -1 *.7z | wc -l) + $TARGETS_NO" | bc -l)
 			fi
-		elif [[ -n $(ls -1 | egrep ".zip") ]]
+		fi
+		if [[ -n $(ls -1 | egrep ".zip") ]]
 		then 
 			if [["ALL" == $EXTRACT_TYPE || "zip" == $EXTRACT_TYPE ]]
 			then TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
 			fi
-		elif [[ -n $(ls -1 | egrep ".rar") ]] 
+		fi
+		if [[ -n $(ls -1 | egrep ".rar") ]] 
 		then
 			if [[ "ALL" == $EXTRACT_TYPE || "rar" == $EXTRACT_TYPE ]]
 			then TARGETS_NO=$(echo "$(ls -1 *.rar | wc -l) + $TARGETS_NO" | bc -l) 
 			fi
-		elif [[ -n $(ls -1 | egrep ".tar.zst") ]]
+		fi
+		if [[ -n $(ls -1 | egrep ".tar.zst") ]]
 		then 
 			if [[ "ALL" == $EXTRACT_TYPE || "zstd" == $EXTRACT_TYPE ]]
 			then TARGETS_NO=$(echo "$(ls -1 *.tar.zst | wc -l) + $TARGETS_NO" | bc -l)
