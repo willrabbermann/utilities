@@ -21,40 +21,44 @@ Other dependencies required:
 ```bash``` ```grep``` ```egrep``` ```bc``` ```app-arch/zstd``` 
 
 ```
-7zSubComp [ [ -c={type} ] [-e -e={type} ] -r -v ] [ -y ] [directory A]
+7zSubComp [ [ -c={type} ] [-e -e={type} ] -r -v ] [directory A] [ -o ] [directory B] [ -y ]
+Release version: 1.105
 
 7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor.
 
 Compressing
-   -c={type} --compress={type}    -   enter directory A to compress all subdirectories of A into new archives in A.
+   -c={type} --compress={type}    -   Enter directory A to compress all subdirectories of A into new archives in A.
    type={ 7z, zstd }                  Verifies archive integrity after each archive creation.
 
 Decompressing
-   -e --extract                  -   enter directory A to extract all archives of A into subdirectories in A.
-   -e={type} --extract={type}        Extract only one type with "-e={type}" or "--extract={type}" .
+   -e --extract -x                        -   Enter directory A to extract all archives of A into subdirectories in A.
+   -x={type} -e={type} --extract={type}   -   Extract only {type}.
    type={ 7z, zip, rar, zstd }
 
 Removing
-   -r --remove             -   enter directory A to remove only subdirectories under A.
+   -r --remove             -   Enter directory A to remove only subdirectories under A.
 
 Viewing
-   -v --view               -   enter directory A to view size info and all subdirectories and archives of A.
+   -v --view               -   Enter directory A to view size info and all subdirectories and archives of A.
 
 Other
-   -y --yes                -   confirm without asking.
+   -y --yes                -   Confirm without asking.
+   -o {directory B}        -   Set the output directory for compressing or extracting to directory B.
 
 Examples:
 
-   7zSubComp -c=7z .       -   Compress all subdirectories under current directory "." into 7z archives.
+   7zSubComp -c=7z .             -   Compress all subdirectories under current directory "." into 7z archives.
+   7zSubComp -c=7z . -o ~/test   -   Compress all subdirectories under current directory "." into 7z archives inside "~/test".
 
-   7zSubComp -e .          -   Extract all archives under current directory "." .
-   7zSubComp -e=zstd .     -   Extract all zstd archives under current directory "." .
+   7zSubComp -e .                -   Extract all archives under current directory "." .
+   7zSubComp -e=zstd .           -   Extract all zstd archives under current directory "." .
+   7zSubComp -x . -o ~/test      -   Extract all archives under current directory "." to "~/test".
 
-   7zSubComp -r -y .       -   Remove only subdirectories under current directory "."
-                               without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
+   7zSubComp -r -y .             -   Remove only subdirectories under current directory "."
+                                     without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
 
-   7zSubComp -v .          -   View subdirectories and archives under current directory "." .
+   7zSubComp -v .                -   View subdirectories and archives under current directory "." .
 
    "." above can be replaced with any directory. Not providing one will ask you for one.
 
-```
+ ```
