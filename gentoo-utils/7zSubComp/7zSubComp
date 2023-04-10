@@ -40,13 +40,11 @@ sig_figs()
 {
 	MAX_FIG=3
 	zero_count=0
-	dec_flag=0
-	val_len=${#SIZE_VAL}
-	for ((i = 0 ; i < $val_len; i++)); do
+	decimal_flag=0
+	for ((i = 0 ; i < ${#SIZE_VAL}; i++)); do
 		c=${SIZE_VAL:$i:1}
-		[[ 1 = $dec_flag ]]
-		[[ 1 = $dec_flag && 0 = $c ]] && zero_count=$((zero_count + 1))
-		[[ '.' = $c ]] && dec_flag=1
+		[[ 1 = $decimal_flag && 0 = $c ]] && zero_count=$((zero_count + 1))
+		[[ '.' = $c ]] && decimal_flag=1
 		[[ "123456789" =~ $c ]] && zero_count=0
 		if (($zero_count >= $MAX_FIG))
 		then
