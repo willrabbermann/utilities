@@ -4,9 +4,6 @@ Miscellaneous libs and utilities.
 ## gentoo-utils
 ### buildkernel
 Build the Linux kernel from source. Clean up old kernels. Change kernel configurations.
-### 7zSubComp
-7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor.
-Retain full directory paths when extracting from 7z, zip, rar, or zstd.
 ### toggledistcc
 Edits portage make.conf to enable / disable distcc options and use sane MAKEOPTS.
 ### toggledhcp
