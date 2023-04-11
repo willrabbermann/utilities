@@ -234,7 +234,7 @@ begin_info_header()
 {
 	echo
 	bar
-	echo -e "${BLUE}Information${NOC}"
+	echo Information
 	bar
 }
 
