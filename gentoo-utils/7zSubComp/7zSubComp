@@ -606,10 +606,6 @@ case $1 in
 		case $COMPRESS_TYPE in
 			7z)
 			;;
-			zip)
-			;;
-			rar)
-			;;
 			zstd)
 			;;
 			*)
