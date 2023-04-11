@@ -1,6 +1,6 @@
 #!/bin/bash
 # 7zip subdirectory compressor and subdirectory archive extractor.
-RELEASE_VERSION="1.07"
+RELEASE_VERSION="1.08"
 
 # Color definitions
 RED='\033[0;31m'
@@ -37,7 +37,7 @@ DEFAULT_ZSTDEXTRACT_EXP="time tar -I 'zstd -dv -M$ZSTD_EXTRACT_MEMFREE --long=31
 
 
 sig_figs()
-# significant figures to 3 decimal places on $SIZE_VAL
+# significant figures to 3 subsequent zeros on $SIZE_VAL
 {
 	MAX_FIG=3
 	zero_count=0
@@ -155,7 +155,7 @@ print_archives()
 
 print_subdirectories()
 {
-	[[ -n $(ls -dp1 * | grep /) ]] &&
+	[[ -n $(ls -1Ap | grep /) ]] &&
 		echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
 }
 
@@ -223,7 +223,7 @@ check_master_path()
 bar()
 {
 	echo -ne "${BLUE}"
-	for ((i = 0; i < 37; i++ ));
+	for ((b = 0; b < 37; b++ ));
 	do 
 			echo -n "--"
 	done
@@ -258,7 +258,7 @@ print_info()
 			SIZE_ARCHIVES=$(echo "$(du -bc *.tar.zst | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
 	fi
 	
-	if [[ -n $(ls -dp1 * | grep /) ]]
+	if [[ -n $(ls -1Ap | grep /) ]]
 	then
 		SIZE_SUBDIR=$(du -bc */ | grep total | cut -f1)
 	else
@@ -349,22 +349,22 @@ case $1 in
         echo -e "7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor."
         echo
         echo -e "Compressing"
-        echo -e "   ${BLUE}-c=${NOC}{type}${BLUE} --compress=${NOC}{type}${NOC}    -   enter directory A to compress all subdirectories of A into new archives in A."
+        echo -e "   ${BLUE}-c=${NOC}{type}${BLUE} --compress=${NOC}{type}${NOC}    -   Enter directory A to compress all subdirectories of A into new archives in A."
         echo    "   type={ 7z, zstd }                  Verifies archive integrity after each archive creation."
         echo
         echo -e "Decompressing"
-        echo -e "   ${BLUE}-e --extract${NOC}                  -   enter directory A to extract all archives of A into subdirectories in A."
-        echo -e "   ${BLUE}-e=${NOC}{type}${BLUE} --extract=${NOC}{type}        Extract only one type with \"-e={type}\" or \"--extract={type}\" ."
+        echo -e "   ${BLUE}-e -x --extract ${NOC}                     -   Enter directory A to extract all archives of A into subdirectories in A."
+        echo -e "   ${BLUE}-x=${NOC}{type}${BLUE} -e=${NOC}{type}${BLUE} --extract=${NOC}{type}     Extract only one type with \"-e={type}\" or \"--extract={type}\" ."
         echo    "   type={ 7z, zip, rar, zstd }"
         echo
         echo -e "Removing"
-        echo -e "   ${BLUE}-r --remove${NOC}             -   enter directory A to remove only subdirectories under A."
+        echo -e "   ${BLUE}-r --remove${NOC}             -   Enter directory A to remove only subdirectories under A."
         echo
         echo    "Viewing"
-        echo -e "   ${BLUE}-v --view${NOC}               -   enter directory A to view size info and all subdirectories and archives of A."
+        echo -e "   ${BLUE}-v --view${NOC}               -   Enter directory A to view size info and all subdirectories and archives of A."
         echo
         echo    "Other"
-        echo -e "   ${BLUE}-y --yes${NOC}                -   confirm without asking."
+        echo -e "   ${BLUE}-y --yes${NOC}                -   Confirm without asking."
         echo
         echo -e "Examples:"
         echo        
@@ -405,7 +405,7 @@ case $1 in
 		
 		check_master_path ALL
 
-		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
+		[[ -n $(ls -1Ap | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
 		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to remove.${NOC}" && exit
 
 		echo -e "\n${GREEN}$TARGETS_NO${CYAN} target subdirectories found."	
@@ -442,10 +442,25 @@ case $1 in
 		print_info REMOVE
 		close_info_header
 	;;
-	"e"|"-e"|"--extract"|"-e=7z"|"-e=zip"|"-e=rar"|"-e=zstd"|"--extract=7z"|"--extract=zip"|"--extract=rar"|"--extract=zstd") 
+	"x"|"-x"|"-x="*|\
+	"e"|"-e"|"--extract"|"-e="*|"--extract="*)
 		if [[ $1 =~ "=" ]] 
 		then
 			EXTRACT_TYPE=$(echo $1 | cut -d'=' -f2)
+			case $EXTRACT_TYPE in
+				7z)
+				;;
+				zip)
+				;;
+				rar)
+				;;
+				zstd)
+				;;
+				*)
+					echo -e "${RED}\"${NOC}$EXTRACT_TYPE${RED}\" is not a valid file type for extraction.${NOC}"
+					exit 1
+				;;
+			esac
 		else
 			EXTRACT_TYPE=ALL
 		fi
@@ -459,16 +474,23 @@ case $1 in
 
 		check_master_path ALL
 		TARGETS_NO=0
-		
-		[[ -n $(ls -1 | egrep ".7z") && "ALL" == $EXTRACT_TYPE || "7z" == $EXTRACT_TYPE ]] && 
-			TARGETS_NO=$(ls -1 *.7z | wc -l)
-		[[ -n $(ls -1 | egrep ".zip") && "ALL" == $EXTRACT_TYPE || "zip" == $EXTRACT_TYPE ]] && 
-			TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
-		[[ -n $(ls -1 | egrep ".rar") && "ALL" == $EXTRACT_TYPE || "rar" == $EXTRACT_TYPE ]] && 
-			TARGETS_NO=$(echo "$(ls -1 *.rar | wc -l) + $TARGETS_NO" | bc -l)
-		[[ -n $(ls -1 | egrep ".tar.zst") && "ALL" == $EXTRACT_TYPE || "zstd" == $EXTRACT_TYPE ]] && 
-			TARGETS_NO=$(echo "$(ls -1 *.tar.zst | wc -l) + $TARGETS_NO" | bc -l)
-		[[ -z $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"$MASTER_PATH\" to extract.${NOC}" && exit
+		if [[ "ALL" == $EXTRACT_TYPE || "7z" == $EXTRACT_TYPE ]]
+		then 
+			[[ -n $(ls -1 | egrep ".7z") ]] && TARGETS_NO=$(ls -1 *.7z | wc -l)
+		fi
+		if [[ "ALL" == $EXTRACT_TYPE || "zip" == $EXTRACT_TYPE ]]
+		then
+			[[ -n $(ls -1 | egrep ".zip") ]] && TARGETS_NO=$(echo "$(ls -1 *.zip | wc -l) + $TARGETS_NO" | bc -l)
+		fi
+		if [[ "ALL" == $EXTRACT_TYPE || "rar" == $EXTRACT_TYPE ]]
+		then
+			[[ -n $(ls -1 | egrep ".rar") ]] && TARGETS_NO=$(echo "$(ls -1 *.rar | wc -l) + $TARGETS_NO" | bc -l)
+		fi
+		if [[ "ALL" == $EXTRACT_TYPE || "zstd" == $EXTRACT_TYPE ]]
+		then
+			[[ -n $(ls -1 | egrep ".tar.zst") ]] && TARGETS_NO=$(echo "$(ls -1 *.tar.zst | wc -l) + $TARGETS_NO" | bc -l)
+		fi
+		[[ 0 = $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"${NOC}$MASTER_PATH${RED}\" to extract.${NOC}" && exit
 		
 		EXT_EXP=".7z|.zip|.rar|.tar.zst"
 		[[ "ALL" != $EXTRACT_TYPE ]] && EXT_EXP=$EXTRACT_TYPE
@@ -479,7 +501,7 @@ case $1 in
 		OVERWRITE_FLAG=0
 		if [[ -z $YES_ALL ]] 
 		then
-			[[ -z $(ls -pA | grep /) ]] && NEW_WRITE=0
+			[[ -z $(ls -1Ap | grep /) ]] && NEW_WRITE=0
 			if [[ -z $NEW_WRITE ]] 
 			then
 				echo -e "\n${CYAN}Overwrite subdirectories?${NOC}"
@@ -578,8 +600,23 @@ case $1 in
 			close_info_header
 		fi		
 	;;	  
-	"-c=7z"|"-c=zstd"|"--compress=7z"|"--compress=zstd")
+	"-c="*|"--compress="*)
 		COMPRESS_TYPE=$(echo $1 | cut -d'=' -f2)
+		
+		case $COMPRESS_TYPE in
+			7z)
+			;;
+			zip)
+			;;
+			rar)
+			;;
+			zstd)
+			;;
+			*)
+				echo -e "${RED}\"${NOC}$COMPRESS_TYPE${RED}\" is not a valid file type for compression.${NOC}"
+				exit 1
+			;;
+		esac
 
 		if [[ -z $MASTER_PATH ]]
 		then
@@ -588,24 +625,25 @@ case $1 in
 			read -e -p ': ' MASTER_PATH
 		fi
 
-		OVERWRITE_FLAG=0
 		check_master_path ALL
-		[[ -n $(ls -dp1 * | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
-		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to compress.${NOC}" && exit
 
+		TARGETS_NO=0
+		[[ -n $(ls -1Ap | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
+		[[ 0 = $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"${NOC}$MASTER_PATH${RED}\" to compress.${NOC}" && exit
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
 		
 		[[ 7z = $COMPRESS_TYPE ]] && echo -e "\n${CYAN}Current 7z compression settings: ${NOC}$DEFAULT_7zCOMPRESS_EXP"
 		[[ zstd = $COMPRESS_TYPE ]] && echo -e "\n${CYAN}Current zstd compression settings: ${NOC}$DEFAULT_ZSTDCOMPRESS_EXP"
 		
+		OVERWRITE_FLAG=0
 		if [[ -z $YES_ALL ]] 
 		then
 			case $COMPRESS_TYPE in
 				7z)
-					[[ -z $(ls -A * | egrep ".7z") ]] && NEW_WRITE=0
+					[[ -z $(ls -1A | egrep ".7z") ]] && NEW_WRITE=0
 				;;
 				zstd)
-					[[ -z $(ls -A * | egrep ".tar.zst") ]] && NEW_WRITE=0
+					[[ -z $(ls -1A | egrep ".tar.zst") ]] && NEW_WRITE=0
 				;;
 			esac
 			if [[ -z $NEW_WRITE ]] 
