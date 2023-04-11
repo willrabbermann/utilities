@@ -521,7 +521,7 @@ case $1 in
 				SED_EXP=$i'p'
 				x=$(ls -1 | egrep $EXT_EXP | sed -n "$SED_EXP")
 				
-				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
+				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x \t${NOC}"
 				file_size=$(du -bs * | grep "$x")
 				accurate_sizeof $file_size
 				
@@ -664,7 +664,7 @@ case $1 in
 				x=$(ls -d1 */ | sed -n "$SED_EXP")
 				x=${x::-1}
 				
-				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x\t${NOC}"
+				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x \t${NOC}"
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
 				# check for existing archives
