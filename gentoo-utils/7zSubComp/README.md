@@ -21,7 +21,7 @@ View current directory structure, archives, and size differential information wi
 
 ```app-arch/zstd``` and ```app-arch/tar``` is required if you want to extract or compress archives as .tar.zst (zstd) archives. 
 
-```bash``` ```grep``` ```egrep``` ```bc``` ```du```  
+GNU Core Utilities should be installed, especially: ```bash``` ```grep``` ```egrep``` ```bc``` ```du``` ```wc```.
 
 ```
 7zSubComp [ [ -c={type} ] [-e -e={type} ] -r -v ] [ -y ] [directory A]
