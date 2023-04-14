@@ -19,7 +19,7 @@ View current directory structure, archives, and size differential information wi
 ### Linux (Gentoo) dependencies
 ```app-arch/p7zip rar``` use flag is required if you want to be able to extract .rar archives, however, it is proprietary.
 
-```app-arch/zstd``` and ```app-arch/tar``` is required if you want to extract or compress archives as .tar.zst archives. 
+```app-arch/zstd``` and ```app-arch/tar``` is required if you want to extract or compress archives as .tar.zst (zstd) archives. 
 
 ```bash``` ```grep``` ```egrep``` ```bc``` ```du```  
 
