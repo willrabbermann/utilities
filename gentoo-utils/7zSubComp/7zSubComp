@@ -229,7 +229,7 @@ check_valid_path()
 	else
 		echo -e "${RED}Directory \"${NOC}$1${RED}\" does not exist.${NOC}" && exit 1
 	fi
-	cd $old_wd
+	cd "$old_wd"
 }
 
 check_master_path()
@@ -334,7 +334,7 @@ print_info()
 			accurate_sizeof $SIZE_MASTER	
 		;;
 	esac
-	cd $old_wd
+	cd "$old_wd"
 }
 
 check_overwrite_subdir_flag()
