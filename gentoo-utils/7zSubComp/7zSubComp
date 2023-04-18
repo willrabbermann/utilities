@@ -1,6 +1,6 @@
 #!/bin/bash
 # 7zip subdirectory compressor and subdirectory archive extractor.
-RELEASE_VERSION="1.08"
+RELEASE_VERSION="1.16"
 
 # Color definitions
 RED='\033[0;31m'
@@ -130,7 +130,6 @@ print_archives()
 {
 	TYPE=ALL
 	[[ -n $EXTRACT_TYPE ]] && TYPE=$EXTRACT_TYPE
-	[[ -n $COMPRESS_TYPE ]] && TYPE=$COMPRESS_TYPE
 	case $TYPE in
 		7z)
 			print_7z
@@ -159,25 +158,28 @@ print_subdirectories()
 		echo -e "\n\t${NOC}Subdirectories${BLUE}\n" && ls -d1 */
 }
 
-show_master_path()
+show_path_contents()
 {
-	echo -ne "${BLUE}"
-	case $1 in
-		ARCHIVES)
-			print_archives
-		;;
-		SUBDIRS)	
-			print_subdirectories
-		;;
-		ALL)
-			print_archives
-			print_subdirectories
-		;;
-	esac	
+	old_wd=$(pwd)
 
-	echo -ne "\n${NOC}$MASTER_PATH\t"
+	cd "$MASTER_PATH"
+	echo -ne "\n${CYAN}Master path: ${NOC}$MASTER_PATH\t"
 	SIZE_MASTER=$(du -bsc "$MASTER_PATH"/ | grep total | cut -f1)
 	accurate_sizeof $SIZE_MASTER
+	print_archives
+	print_subdirectories
+
+	if [[ -n $OUTPUT_PATH ]]
+	then
+		cd "$OUTPUT_PATH"
+		echo -ne "\n${CYAN}Output path: ${NOC}$OUTPUT_PATH\t"
+		SIZE_OUTPUT=$(du -bsc "$OUTPUT_PATH"/ | grep total | cut -f1)
+		accurate_sizeof $SIZE_OUTPUT
+		print_archives
+		print_subdirectories
+	fi
+
+	cd "$old_wd"
 }
 
 check_exit_status()
@@ -203,21 +205,41 @@ check_exit_status()
 	fi
 }
 
-check_master_path()
+check_valid_path()
+# $1 = path to check
+# $2 = path type
 {
-	if [[ -d $MASTER_PATH ]]
+	old_wd=$(pwd)
+	if [[ -d $1 ]]
 	then
-		if [[ -n $(echo $MASTER_PATH | cut -c 1 | grep /) ]]
+		if [[ -n $(echo $1 | cut -c 1 | grep /) ]]
 		then
-			cd "$MASTER_PATH"
-		else cd "$(pwd)/$MASTER_PATH"
+			cd "$1"
+		else cd "$(pwd)/$1"
 		fi
 		check_exit_status PATH
-		MASTER_PATH=$(pwd)
-		show_master_path $1
+		case $2 in
+			MASTER)
+				MASTER_PATH=$(pwd)
+			;;
+			OUTPUT)
+				OUTPUT_PATH=$(pwd)
+			;;
+		esac
 	else
-		echo -e "${RED}That directory does not exist.${NOC}" && exit 1
+		echo -e "${RED}Directory \"${NOC}$1${RED}\" does not exist.${NOC}" && exit 1
 	fi
+	cd $old_wd
+}
+
+check_master_path()
+{
+	check_valid_path $MASTER_PATH MASTER
+}
+
+check_output_path()
+{
+	check_valid_path $OUTPUT_PATH OUTPUT
 }
 
 bar()
@@ -244,7 +266,19 @@ close_info_header()
 }
 
 print_info()
+# $1 = option
 {
+	old_wd=$(pwd)
+
+	# print archives
+	case $1 in
+		VIEW|REMOVE|EXTRACT)
+			cd "$MASTER_PATH"
+		;;
+		COMPRESS)
+			cd "$OUTPUT_PATH"
+		;;
+	esac
 	SIZE_ARCHIVES=0
 	if [[ -n $(ls -1 | egrep ".7z|.zip|.rar|.tar.zst") ]]
 	then
@@ -257,7 +291,16 @@ print_info()
 		[[ -n $(ls -1 | grep ".tar.zst") ]] && 
 			SIZE_ARCHIVES=$(echo "$(du -bc *.tar.zst | grep total | cut -f1) + $SIZE_ARCHIVES" | bc -l)
 	fi
-	
+
+	# print directories
+	case $1 in
+		VIEW|REMOVE|COMPRESS)
+			cd "$MASTER_PATH"
+		;;
+		EXTRACT)
+			cd "$OUTPUT_PATH"
+		;;
+	esac
 	if [[ -n $(ls -1Ap | grep /) ]]
 	then
 		SIZE_SUBDIR=$(du -bc */ | grep total | cut -f1)
@@ -291,6 +334,18 @@ print_info()
 			accurate_sizeof $SIZE_MASTER	
 		;;
 	esac
+	cd $old_wd
+}
+
+check_overwrite_subdir_flag()
+{
+	if [[ 0 = $OVERWRITE_FLAG ]]
+	then
+		echo -e "${CYAN}Overwriting existing subdirectory...${NOC}"
+	else
+		echo -e "${CYAN}Not overwriting existing subdirectory, skipping...${NOC}"
+		EXTRACT_FLAG=1
+	fi
 }
 
 check_illegal_chars()
@@ -328,22 +383,68 @@ check_archives()
 	[[ -n $ILLEGAL_EXIT ]] && exit 1
 }
 
-if [[ -n $2 ]] 
-then
-	case $2 in
-		"y"|"-y"|"--yes")
-			[[ -n $3 ]] && MASTER_PATH=$3
-			YES_ALL=1
-		;;
-		*)
-			MASTER_PATH=$2
-		;;
-	esac
-fi
+chk_arg()
+# $1 = argument
+{
+	if [[ -n $1 ]] 
+	then
+		case $1 in
+			"y"|"-y"|"--yes")
+				YES_ALL=1
+			;;
+			"-o"|"--output")
+				OUTPUT_OPT=1
+				MASTER_OPT=0
+			;;
+			"-o="*|"--output="*)
+				OUTPUT_PATH=$(echo $1 | cut -d= -f2)
+				OUTPUT_OPT=0
+				MASTER_OPT=0
+				check_output_path
+			;;
+			"-r"|"--remove"|\
+			"-v"|"--view"|\
+			"-c="*|"--compress="*|\
+			"-x"|"-e"|"--extract"|"-x="*|"-e="*|"--extract="*)
+				MASTER_OPT=1
+				OUTPUT_OPT=0
+			;;
+			"-c"|"--create")
+				echo -e "${RED}Enter a compression file type.${NOC}"
+			;;
+			*)
+				if [[ 1 = $MASTER_OPT ]] 
+				then
+					MASTER_PATH=$1 && MASTER_OPT=0
+					check_master_path
+				elif [[ 1 = $OUTPUT_OPT ]]
+				then
+					OUTPUT_PATH=$1 && OUTPUT_OPT=0
+					check_output_path
+				fi
+			;;
+		esac
+	fi
+}
+
+check_args()
+{
+	chk_arg $1
+	chk_arg $2
+	chk_arg $3
+	chk_arg $4
+	chk_arg $5
+	chk_arg $6
+	chk_arg $7
+	chk_arg $8
+	chk_arg $9
+}
+
+check_args $1 $2 $3 $4 $5 $6 $7 $8 $9
 
 case $1 in
     "h"|"-h"|"-help"|"--help")
-        echo -e "${CYAN}7zSubComp ${BLUE}[ [ -c=${NOC}{type}${BLUE} ] [-e -e=${NOC}{type}${BLUE} ] -r -v ] [ -y ] [directory A]${NOC}"
+        echo -e "${CYAN}7zSubComp ${BLUE}[ [ -c=${NOC}{type}${BLUE} ] [-e -e=${NOC}{type}${BLUE} ] -r -v ] [ -y ] [${NOC}directory A${BLUE}] [ -o ] [${NOC}directory B${BLUE}]${NOC}"
         echo -e "Release version: $RELEASE_VERSION"
 	echo
         echo -e "7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor."
@@ -366,12 +467,17 @@ case $1 in
         echo    "Other"
         echo -e "   ${BLUE}-y --yes${NOC}                -   Confirm without asking."
         echo
+		echo -e "   ${BLUE}-o ${NOC}{PATH} ${BLUE}-o=${NOC}{PATH}                  -   Set the output path (relative or absolute)."
+        echo -e "   ${BLUE}--output ${NOC}{PATH} ${BLUE}--output=${NOC}{PATH}"
+        echo
         echo -e "Examples:"
         echo        
         echo -e "   7zSubComp -c=7z .       -   Compress all subdirectories under current directory \".\" into 7z archives."
         echo
         echo -e "   7zSubComp -e .          -   Extract all archives under current directory \".\" ."
         echo -e "   7zSubComp -e=zstd .     -   Extract all zstd archives under current directory \".\" ."
+        echo -e "   7zSubComp -e=zstd . -o extract"
+		echo -e "                           -   Extract all zstd archives under current directory \".\" to output directory \"extract\"."
         echo 
         echo -e "   7zSubComp -r -y .       -   Remove only subdirectories under current directory \".\""
         echo -e "                               without asking for confirmation. With \"7zSubComp -r -y\" it will still ask once."
@@ -387,11 +493,12 @@ case $1 in
 			echo -e "${CYAN}Enter a directory to view all subdirectories and archives.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH	
+			check_master_path
 		fi
-		check_master_path ALL
-
+		
+		show_path_contents
 		begin_info_header
-		print_info
+		print_info VIEW
 		close_info_header
 	;;
 	"r"|"-r"|"--remove")
@@ -401,12 +508,14 @@ case $1 in
 			\nThis will not remove anything other than subdirectories under this path.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
+			check_master_path
 		fi	
 		
-		check_master_path ALL
+		show_path_contents
+		cd "$MASTER_PATH"
 
 		[[ -n $(ls -1Ap | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
-		[[ -z $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"$MASTER_PATH\" to remove.${NOC}" && exit
+		[[ -z $TARGETS_NO ]] && echo -e "\n${RED}No subdirectories found inside \"${NOC}$MASTER_PATH${RED}\" to remove.${NOC}" && exit
 
 		echo -e "\n${GREEN}$TARGETS_NO${CYAN} target subdirectories found."	
 		
@@ -425,17 +534,18 @@ case $1 in
 				do
 					SED_EXP=$i'p'
 					x=$(ls -d1 */ | head -n1)
-					x=${x::-1}
 					echo -e "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t\"$x\"/${NOC}"
-					REMOVAL_EXP="rm -rv \"$x\"/"
+					REMOVAL_EXP="rm -rv \"$MASTER_PATH/$x\""
 
 					eval $REMOVAL_EXP
 					
 					((i++))
 				done
+			else
+				echo -e "${NOC}\nAborting."
+				exit
 			fi
 		fi
-		show_master_path ALL
 	
 		begin_info_header
 		echo -e "${GREEN}$TARGETS_NO${CYAN} subdirectories removed in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
@@ -446,7 +556,7 @@ case $1 in
 	"e"|"-e"|"--extract"|"-e="*|"--extract="*)
 		if [[ $1 =~ "=" ]] 
 		then
-			EXTRACT_TYPE=$(echo $1 | cut -d'=' -f2)
+			EXTRACT_TYPE=$(echo $1 | cut -d= -f2)
 			case $EXTRACT_TYPE in
 				7z)
 				;;
@@ -467,12 +577,15 @@ case $1 in
 		
 		if [[ -z $MASTER_PATH ]]
 		then
-			echo -e "${CYAN}Enter a directory to target and extract $COMPRESS_TYPE archives into separate subdirectories.${NOC}"
+			echo -e "${CYAN}Enter a directory to target and extract $EXTRACT_TYPE archives into separate subdirectories.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
+			check_master_path
 		fi
 
-		check_master_path ALL
+		show_path_contents
+		cd "$MASTER_PATH"
+
 		TARGETS_NO=0
 		if [[ "ALL" == $EXTRACT_TYPE || "7z" == $EXTRACT_TYPE ]]
 		then 
@@ -490,18 +603,21 @@ case $1 in
 		then
 			[[ -n $(ls -1 | egrep ".tar.zst") ]] && TARGETS_NO=$(echo "$(ls -1 *.tar.zst | wc -l) + $TARGETS_NO" | bc -l)
 		fi
-		[[ 0 = $TARGETS_NO ]] && echo -e "${RED}No archives found inside \"${NOC}$MASTER_PATH${RED}\" to extract.${NOC}" && exit
-		
+		[[ 0 = $TARGETS_NO ]] && echo -e "\n${RED}No archives found inside \"${NOC}$MASTER_PATH${RED}\" to extract.${NOC}" && exit
+
 		EXT_EXP=".7z|.zip|.rar|.tar.zst"
 		[[ "ALL" != $EXTRACT_TYPE ]] && EXT_EXP=$EXTRACT_TYPE
 		[[ "zstd" = $EXTRACT_TYPE ]] && EXT_EXP=".tar.zst"
 
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target archives found."
+		[[ -n $OUTPUT_PATH ]] && echo -e "\n${CYAN}Output directory set to: ${NOC}$OUTPUT_PATH"
+
 		check_archives
 		OVERWRITE_FLAG=0
 		if [[ -z $YES_ALL ]] 
 		then
-			[[ -z $(ls -1Ap | grep /) ]] && NEW_WRITE=0
+			[[ -n $OUTPUT_PATH ]] && [[ -z $(ls -1Ap "$OUTPUT_PATH" | grep /) ]] && NEW_WRITE=0
+			[[ -z $OUTPUT_PATH ]] && [[ -z $(ls -1Ap | grep /) ]] && NEW_WRITE=0
 			if [[ -z $NEW_WRITE ]] 
 			then
 				echo -e "\n${CYAN}Overwrite subdirectories?${NOC}"
@@ -522,8 +638,7 @@ case $1 in
 				x=$(ls -1 | egrep $EXT_EXP | sed -n "$SED_EXP")
 				
 				echo -ne "\n${BLUE}[${NOC}$i${BLUE}/${NOC}$TARGETS_NO${BLUE}]\t$x \t${NOC}"
-				file_size=$(du -bs * | grep "$x")
-				accurate_sizeof $file_size
+				accurate_sizeof $(du -bs "$x" | cut -f1)
 				
 				dot_i=${x//[^.]}
 				dot_i=${#dot_i}
@@ -532,12 +647,8 @@ case $1 in
 				then
 					dot_i=$((dot_i - 1))
 				fi
-				abs_name=$(echo "$x" | cut -d"." -f1-$dot_i)	
-				
-				# make sure we are in the new subdir
-				mkdir -p "$abs_name"/
-				cd "$abs_name"/ 
-
+				abs_name=$(echo "$x" | cut -d. -f1-$dot_i)	
+					
 				# filetype specific extraction method
 				if [[ $x =~ ".7z" ]]
 				then
@@ -553,40 +664,73 @@ case $1 in
 					EXTRACT_EXP="$DEFAULT_ZSTDEXTRACT_EXP \"$MASTER_PATH/$x\""
 				fi
 				
+				if [[ -z $OUTPUT_PATH ]]
+				then
+					mkdir -p "$abs_name"/
+					cd "$abs_name"/ 
+				else
+					mkdir -p "$OUTPUT_PATH/$abs_name"
+					EXTRACT_EXP+=" -o\"$OUTPUT_PATH\""
+				fi
+
 				EXTRACT_FLAG=0
 				# check if "$abs_name"/ size of all files is >= archive file.
-				if [[ 1 = $(echo "$(echo "$(du -bc . | grep total | cut -f1) - 4096" | bc) >= $(du -b "../$x" | cut -f1)" | bc) ]]
+				if [[ -z $OUTPUT_PATH ]] 
 				then
-					if [[ 0 = $OVERWRITE_FLAG ]]
+					if [[ 1 = $(echo "$(echo "$(du -bc . | grep total | cut -f1) - 4096" | bc) >= $(du -b "../$x" | cut -f1)" | bc) ]]
 					then
-						echo -e "${CYAN}Overwriting existing subdirectory...${NOC}"
-					else
-						echo -e "${CYAN}Not overwriting existing subdirectory, skipping...${NOC}"
-						EXTRACT_FLAG=1
+						check_overwrite_subdir_flag
 					fi
-				fi	
+				else
+					if [[ 1 = $(echo "$(echo "$(du -bc "$OUTPUT_PATH/$abs_name" | grep total | cut -f1) - 4096" | bc) >= $(du -b "$MASTER_PATH/$x" | cut -f1)" | bc) ]]
+					then
+						check_overwrite_subdir_flag
+					fi
+				fi
 
 				if [[ 0 = $EXTRACT_FLAG ]]
 				then
-					# remove any old files under $MASTERPATH/"$abs_name"/* 
-					if [[ 0 = $OVERWRITE_FLAG && -n $(ls -A) ]]
+					if [[ -z OUTPUT_PATH ]]
 					then
-						echo -e "${CYAN}Removing old files under \"${NOC}$(pwd)/*${CYAN}\"${NOC}"
-						rm -rfv *
-						echo
+						if [[ 0 = $OVERWRITE_FLAG && -n $(ls -A "$MASTER_PATH/$abs_name/") ]]
+						then
+							echo -e "${CYAN}Removing old files under \"${NOC}$MASTER_PATH/$abs_name/*${CYAN}\"${NOC}"
+							rm -rfv "$MASTER_PATH/$abs_name/"*
+							echo
+						fi
+					else
+						if [[ 0 = $OVERWRITE_FLAG && -n $(ls -A "$OUTPUT_PATH/$abs_name/") ]]
+						then
+							echo -e "${CYAN}Removing old files under \"${NOC}$OUTPUT_PATH/$abs_name/*${CYAN}\"${NOC}"
+							rm -rfv "$OUTPUT_PATH/$abs_name/"*
+							echo
+						fi
 					fi
-
+					
 					echo -e "${CYAN}Extracting archive...${NOC}"
 					echo $EXTRACT_EXP
 					eval $EXTRACT_EXP
 					check_exit_status EXTRACT
-
-					if [[ -d "$abs_name"/ ]]
+					
+					# check for redundant paths
+					two_abs_name="$abs_name/$abs_name"
+					if [[ -z $OUTPUT_PATH ]]
 					then
-						cd "$abs_name"/ 
-						[[ -n $(ls -A) ]] && mv * ..
-						cd ..
-						rm -rf "$abs_name"/
+						if [[ -d "$MASTER_PATH/$two_abs_name/" ]]
+						then
+							cd "$MASTER_PATH/$two_abs_name/"
+							[[ -n $(ls -A) ]] && mv * ..
+							cd ..
+							rm -rf "$abs_name"/
+						fi
+					else
+						if [[ -d "$OUTPUT_PATH/$two_abs_name/" ]]
+						then
+							cd "$OUTPUT_PATH/$two_abs_name/"
+							[[ -n $(ls -A) ]] && mv * ..
+							cd ..
+							rm -rf "$abs_name"/
+						fi
 					fi
 				fi
 				
@@ -596,12 +740,12 @@ case $1 in
 			
 			begin_info_header
 			echo -e "${GREEN}$TARGETS_NO${CYAN} archives extracted in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
-			print_info
+			print_info EXTRACT
 			close_info_header
 		fi		
 	;;	  
 	"-c="*|"--compress="*)
-		COMPRESS_TYPE=$(echo $1 | cut -d'=' -f2)
+		COMPRESS_TYPE=$(echo $1 | cut -d= -f2)
 		
 		case $COMPRESS_TYPE in
 			7z)
@@ -619,14 +763,17 @@ case $1 in
 			echo -e "${CYAN}Enter a directory to target and compress all subdirectories into separate $COMPRESS_TYPE archives.${NOC}"
 			echo
 			read -e -p ': ' MASTER_PATH
+			check_master_path
 		fi
 
-		check_master_path ALL
+		show_path_contents
+		cd "$MASTER_PATH"
 
 		TARGETS_NO=0
 		[[ -n $(ls -1Ap | grep /) ]] && TARGETS_NO=$(ls -d1 */ | wc -l)
-		[[ 0 = $TARGETS_NO ]] && echo -e "${RED}No subdirectories found inside \"${NOC}$MASTER_PATH${RED}\" to compress.${NOC}" && exit
+		[[ 0 = $TARGETS_NO ]] && echo -e "\n${RED}No subdirectories found inside \"${NOC}$MASTER_PATH${RED}\" to compress.${NOC}" && exit
 		echo -e "\n${GREEN}$TARGETS_NO${NOC} target subdirectories found."
+		[[ -n $OUTPUT_PATH ]] && echo -e "\n${CYAN}Output directory set to: ${NOC}$OUTPUT_PATH"
 		
 		[[ 7z = $COMPRESS_TYPE ]] && echo -e "\n${CYAN}Current 7z compression settings: ${NOC}$DEFAULT_7zCOMPRESS_EXP"
 		[[ zstd = $COMPRESS_TYPE ]] && echo -e "\n${CYAN}Current zstd compression settings: ${NOC}$DEFAULT_ZSTDCOMPRESS_EXP"
@@ -634,14 +781,26 @@ case $1 in
 		OVERWRITE_FLAG=0
 		if [[ -z $YES_ALL ]] 
 		then
-			case $COMPRESS_TYPE in
-				7z)
-					[[ -z $(ls -1A | egrep ".7z") ]] && NEW_WRITE=0
-				;;
-				zstd)
-					[[ -z $(ls -1A | egrep ".tar.zst") ]] && NEW_WRITE=0
-				;;
-			esac
+			if [[ -z $OUTPUT_PATH ]]
+			then
+				case $COMPRESS_TYPE in
+					7z)
+						[[ -z $(ls -1A "$MASTER_PATH" | egrep ".7z") ]] && NEW_WRITE=0
+					;;
+					zstd)
+						[[ -z $(ls -1A "$MASTER_PATH" | egrep ".tar.zst") ]] && NEW_WRITE=0
+					;;
+				esac
+			else
+				case $COMPRESS_TYPE in
+					7z)
+						[[ -z $(ls -1A "$OUTPUT_PATH" | egrep ".7z") ]] && NEW_WRITE=0
+					;;
+					zstd)
+						[[ -z $(ls -1A "$OUTPUT_PATH" | egrep ".tar.zst") ]] && NEW_WRITE=0
+					;;
+				esac
+			fi
 			if [[ -z $NEW_WRITE ]] 
 			then
 				echo -e "\n${CYAN}Overwrite old $COMPRESS_TYPE archives?${NOC}"
@@ -668,51 +827,100 @@ case $1 in
 				accurate_sizeof $(du -bs "$x"/ | cut -f1)
 
 				# check for existing archives
-				case $COMPRESS_TYPE in
-					7z)
-						if [[ -e "$x.7z" ]]
-						then
-							if [[ 0 = $OVERWRITE_FLAG ]]
-							then
-								echo -e "${CYAN}Deleting old 7z archive...${NOC}"
-								rm -v "$x.7z"
-								echo
-							else
-								COMPRESS_FLAG=1
-							fi
-						fi
-					;;
-					zstd)
-						if [[ -e "$x.tar.zst" ]]
-						then
-							if [[ 0 = $OVERWRITE_FLAG ]]
-							then
-								echo -e "${CYAN}Deleting old zstd archive...${NOC}"
-								rm -v "$x.tar.zst"
-								echo
-							else
-								COMPRESS_FLAG=1
-							fi
-						fi
-					;;
-				esac	
-
-				if [[ 0 = $COMPRESS_FLAG ]]
+				if [[ -z $OUTPUT_PATH ]] 
 				then
 					case $COMPRESS_TYPE in
 						7z)
-							echo -e "${CYAN}Creating new 7z archive...${NOC}"
-							COMPRESS_EXP="$DEFAULT_7zCOMPRESS_EXP \"$x.7z\" \"$x\"/"
+							if [[ -e "$MASTER_PATH/$x.7z" ]]
+							then
+								if [[ 0 = $OVERWRITE_FLAG ]]
+								then
+									echo -e "${CYAN}Deleting old 7z archive...${NOC}"
+									rm -v "$MASTER_PATH/$x.7z"
+									echo
+								else
+									COMPRESS_FLAG=1
+								fi
+							fi
 						;;
 						zstd)
-							echo -e "${CYAN}Creating new zstd archive...${NOC}"
-							COMPRESS_EXP="$DEFAULT_ZSTDCOMPRESS_EXP \"$x.tar.zst\" \"$x\"/"
-						;;
-						*)
-							exit 1
+							if [[ -e "$MASTER_PATH/$x.tar.zst" ]]
+							then
+								if [[ 0 = $OVERWRITE_FLAG ]]
+								then
+									echo -e "${CYAN}Deleting old zstd archive...${NOC}"
+									rm -v "$MASTER_PATH/$x.tar.zst"
+									echo
+								else
+									COMPRESS_FLAG=1
+								fi
+							fi
 						;;
 					esac
-					
+				else
+					case $COMPRESS_TYPE in
+						7z)
+							if [[ -e "$OUTPUT_PATH/$x.7z" ]]
+							then
+								if [[ 0 = $OVERWRITE_FLAG ]]
+								then
+									echo -e "${CYAN}Deleting old 7z archive...${NOC}"
+									rm -v "$OUTPUT_PATH/$x.7z"
+									echo
+								else
+									COMPRESS_FLAG=1
+								fi
+							fi
+						;;
+						zstd)
+							if [[ -e "$OUTPUT_PATH/$x.tar.zst" ]]
+							then
+								if [[ 0 = $OVERWRITE_FLAG ]]
+								then
+									echo -e "${CYAN}Deleting old zstd archive...${NOC}"
+									rm -v "$OUTPUT_PATH/$x.tar.zst"
+									echo
+								else
+									COMPRESS_FLAG=1
+								fi
+							fi
+						;;
+					esac
+				fi
+
+				if [[ 0 = $COMPRESS_FLAG ]]
+				then
+					if [[ -z $OUTPUT_PATH ]]
+					then 
+						case $COMPRESS_TYPE in
+							7z)
+								echo -e "${CYAN}Creating new 7z archive...${NOC}"
+								COMPRESS_EXP="$DEFAULT_7zCOMPRESS_EXP \"$x.7z\" \"$x\"/"
+							;;
+							zstd)
+								echo -e "${CYAN}Creating new zstd archive...${NOC}"
+								COMPRESS_EXP="$DEFAULT_ZSTDCOMPRESS_EXP \"$x.tar.zst\" \"$x\"/"
+							;;
+							*)
+								exit 1
+							;;
+						esac
+					else
+						case $COMPRESS_TYPE in
+							7z)
+								echo -e "${CYAN}Creating new 7z archive...${NOC}"
+								COMPRESS_EXP="$DEFAULT_7zCOMPRESS_EXP \"$OUTPUT_PATH/$x.7z\" \"$x\"/"
+							;;
+							zstd)
+								echo -e "${CYAN}Creating new zstd archive...${NOC}"
+								COMPRESS_EXP="$DEFAULT_ZSTDCOMPRESS_EXP \"$OUTPUT_PATH/$x.tar.zst\" \"$x\"/"
+							;;
+							*)
+								exit 1
+							;;
+						esac
+					fi
+
 					echo $COMPRESS_EXP
 					eval $COMPRESS_EXP
 					check_exit_status COMPRESS
@@ -720,10 +928,20 @@ case $1 in
 					echo -e "\n${CYAN}Verifying integrity of archive...${NOC}"
 					case $COMPRESS_TYPE in
 						7z)
-							INTEGRITY_EXP="7z t \"$x.7z\""
+							if [[ -z $OUTPUT_PATH ]]
+							then
+								INTEGRITY_EXP="7z t \"$x.7z\""
+							else
+								INTEGRITY_EXP="7z t \"$OUTPUT_PATH/$x.7z\""
+							fi
 						;;
 						zstd)
-							INTEGRITY_EXP="zstd --test \"$x.tar.zst\""
+							if [[ -z $OUTPUT_PATH ]]
+							then
+								INTEGRITY_EXP="zstd --test \"$x.tar.zst\""
+							else
+								INTEGRITY_EXP="zstd --test \"$OUTPUT_PATH/$x.tar.zst\""
+							fi
 						;;
 					esac
 
@@ -733,12 +951,14 @@ case $1 in
 				else
 					echo -e "${CYAN}Not overwriting existing $COMPRESS_TYPE archive, skipping.${NOC}"
 				fi
+
+				cd "$MASTER_PATH"
 				((i++))
 			done
 
 			begin_info_header
 			echo -e "${GREEN}$TARGETS_NO${CYAN} archives created and verified in ${NOC}$((SECONDS - START_TIME))${CYAN} seconds."
-			print_info
+			print_info COMPRESS
 			close_info_header
 		fi
 	;;

@@ -22,8 +22,8 @@ Other dependencies required:
 ```bash``` ```grep``` ```egrep``` ```bc``` ```app-arch/zstd``` 
 
 ```
-7zSubComp [ [ -c={type} ] [-e -e={type} ] -r -v ] [ -y ] [directory A]
-Release version: 1.08
+7zSubComp [ [ -c={type} ] [-e -e={type} ] -r -v ] [ -y ] [directory A] [ -o ] [directory B]
+Release version: 1.16
 
 7z/zstd subdirectory compressor and 7z/zip/rar/zstd archive extractor.
 
@@ -45,12 +45,17 @@ Viewing
 Other
    -y --yes                -   Confirm without asking.
 
+   -o {PATH} -o={PATH}                  -   Set the output path (relative or absolute).
+   --output {PATH} --output={PATH}
+
 Examples:
 
    7zSubComp -c=7z .       -   Compress all subdirectories under current directory "." into 7z archives.
 
    7zSubComp -e .          -   Extract all archives under current directory "." .
    7zSubComp -e=zstd .     -   Extract all zstd archives under current directory "." .
+   7zSubComp -e=zstd . -o extract
+                           -   Extract all zstd archives under current directory "." to output directory "extract".
 
    7zSubComp -r -y .       -   Remove only subdirectories under current directory "."
                                without asking for confirmation. With "7zSubComp -r -y" it will still ask once.
@@ -58,4 +63,5 @@ Examples:
    7zSubComp -v .          -   View subdirectories and archives under current directory "." .
 
    "." above can be replaced with any directory. Not providing one will ask you for one.
+
 ```
