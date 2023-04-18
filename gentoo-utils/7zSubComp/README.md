@@ -2,7 +2,7 @@
 version 1.16
 
 ## 7zSubComp stands for 7zip Subdirectory Compression tool
-Made for Gentoo Linux but anyone could probably run 7zSubComp as long as you have the dependencies listed below.
+Made for Gentoo Linux but anyone could run 7zSubComp as long as you have the dependencies listed below.
 
 7zSubComp can preform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. 
 
@@ -23,7 +23,7 @@ View current directory structure, archives, and size differential information wi
 
 ```app-arch/zstd``` and ```app-arch/tar``` is required if you want to extract or compress archives as .tar.zst (zstd) archives. 
 
-GNU Core Utilities should be installed, especially: ```bash``` ```grep``` ```egrep``` ```bc``` ```du``` ```wc```.
+GNU Core Utilities should be installed, especially: ```bash``` ```grep``` ```egrep``` ```bc``` ```du``` ```wc``` ```free``` ```cut``` ```echo``` ```cat``` ```sort``` ```ls``` ```pwd```.
 
 ```
 7zSubComp [ [ -c={type} ] [-e -e={type} ] -r -v ] [ -y ] [directory A] [ -o ] [directory B]
