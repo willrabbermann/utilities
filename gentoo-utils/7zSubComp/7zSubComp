@@ -348,6 +348,12 @@ check_overwrite_subdir_flag()
 	fi
 }
 
+abort()
+{
+	echo -e "${NOC}\nAborting."
+	exit
+}
+
 check_illegal_chars()
 # $1 = string input (filename)
 {
@@ -542,9 +548,10 @@ case $1 in
 					((i++))
 				done
 			else
-				echo -e "${NOC}\nAborting."
-				exit
+				abort
 			fi
+		else
+			abort
 		fi
 	
 		begin_info_header
