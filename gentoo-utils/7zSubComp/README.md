@@ -2,11 +2,13 @@
 version 1.16
 
 ## 7zSubComp stands for 7zip Subdirectory Compression tool
-Made for Gentoo Linux.
+Made for Gentoo Linux but anyone could probably run 7zSubComp as long as you have the dependencies listed below.
 
 7zSubComp can preform compression, extraction, viewing the directory structure, accurate size information, accurate size differential after operations, and removal of subdirectories under a master directory. 
 
 Retain full directory paths when compressing/extracting to/from 7z, zip, rar, and zstd.
+
+Set the output directory for extraction and compression operations using ```--output={PATH}``` or ```-o {PATH}```
 
 Create either 7z or zstd archives with ```--compress=7z``` or ```--compress=zstd```
 
