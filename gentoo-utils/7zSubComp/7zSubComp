@@ -474,7 +474,7 @@ case $1 in
         echo -e "   ${BLUE}-y --yes${NOC}                -   Confirm without asking."
         echo
 		echo -e "   ${BLUE}-o ${NOC}{PATH} ${BLUE}-o=${NOC}{PATH}                  -   Set the output path (relative or absolute)."
-        echo -e "   ${BLUE}--output ${NOC}{PATH} ${BLUE}--output=${NOC}{PATH}"
+        echo -e "   ${BLUE}--output ${NOC}{PATH} ${BLUE}--output=${NOC}{PATH}          No input defaults to directory A."
         echo
         echo -e "Examples:"
         echo        
