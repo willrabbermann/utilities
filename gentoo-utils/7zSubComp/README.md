@@ -48,7 +48,7 @@ Other
    -y --yes                -   Confirm without asking.
 
    -o {PATH} -o={PATH}                  -   Set the output path (relative or absolute).
-   --output {PATH} --output={PATH}
+   --output {PATH} --output={PATH}          No input defaults to directory A.
 
 Examples:
 
