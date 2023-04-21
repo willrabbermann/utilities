@@ -10,5 +10,3 @@ rm */.git/ -rfv
 
 echo -e "\nAdding all new files to git...\n"
 git add -v *
-
-
