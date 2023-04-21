@@ -9,7 +9,7 @@ Edits portage make.conf to enable / disable distcc options and use sane MAKEOPTS
 ### toggledhcp
 Edits /etc/conf.d/net to enable / disable DHCP and static addressing in netifrc.
 ### dot_files
-Some of my custom config files including alacritty, zsh, tmux.
+Some of my custom config files including alacritty, zsh, tmux, and suckless utilities like dwm.
 ## c-libs
 ### gmath
 C linear algebra library.
