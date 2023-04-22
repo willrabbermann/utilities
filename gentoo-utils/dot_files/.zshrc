@@ -49,10 +49,10 @@ bindkey '^[[F' end-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^E' end-of-line
 # Shift|Ctrl + Left|Right move by word
-bindkey '^[[1;5C' forward-word
-bindkey '^[[1;5D' backward-word
-bindkey '^[[1;2C' forward-word
-bindkey '^[[1;2D' backward-word
+bindkey '^[[1;5C' vi-forward-word
+bindkey '^[[1;5D' vi-backward-word
+bindkey '^[[1;2C' vi-forward-word
+bindkey '^[[1;2D' vi-backward-word
 # Shift+Ctrl+Left|Right delete word
 bindkey '^[[1;6C' delete-word
 bindkey '^[[1;6D' backward-delete-word
@@ -104,7 +104,7 @@ alias la='ls -CFA --group-directories-first'
 alias l='ls -CF --group-directories-first'
 alias dus='du -had1 | sort -h'
 alias git-fm='git fetch && git merge'
-alias rsync-hax='rsync -aHAXhvPS --info=progress2 --no-i-r'
+alias rsync-hax='rsync -aHAXhvPS --info=progress2 --no-i-r '
 
 tab_complete()
 {
