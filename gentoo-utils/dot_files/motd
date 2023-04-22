@@ -16,10 +16,6 @@ get_pci_device()
 
 gpu_info()
 {
-	local VGA_count_
-	local VGA_
-	local PCI_
-	local DRIVER_
 	VGA_=$(lspci | grep "VGA compatible controller")
 	VGA_count_=$(echo "$VGA_" | wc -l) 
 
@@ -33,11 +29,11 @@ gpu_info()
 			PCI_=$(get_pci_device $PCI_)
 
 			DRIVER_=$(cat /sys/bus/pci/devices/0000:$PCI_/driver_override | grep -v "(null)")
-			[[ -z $DRIVER_ ]] && DRIVER_=$(lspci -k | grep "$PCI_" -A2 | grep "in use:" | cut -d: -f2 | xargs)
+			[[ -z $DRIVER_ ]] && DRIVER_=$(lspci -k | grep "$PCI_" -A3 | grep "in use:" | cut -d: -f2 | xargs)
 			[[ -z $DRIVER_ ]] && DRIVER_="(none)"
 			printf "  Driver in use:\t$DRIVER_\n"
-			
-			printf "  Current link speed:\t$(cat /sys/bus/pci/devices/0000:$PCI_/current_link_speed)\n"
+			LINK_SPEED_=$(cat /sys/bus/pci/devices/0000:$PCI_/current_link_speed)
+			[[ -n $(echo $LINK_SPEED_ | grep -v Unknown) ]] && printf "  Current link speed:\t$LINK_SPEED_\n"
 			(( 1 == $(cat /sys/bus/pci/devices/0000:$PCI_/boot_vga) )) && printf "  (Primary)\n"
 		done
 	fi
@@ -45,12 +41,6 @@ gpu_info()
 
 system_info()
 {
-	local OS_
-	local ARCH_
-	local KERNEL_RELEASE_
-	local CPU_TEMP_
-	local SWAP_
-	local MEMORY_
 	OS_=$(uname -o)
 	ARCH_=$(uname -mp)
 	KERNEL_RELEASE_=$(uname -r)
