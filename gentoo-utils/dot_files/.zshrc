@@ -10,7 +10,9 @@ setopt correct
 [[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
 
 case $(tty) in
-	(/dev/tty[1-9]) custom_colors=0;;
+	(/dev/tty[1-9]) 
+		custom_colors=0 
+		[[ -e /usr/local/bin/motd && -e /tmp/fresh-boot.tmp ]] && rm /tmp/fresh-boot.tmp && motd;;
 	(*) custom_colors=1;;
 esac
 
@@ -102,6 +104,7 @@ alias la='ls -CFA --group-directories-first'
 alias l='ls -CF --group-directories-first'
 alias dus='du -had1 | sort -h'
 alias git-fm='git fetch && git merge'
+alias rsync-hax='rsync -aHAXhvPS --info=progress2 --no-i-r'
 
 tab_complete()
 {

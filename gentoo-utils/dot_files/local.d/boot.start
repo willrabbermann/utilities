@@ -1,0 +1,7 @@
+#!/bin/sh
+fresh_boot=/tmp/fresh-boot.tmp
+
+[[ -e $fresh_boot ]] &&	exit
+
+touch $fresh_boot
+chown will:will $fresh_boot && chmod 777 $fresh_boot

@@ -1,0 +1,70 @@
+#!/bin/sh
+
+get_index() 
+{
+    echo -e "$1" |
+    head --lines "$(( $2 + 1 ))" |
+    tail --lines "1"
+}
+
+get_pci_device()
+# $1 = single line of lspci input
+# returns device id
+{
+	printf "$(echo "$1" | cut -d' ' -f1)\n"
+}
+
+gpu_info()
+{
+	local VGA_count_
+	local VGA_
+	local PCI_
+	local DRIVER_
+	VGA_=$(lspci | grep "VGA compatible controller")
+	VGA_count_=$(echo "$VGA_" | wc -l) 
+
+	if (( $VGA_count_ > 0 ))
+	then
+		for (( i = 0; i < $VGA_count_; i++ ))
+		do
+			printf "\n"
+			PCI_=$(get_index "$VGA_" $i)
+			printf "$(echo "$PCI_" | cut -d: -f3- | xargs)\n"
+			PCI_=$(get_pci_device $PCI_)
+
+			DRIVER_=$(cat /sys/bus/pci/devices/0000:$PCI_/driver_override | grep -v "(null)")
+			[[ -z $DRIVER_ ]] && DRIVER_=$(lspci -k | grep "$PCI_" -A2 | grep "in use:" | cut -d: -f2 | xargs)
+			[[ -z $DRIVER_ ]] && DRIVER_="(none)"
+			printf "  Driver in use:\t$DRIVER_\n"
+			
+			printf "  Current link speed:\t$(cat /sys/bus/pci/devices/0000:$PCI_/current_link_speed)\n"
+			(( 1 == $(cat /sys/bus/pci/devices/0000:$PCI_/boot_vga) )) && printf "  (Primary)\n"
+		done
+	fi
+}
+
+system_info()
+{
+	local OS_
+	local ARCH_
+	local KERNEL_RELEASE_
+	local CPU_TEMP_
+	local SWAP_
+	local MEMORY_
+	OS_=$(uname -o)
+	ARCH_=$(uname -mp)
+	KERNEL_RELEASE_=$(uname -r)
+	[[ -e /usr/bin/sensors ]] && CPU_TEMP_=$(sensors | grep "Package id 0" | cut -d' ' -f5)
+	MEMORY_=$(free -m --si | grep Mem | xargs | cut -d' ' -f2)
+	SWAP_=$(free -m --si | grep Swap | xargs | cut -d' ' -f2)
+	printf  "\n"
+	printf  "$OS_ $KERNEL_RELEASE_\n"
+	printf  "\n$ARCH_"
+	[[ -n $CPU_TEMP_ ]] && printf "  $CPU_TEMP_\n\n" || printf "\n\n"
+	printf  "Memory:\t$MEMORY_ MB\nSwap:\t$SWAP_ MB\n"
+	gpu_info
+	printf  "\n"
+}
+
+system_info
+
