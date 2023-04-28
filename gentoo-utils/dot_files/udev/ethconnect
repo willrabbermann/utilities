@@ -1,0 +1,21 @@
+#!/bin/bash
+#exec 2>>/tmp/ethconnect.log; set -x
+
+sleep 2.5
+
+rc-service net.eth0 restart
+
+while [[ -n $(ip link show eth0 | grep "does not exist") ]];
+do
+	sleep 0.5
+done
+
+sleep 2.5
+
+
+if [[ -z $(ip link show eth0 | grep DOWN) ]]; then
+	ip link set wlan0 down
+else
+	echo "No ethernet connection found, reconnecting wlan0"
+	rc-service net.eth0 stop
+fi

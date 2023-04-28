@@ -1,0 +1,5 @@
+#!/bin/bash
+#exec 2>>/tmp/wlanconnect.log; set -x
+
+rc-service net.wlan0 restart
+ip link set eth0 down
