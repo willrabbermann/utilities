@@ -699,14 +699,14 @@ case $1 in
 				then
 					if [[ -z OUTPUT_PATH ]]
 					then
-						if [[ 0 = $OVERWRITE_FLAG && -n $(ls -A "$MASTER_PATH/$abs_name/") ]]
+						if [[ 0 = $OVERWRITE_FLAG && -e "$MASTER_PATH/$abs_name/" && -n $(ls -A "$MASTER_PATH/$abs_name/") ]]
 						then
 							echo -e "${CYAN}Removing old files under \"${NOC}$MASTER_PATH/$abs_name/*${CYAN}\"${NOC}"
 							rm -rfv "$MASTER_PATH/$abs_name/"*
 							echo
 						fi
 					else
-						if [[ 0 = $OVERWRITE_FLAG && -n $(ls -A "$OUTPUT_PATH/$abs_name/") ]]
+						if [[ 0 = $OVERWRITE_FLAG && -e "$OUTPUT_PATH/$abs_name/" && -n $(ls -A "$OUTPUT_PATH/$abs_name/") ]]
 						then
 							echo -e "${CYAN}Removing old files under \"${NOC}$OUTPUT_PATH/$abs_name/*${CYAN}\"${NOC}"
 							rm -rfv "$OUTPUT_PATH/$abs_name/"*
