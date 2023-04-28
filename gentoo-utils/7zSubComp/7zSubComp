@@ -27,7 +27,7 @@ fi
 tj=$(cat /proc/cpuinfo	| grep siblings | sort -u | awk -F ": " '{print $NF}')
 
 # options used to compress
-DEFAULT_7zCOMPRESS_EXP="time 7z a -t7z -m0=lzma -mx=9 -mfb=128 -md=32m -ms=on"
+DEFAULT_7zCOMPRESS_EXP="time 7z a -t7z -m0=lzma -mx=9 -mfb=256 -md=256m -ms=on"
 DEFAULT_ZSTDCOMPRESS_EXP="time tar -I 'zstd -v -T$tj -M$MEMFREE --ultra -22' -cf"
 # options used to extract
 DEFAULT_7zEXTRACT_EXP="7z x -y"
