@@ -3,7 +3,7 @@ Miscellaneous libs and utilities.
 
 ## gentoo-utils
 ### 7zSubComp
-A needlessly long bash program to manage my enormous archive directories. Retain full directory paths when compressing/extracting to/from 7z, zip, rar, and zstd.
+A needlessly long bash program to manage my enormous archive directories. Retain full directory paths when compressing/extracting to/from 7z, zip, rar, and zstd. With a high emphasis on usabiliy and output generation, this thing took too long to make.
 ### buildkernel
 Build the Linux kernel from source. Clean up old kernels. Change kernel configurations.
 ### toggledistcc
