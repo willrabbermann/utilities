@@ -70,6 +70,6 @@ Examples:
 
 ```
 ## Known issues
-There is no way to set output/input directories which include spaces of any kind. This is because bash strips all escape sequences '\' and strings lose their quotes '"'. If I would have programmed this in C I have no doubt this would have not been an issue. For now just make sure the directory doesnt contain spaces.
+There is no way to set output/input directories which include spaces of any kind. This is because bash strips all escape sequences and strings lose their quotes '"'. If I would have programmed this in C I have no doubt this would have not been an issue. For now just make sure the directory doesnt contain spaces.
 
 Im abandoning this script but it still works within its original intention. It can quickly extract and compress many directories at once but if I were to remake it I would have done it in C to start. Bash is such a limiting factor.
