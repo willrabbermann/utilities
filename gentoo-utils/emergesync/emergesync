@@ -3,7 +3,6 @@ help()
 {
 	echo "emergesync  [  -h  -f  -uc  -t  -ts  ] [ -na ]"
 	echo
-	echo "No input will show last sync time."
 	echo 
 	echo "First argument"
 	echo "  -h    --help"
