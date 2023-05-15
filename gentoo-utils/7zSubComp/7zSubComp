@@ -677,7 +677,7 @@ case $1 in
 					cd "$abs_name"/ 
 				else
 					mkdir -p "$OUTPUT_PATH/$abs_name"
-					EXTRACT_EXP+=" -o\"$OUTPUT_PATH\""
+					EXTRACT_EXP+=" -o\"$OUTPUT_PATH/$abs_name\""
 				fi
 
 				EXTRACT_FLAG=0
