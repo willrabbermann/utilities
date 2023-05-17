@@ -71,5 +71,3 @@ Examples:
 ```
 ## Known issues
 There is no way to set output/input directories which include spaces of any kind. I could fix it if I get around to it. 
-
-Im abandoning this script but it still works within its original intention. It can quickly extract and compress many directories at once but if I were to remake it I would have done it in C to start. Bash is such a limiting factor.
