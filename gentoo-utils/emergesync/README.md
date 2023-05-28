@@ -4,7 +4,7 @@ Sync portage without spamming their servers.
 ```MIN_TIME``` reflects the minimum amount of time in seconds before allowing a sync.
 
 ```
-emergesync  [  -h  -f  -uc  -t  -ts -s  ] [ -na ]
+emergesync  [  -h  -f  -uc  -t  -ts -s ] [ -na ]
 
 
 First argument
