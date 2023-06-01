@@ -32,8 +32,11 @@ gpu_info()
 			[[ -z $DRIVER_ ]] && DRIVER_=$(lspci -k | grep "$PCI_" -A3 | grep "in use:" | cut -d: -f2 | xargs)
 			[[ -z $DRIVER_ ]] && DRIVER_="(none)"
 			printf "  Driver in use:\t$DRIVER_\n"
-			LINK_SPEED_=$(cat /sys/bus/pci/devices/0000:$PCI_/current_link_speed)
-			[[ -n $(echo $LINK_SPEED_ | grep -v Unknown) ]] && printf "  Current link speed:\t$LINK_SPEED_\n"
+			if [[ -e /sys/bus/pci/devices/0000:$PCI_/current_link_speed ]]
+			then
+				LINK_SPEED_=$(cat /sys/bus/pci/devices/0000:$PCI_/current_link_speed)
+				[[ -n $(echo $LINK_SPEED_ | grep -v Unknown) ]] && printf "  Current link speed:\t$LINK_SPEED_\n"
+			fi
 			(( 1 == $(cat /sys/bus/pci/devices/0000:$PCI_/boot_vga) )) && printf "  (Primary)\n"
 		done
 	fi
