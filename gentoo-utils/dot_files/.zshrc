@@ -103,7 +103,6 @@ alias ll='ls -lAFh --group-directories-first'
 alias la='ls -CFA --group-directories-first'
 alias l='ls -CF --group-directories-first'
 alias dus='du -had1 | sort -h'
-alias git-fm='git fetch && git merge'
 alias rsync-hax='rsync -aHAXhvPS --info=progress2 --no-i-r '
 
 tab_complete()
@@ -167,6 +166,7 @@ if [ $custom_colors = 1 ]; then
 	ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=blue'
 	ZSH_HIGHLIGHT_STYLES[command-substitution]='fg=magenta'
 	ZSH_HIGHLIGHT_PATTERNS+=('sudo' 'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('visudo' 'fg=blue,bold')
 	ZSH_HIGHLIGHT_PATTERNS+=('rm -r' 'fg=red,bold')
 	ZSH_HIGHLIGHT_PATTERNS+=('rm -rf' 'fg=red,bold')
 	ZSH_HIGHLIGHT_PATTERNS+=('rm -fr' 'fg=red,bold')
