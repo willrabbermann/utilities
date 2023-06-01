@@ -165,9 +165,10 @@ if [ $custom_colors = 1 ]; then
 	ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=magenta'
 	ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=blue'
 	ZSH_HIGHLIGHT_STYLES[command-substitution]='fg=magenta'
-	ZSH_HIGHLIGHT_PATTERNS+=('sudo' 'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('sudo'   'fg=red,bold')
 	ZSH_HIGHLIGHT_PATTERNS+=('visudo' 'fg=blue,bold')
-	ZSH_HIGHLIGHT_PATTERNS+=('rm -r' 'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('rm'     'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('rm -r'  'fg=red,bold')
 	ZSH_HIGHLIGHT_PATTERNS+=('rm -rf' 'fg=red,bold')
 	ZSH_HIGHLIGHT_PATTERNS+=('rm -fr' 'fg=red,bold')
 fi
