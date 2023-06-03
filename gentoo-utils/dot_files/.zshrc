@@ -1,11 +1,13 @@
 autoload -U compinit promptinit
 compinit
-promptinit; prompt gentoo
+promptinit; [[ -n $(grep gentoo /etc/os-release) ]] && prompt gentoo
 
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' rehash true
 zstyle ':completion:*' insert-tab false
 setopt correct
+setopt autocd
+setopt extendedglob
 
 [[ $COLORTERM = *(24bit|truecolor)* ]] || zmodload zsh/nearcolor
 
@@ -33,6 +35,45 @@ git_prompt()
 setopt prompt_subst
 PROMPT='%F{004}%n%f%F{006}@%f%F{005}%m%f %F{006}%~ $(git_prompt)λ%f '
 
+alias ls='ls --color=auto'
+alias dir='dir --color=auto'
+alias vdir='vdir --color=auto'
+alias grep='grep --color=auto'
+alias tree='tree -C'
+
+alias ll='ls -lAFh --group-directories-first'
+alias la='ls -CFA --group-directories-first'
+alias l='ls -CF --group-directories-first'
+alias dus='du -had1 | sort -h'
+alias rsync-hax='rsync -aHAXhvPS --info=progress2 --no-i-r '
+
+tab-complete()
+{
+	if [[ $BUFFER =~ ^'\.'$ ]]; then
+		BUFFER='./'
+		CURSOR=2
+		zle list-choices
+	elif [[ -z "${BUFFER// /}" ]]; then
+		print && la
+		zle reset-prompt
+	else
+		zle expand-or-complete		
+	fi
+}
+
+select-all()
+{
+  MARK=0
+  CURSOR=$#BUFFER
+  [[ $REGION_ACTIVE = 1 ]] && REGION_ACTIVE=0 || REGION_ACTIVE=1
+}
+
+# tab
+bindkey '^I' tab-complete
+zle -N tab-complete
+# ctrl + a
+zle -N select-all
+bindkey '^A' select-all
 # insert / page / space  keys
 bindkey '^[[2~' complete-word
 bindkey '^[[5~' up-history
@@ -48,29 +89,28 @@ bindkey '^[OF' end-of-line
 bindkey '^[[F' end-of-line
 bindkey '^[[4~' end-of-line
 bindkey '^E' end-of-line
-# Shift|Ctrl + Left|Right move by word
+# shift|ctrl + left|right move by word
 bindkey '^[[1;5C' vi-forward-word
 bindkey '^[[1;5D' vi-backward-word
 bindkey '^[[1;2C' vi-forward-word
 bindkey '^[[1;2D' vi-backward-word
-# Shift+Ctrl+Left|Right delete word
+# shift+ctrl+left|right delete word
 bindkey '^[[1;6C' delete-word
 bindkey '^[[1;6D' backward-delete-word
-# Ctrl+Up|Down change case of word
+# ctrl+up|down change case of word
 bindkey '^[[1;5B' down-case-word
 bindkey '^[[1;5A' up-case-word
-# Shift+Up|Down swap case of char
+# shift+up|down swap case of char
 bindkey '^[[1;2A' vi-swap-case
 bindkey '^[[1;2B' vi-swap-case
 bindkey '^Z' undo
 bindkey '^[[90;6u' redo
 bindkey '^R' history-incremental-search-backward
 bindkey '^[[3~' delete-char
-# Shift+tab clear screen
+# shift+tab clear screen
 bindkey '^[[Z' clear-screen
 bindkey '^[	'  clear-screen
-
-# Function keys
+# function keys
 bindkey '^[OP' end-of-line
 bindkey '^[OQ' end-of-line
 bindkey '^[OR' end-of-line
@@ -84,44 +124,18 @@ bindkey '^[[21~' end-of-line
 bindkey '^[[23~' end-of-line
 bindkey '^[[24~' end-of-line
 
-export HISTSIZE=2000
-export HISTFILE="$HOME/.zsh_history" 
-export SAVEHIST=$HISTSIZE
+HISTSIZE=2000
+HISTFILE="$HOME/.zsh_history"
+SAVEHIST=$HISTSIZE
 setopt hist_ignore_all_dups
 setopt hist_ignore_space
+HISTORY_IGNORE='(git reset*|reboot|shutdown|exit|cd ..|cd ~|..|~)'
 
-setopt autocd
-setopt extendedglob
-
-alias ls='ls --color=auto'
-alias dir='dir --color=auto'
-alias vdir='vdir --color=auto'
-alias grep='grep --color=auto'
-alias tree='tree -C'
-
-alias ll='ls -lAFh --group-directories-first'
-alias la='ls -CFA --group-directories-first'
-alias l='ls -CF --group-directories-first'
-alias dus='du -had1 | sort -h'
-alias rsync-hax='rsync -aHAXhvPS --info=progress2 --no-i-r '
-
-tab_complete()
+zshaddhistory() 
 {
-	if [[ $BUFFER =~ ^'\.'$ ]]; then
-		BUFFER='./'
-		CURSOR=2
-		zle list-choices
-	elif [[ -z "${BUFFER// /}" ]]; then
-		#zle -R "" $(la)
-		print && la
-		zle reset-prompt
-	else
-		zle expand-or-complete		
-	fi
+  emulate -L zsh
+  [[ $1 != ${~HISTORY_IGNORE} ]] | fc -R $HISTFILE
 }
-
-bindkey '^I' tab_complete
-zle -N tab_complete
 
 kill_ssh_agent()
 {
@@ -137,7 +151,8 @@ if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
 	fi
 fi
 
-. /etc/env.d/00custom
+# custom environment variables
+[[ -e /etc/env.d/00custom ]] && . /etc/env.d/00custom
 
 if [ $custom_colors = 1 ]; then
 	. /usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh
