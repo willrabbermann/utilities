@@ -14,7 +14,8 @@ setopt extendedglob
 case $(tty) in
 	(/dev/tty[1-9]) 
 		custom_colors=0 
-		[[ -e /usr/local/bin/motd && -e /tmp/fresh-boot.tmp ]] && rm /tmp/fresh-boot.tmp && motd;;
+		[[ -e /usr/local/bin/motd && -e /tmp/fresh-boot.tmp ]] && 
+			rm /tmp/fresh-boot.tmp && motd;;
 	(*) custom_colors=1;;
 esac
 
