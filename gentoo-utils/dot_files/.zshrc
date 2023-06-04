@@ -88,8 +88,8 @@ select-all()
 }
 
 # tab
-bindkey '^I' tab-complete
 zle -N tab-complete
+bindkey '^I' tab-complete
 # ctrl + a
 zle -N select-all
 bindkey '^A' select-all
