@@ -153,7 +153,7 @@ HISTORY_IGNORE='(git reset*|reboot|shutdown|exit|cd ..|cd ~|..|~)'
 zshaddhistory() 
 {
   emulate -L zsh
-  [[ $1 != ${~HISTORY_IGNORE} ]] | fc -R $HISTFILE
+  [[ $1 != ${~HISTORY_IGNORE} ]]
 }
 
 kill_ssh_agent()
