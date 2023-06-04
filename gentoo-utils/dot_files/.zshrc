@@ -36,7 +36,7 @@ find_zsh_hl_module()
 	do
 		[[ -e $LOCATIONS[i] ]] && . $LOCATIONS[i] && return
 	done
-	printf "WARNING: \"zsh-syntax-highlight.zsh\" not found!\n"
+	printf "WARNING: \"zsh-syntax-highlighting.zsh\" not found!\n"
 }
 
 reset_broken_terminal()
@@ -166,7 +166,7 @@ add-zsh-hook -Uz zshexit kill_ssh_agent
 
 export_distcc_path()
 {
-	if [[ -d /usr/lib/distcc/ && -d /etc/portage/make.conf && 
+	if [[ -d /usr/lib/distcc/ && -e /etc/portage/make.conf && 
 		  -n $(grep distcc /etc/portage/make.conf) ]]
 	then
 		if grep -q  "distcc" <<< "$PATH"; then
