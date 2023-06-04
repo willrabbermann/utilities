@@ -1,6 +1,9 @@
 autoload -U compinit promptinit
 compinit
-promptinit; [[ -n $(grep gentoo /etc/os-release) ]] && prompt gentoo
+promptinit; 
+
+[[ Gentoo = $(head -n1 /etc/os-release | cut -d= -f2) ]] && 
+	prompt gentoo 
 
 zstyle ':completion::complete:*' use-cache 1
 zstyle ':completion:*' rehash true
@@ -20,6 +23,21 @@ case $(tty) in
 esac
 
 autoload -Uz add-zsh-hook
+
+find_zsh_hl_module()
+{
+	LOCATIONS=(
+		# Gentoo
+		"/usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh" 
+		# Fedora
+		"/usr/share/zsh/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+	)
+	for (( i=0; i < $#LOCATIONS; i++ ))
+	do
+		[[ -e $LOCATIONS[i] ]] && . $LOCATIONS[i] && return
+	done
+	printf "WARNING: \"zsh-syntax-highlight.zsh\" not found!\n"
+}
 
 reset_broken_terminal()
 {
@@ -146,17 +164,25 @@ kill_ssh_agent()
 eval "$(ssh-agent)" > /dev/null
 add-zsh-hook -Uz zshexit kill_ssh_agent
 
-if [[ -d /usr/lib/distcc/ && -n $(grep distcc /etc/portage/make.conf) ]]; then
-	if grep -q  "distcc" <<< "$PATH"; then
-	else export PATH="/usr/lib/distcc/bin:${PATH}"
+export_distcc_path()
+{
+	if [[ -d /usr/lib/distcc/ && -d /etc/portage/make.conf && 
+		  -n $(grep distcc /etc/portage/make.conf) ]]
+	then
+		if grep -q  "distcc" <<< "$PATH"; then
+		else export PATH="/usr/lib/distcc/bin:${PATH}"
+		fi
 	fi
-fi
+}
+
+export_distcc_path
 
 # custom environment variables
 [[ -e /etc/env.d/00custom ]] && . /etc/env.d/00custom
 
-if [ $custom_colors = 1 ]; then
-	. /usr/share/zsh/site-functions/zsh-syntax-highlighting.zsh
+if [[ 1 = $custom_colors ]]
+then
+	find_zsh_hl_module
 	typeset -A ZSH_HIGHLIGHT_STYLES
 	ZSH_HIGHLIGHT_MAXLENGTH=512
 	ZSH_HIGHLIGHT_HIGHLIGHTERS=(main brackets pattern regexp root line)
@@ -181,10 +207,8 @@ if [ $custom_colors = 1 ]; then
 	ZSH_HIGHLIGHT_STYLES[dollar-quoted-argument]='fg=magenta'
 	ZSH_HIGHLIGHT_STYLES[history-expansion]='fg=blue'
 	ZSH_HIGHLIGHT_STYLES[command-substitution]='fg=magenta'
-	ZSH_HIGHLIGHT_PATTERNS+=('sudo'   'fg=red,bold')
-	ZSH_HIGHLIGHT_PATTERNS+=('visudo' 'fg=blue,bold')
-	ZSH_HIGHLIGHT_PATTERNS+=('rm'     'fg=red,bold')
-	ZSH_HIGHLIGHT_PATTERNS+=('rm -r'  'fg=red,bold')
-	ZSH_HIGHLIGHT_PATTERNS+=('rm -rf' 'fg=red,bold')
-	ZSH_HIGHLIGHT_PATTERNS+=('rm -fr' 'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('visudo'  'fg=blue,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('sudo '   'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('rm '     'fg=red,bold')
+	ZSH_HIGHLIGHT_PATTERNS+=('rm *-* ' 'fg=red,bold')
 fi
