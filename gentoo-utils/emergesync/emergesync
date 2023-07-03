@@ -45,8 +45,8 @@ update_portage()
 	cmd="emerge --update $ASK --newuse --deep --with-bdeps=y @world"
 	echo $cmd
     $cmd
-	echo $cmd
 	cmd="emerge -c $ASK"
+	echo $cmd
     $cmd
 }
 
