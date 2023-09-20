@@ -285,7 +285,6 @@ auto_upgrade_kernel()
 		latestkernel_index=$(eselect kernel list | grep $latestkernel | cut -f 2 -d [ | cut -f 1 -d ])
 		if [[ $latestkernel_index ]]; then
 			eselect kernel set $latestkernel_index
-			eselect kernel list
 			menu_config
 			build
 			build_initramfs
