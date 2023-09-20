@@ -81,6 +81,20 @@ getKernelVersion()
 	kver=$(eselect kernel show | grep src | awk '{print $NF}' | cut -c 16-)
 }
 
+findLatestKernel()
+{
+	num_of_kernels=$(ls -1 /usr/src/ | grep -n '' | tail -n 1 | cut -b 1)
+	for ((i=num_of_kernels; i > 0; i--))
+	do
+		a=$(ls -1 /usr/src/ | sed -n "$i"p)
+		if [[ ! $a =~ "dist" ]]; then
+			latestkernel=$a
+			i=0
+			lkver=$(echo $latestkernel | cut -f2- -d-)
+		fi
+	done
+}
+
 build_initramfs()
 {
 	relocate
@@ -257,6 +271,28 @@ upgrade_kernel()
 	fi
 }
 
+auto_upgrade_kernel()
+{
+	getKernelVersion
+	findLatestKernel
+	echo -e "Current kernel is ${GREEN}$kver${NOC}\n"
+	echo -e "Latest kernel installed is ${GREEN}$lkver${NOC}\n"
+	if [[ $lkver = $kver ]]; then
+		echo -e "${BLUE}Already upgraded to the latest kernel version, nothing to do.${NOC}\n"
+	else
+		cp -v /usr/src/$kernel/.config /usr/src/$latestkernel/.config
+		echo  
+		latestkernel_index=$(eselect kernel list | grep $latestkernel | cut -f 2 -d [ | cut -f 1 -d ])
+		if [[ $latestkernel_index ]]; then
+			eselect kernel set $latestkernel_index
+			eselect kernel list
+			menu_config
+			build
+			build_initramfs
+		fi
+	fi
+}
+
 clean_kernels()
 {
 	baseDir="/boot/EFI/gentoo/"
@@ -386,6 +422,9 @@ case $1 in
 		upgrade_kernel
 		exit
 	;;
+	'auto-upgrade' | 'au' | '-au' | '--auto-upgrade')
+		auto_upgrade_kernel
+	;;
 	'menu' | 'me' | '-me' | '--menu')
 		menu_config
 		exit
@@ -397,7 +436,7 @@ case $1 in
 	*)
 	
 		echo -en \
-		"buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -me -c clean-kernels install-efi -h${NOC}] "
+		"buildkernel   [${GREEN}-m -r -b -a ${BLUE}-l${GREEN} -i -im -u -au -me -c clean-kernels install-efi -h${NOC}] "
 		echo -e "[${BLUE}kernel_version,localhost${NOC}]"
 		echo -e "${GREEN}--move${NOC}          -- move build files."
 		echo -e "${GREEN}--regen${NOC}         -- regenerate \"${LPURPLE}/boot/grub/grub.cfg${NOC}\" and exit."
@@ -407,6 +446,7 @@ case $1 in
 		echo -e "${GREEN}--i${NOC}   ${BLUE}[kver]${NOC}    -- build initramfs and exit. ${BLUE}[kver]${NOC} is optional."
 		echo -e "${GREEN}--im${NOC}  ${BLUE}[kver]${NOC}    -- build initramfs and continue to moving. ${BLUE}[kver]${NOC} is optional."
 		echo -e "${GREEN}--upgrade${NOC}       -- copy the .config of the current kernel to a new kernel directory."
+		echo -e "${GREEN}--auto-upgrade${NOC}  -- copy the .config of the current kernel into latest kernel directory, automatically preform most update steps."
 		echo -e "${GREEN}--menu${NOC}          -- open menuconfig in \"${LPURPLE}/usr/src/linux${NOC}\"."
 		echo -e "${GREEN}--current${NOC}       -- print current kernel(s) in eselect and exit."
 		echo -e "${GREEN}--clean-kernels${NOC} -- clean up old kernels and kernel modules."
