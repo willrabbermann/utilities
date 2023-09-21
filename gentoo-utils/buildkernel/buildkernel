@@ -296,10 +296,10 @@ auto_upgrade_kernel()
 {
 	getKernelVersion
 	findLatestKernel
-	echo -e "Current kernel is ${GREEN}$kver${NOC}\n"
+	echo -e "Current kernel is ${GREEN}$kver${NOC}"
 	echo -e "Latest kernel installed is ${GREEN}$lkver${NOC}\n"
 	
-	if [[ $lkver != $kver ]]; then
+	if [[ $lkver = $kver ]]; then
 		echo -e "${BLUE}Already upgraded to the latest kernel version, nothing to do.${NOC}\n"
 	else
 		cp -v /usr/src/$kernel_full/.config /usr/src/$latestkernel/.config
