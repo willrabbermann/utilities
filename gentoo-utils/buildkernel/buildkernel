@@ -79,6 +79,7 @@ relocate()
 getKernelVersion() 
 {
 	kver=$(eselect kernel show | grep src | awk '{print $NF}' | cut -c 16-)
+	kernel="linux-$kver"
 }
 
 findLatestKernel()
@@ -95,6 +96,17 @@ findLatestKernel()
 	done
 }
 
+run_build_initramfs()
+{
+	if [[ -s $SECUREBOOTKEY && -s $SECUREBOOTCERT ]]; then
+			echo -e "\n${GREEN}Building unified kernel image...${NOC}\n"
+			dracut --kver=$kver --force --uefi
+	fi
+		# build backup initramfs for unsecure boot 
+		echo -e "\n${GREEN}Building initramfs...${NOC}\n"
+		dracut --kver=$kver --force
+}
+
 build_initramfs()
 {
 	relocate
@@ -106,15 +118,13 @@ build_initramfs()
 		getKernelVersion
 	fi
 	echo -e "Kernel version: ${GREEN}$kver${NOC}"
-	echo "Build initramfs?"
-	if (yes_or_no "$input") then
-		if [[ -s $SECUREBOOTKEY && -s $SECUREBOOTCERT ]]; then
-			echo -e "\n${GREEN}Building unified kernel image...${NOC}\n"
-			dracut --kver=$kver --force --uefi
+	if [[ -z $NO_ASK ]]; then
+		echo "Build initramfs?"
+		if ( yes_or_no "$input" ) then
+			run_build_initramfs
 		fi
-			# build backup initramfs for unsecure boot 
-			echo -e "\n${GREEN}Building initramfs...${NOC}\n"
-			dracut --kver=$kver --force
+	else
+		run_build_initramfs
 	fi
 }
 
@@ -175,21 +185,33 @@ make_kernel()
 	make install
 }
 
+run_build_kernel()
+{
+	cd /usr/src/linux
+	
+	if [[ -z $NO_ASK ]]; then
+		echo -e "\nClean linux tree?"
+		if ( yes_or_no "$input" ) then
+			make clean
+			echo
+		fi
+	fi
+
+	time make_kernel
+	echo
+}
+
 build()
 {
-	echo "Is this the correct kernel to build?"
-	eselect kernel list
-	if (yes_or_no "$input") then
-		cd /usr/src/linux
-		
-		echo -e "\nClean linux tree?"
-		if (yes_or_no "$input") then
-			echo -e "\n${GREEN}Making clean...${NOC}"
-			make clean
-		fi
 
-		time make_kernel
-		echo
+	if [[ -z $NO_ASK ]]; then
+		echo "Is this the correct kernel to build?"
+		eselect kernel list
+		if ( yes_or_no "$input" ) then
+			run_build_kernel
+		fi
+	else
+		run_build_kernel
 	fi
 }
 
@@ -277,17 +299,37 @@ auto_upgrade_kernel()
 	findLatestKernel
 	echo -e "Current kernel is ${GREEN}$kver${NOC}\n"
 	echo -e "Latest kernel installed is ${GREEN}$lkver${NOC}\n"
-	if [[ $lkver = $kver ]]; then
+	
+	if [[ $lkver != $kver ]]; then
 		echo -e "${BLUE}Already upgraded to the latest kernel version, nothing to do.${NOC}\n"
 	else
 		cp -v /usr/src/$kernel/.config /usr/src/$latestkernel/.config
 		echo  
 		latestkernel_index=$(eselect kernel list | grep $latestkernel | cut -f 2 -d [ | cut -f 1 -d ])
 		if [[ $latestkernel_index ]]; then
+			echo -e "${BLUE}$(ls -l /usr/src/linux | cut -f9- -d " ")${NOC}\n"
 			eselect kernel set $latestkernel_index
 			menu_config
+			relocate
+			if [[ -n "$kernel$sysmap$config$initrd$efi" ]]; then
+				echo "Existing build files detected, moving to a temporary location..."
+				mkdir -pv /boot/old_build_files
+				[[ -n $kernel ]] && mv /boot/$kernel /boot/old_build_files
+				[[ -n $sysmap ]] && mv /boot/$sysmap /boot/old_build_files
+				[[ -n $config ]] && mv /boot/$config /boot/old_build_files
+				[[ -n $initrd ]] && mv /boot/$initrd /boot/old_build_files
+				[[ -n $efi ]] && mv $efi /boot/old_build_files
+				echo
+			fi
+			NO_ASK=1
 			build
 			build_initramfs
+			rename "custom"
+			move_build "/boot/EFI/gentoo/custom/"
+			regen_grub
+			echo
+			[[ -d /boot/old_build_files ]] && mv -v /boot/old_build_files/* /boot && rm -rfv /boot/old_build_files
+			emerge --quiet --usepkg @module-rebuild
 		fi
 	fi
 }
@@ -445,7 +487,7 @@ case $1 in
 		echo -e "${GREEN}--i${NOC}   ${BLUE}[kver]${NOC}    -- build initramfs and exit. ${BLUE}[kver]${NOC} is optional."
 		echo -e "${GREEN}--im${NOC}  ${BLUE}[kver]${NOC}    -- build initramfs and continue to moving. ${BLUE}[kver]${NOC} is optional."
 		echo -e "${GREEN}--upgrade${NOC}       -- copy the .config of the current kernel to a new kernel directory."
-		echo -e "${GREEN}--auto-upgrade${NOC}  -- copy the .config of the current kernel into latest kernel directory, automatically preform most update steps."
+		echo -e "${GREEN}--auto-upgrade${NOC}  -- copy the .config of the current kernel into latest kernel directory, automatically preform most update steps for a custom kernel."
 		echo -e "${GREEN}--menu${NOC}          -- open menuconfig in \"${LPURPLE}/usr/src/linux${NOC}\"."
 		echo -e "${GREEN}--current${NOC}       -- print current kernel(s) in eselect and exit."
 		echo -e "${GREEN}--clean-kernels${NOC} -- clean up old kernels and kernel modules."
