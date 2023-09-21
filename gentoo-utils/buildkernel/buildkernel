@@ -79,7 +79,7 @@ relocate()
 getKernelVersion() 
 {
 	kver=$(eselect kernel show | grep src | awk '{print $NF}' | cut -c 16-)
-	kernel="linux-$kver"
+	kernel_full="linux-$kver"
 }
 
 findLatestKernel()
@@ -203,7 +203,6 @@ run_build_kernel()
 
 build()
 {
-
 	if [[ -z $NO_ASK ]]; then
 		echo "Is this the correct kernel to build?"
 		eselect kernel list
@@ -303,7 +302,7 @@ auto_upgrade_kernel()
 	if [[ $lkver != $kver ]]; then
 		echo -e "${BLUE}Already upgraded to the latest kernel version, nothing to do.${NOC}\n"
 	else
-		cp -v /usr/src/$kernel/.config /usr/src/$latestkernel/.config
+		cp -v /usr/src/$kernel_full/.config /usr/src/$latestkernel/.config
 		echo  
 		latestkernel_index=$(eselect kernel list | grep $latestkernel | cut -f 2 -d [ | cut -f 1 -d ])
 		if [[ $latestkernel_index ]]; then
