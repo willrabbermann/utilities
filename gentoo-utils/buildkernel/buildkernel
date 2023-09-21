@@ -94,6 +94,7 @@ findLatestKernel()
 			lkver=$(echo $latestkernel | cut -f2- -d-)
 		fi
 	done
+	[[ $latestkernel = "linux" ]] && "Nothing to upgrade to. Exiting" && exit 0
 }
 
 run_build_initramfs()
