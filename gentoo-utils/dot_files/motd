@@ -1,15 +1,5 @@
 #!/bin/sh
 
-update_drivers()
-{
-	[[ -n $(lspci | grep -iF nvidia) ]] && NVIDIA_FLAG=1
-	if [[ $NVIDIA_FLAG = 1 && ! -e "/lib/modules/$KERNEL_RELEASE_/video/nvidia.ko" ]];
-	then
-		sudo emerge --usepkg -v nvidia-drivers
-		sudo reboot
-	fi
-}
-
 get_index() 
 {
     echo -e "$1" |
@@ -70,4 +60,3 @@ system_info()
 }
 
 system_info
-update_drivers
