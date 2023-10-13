@@ -305,10 +305,13 @@ auto_upgrade_kernel()
 	else
 		cp -v /usr/src/$kernel_full/.config /usr/src/$latestkernel/.config
 		echo  
-		latestkernel_index=$(eselect kernel list | grep $latestkernel | cut -f 2 -d [ | cut -f 1 -d ])
+		latestkernel_index=$(eselect kernel list | grep $latestkernel | head -n 1 | cut -f 2 -d [ | cut -f 1 -d ] )
 		if [[ $latestkernel_index ]]; then
-			echo -e "${BLUE}$(ls -l /usr/src/linux | cut -f9- -d " ")${NOC}\n"
-			eselect kernel set $latestkernel_index
+			eselect kernel list
+			CMD="eselect kernel set $latestkernel_index"
+			echo -e "\n${GREEN}$CMD${NOC}"
+			$CMD
+			echo -e "\n${BLUE}$(ls -l /usr/src/linux | cut -f9- -d " ")${NOC}\n"
 			menu_config
 			relocate
 			if [[ -n "$kernel$sysmap$config$initrd$efi" ]]; then
