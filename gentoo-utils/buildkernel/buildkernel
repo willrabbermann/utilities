@@ -305,7 +305,7 @@ auto_upgrade_kernel()
 	else
 		cp -v /usr/src/$kernel_full/.config /usr/src/$latestkernel/.config
 		echo  
-		latestkernel_index=$(eselect kernel list | grep $latestkernel | head -n 1 | cut -f 2 -d [ | cut -f 1 -d ] )
+		latestkernel_index=$(eselect kernel list | grep $latestkernel | head -n 1 | cut -f 2 -d [ | cut -f 1 -d ])
 		if [[ $latestkernel_index ]]; then
 			eselect kernel list
 			CMD="eselect kernel set $latestkernel_index"
