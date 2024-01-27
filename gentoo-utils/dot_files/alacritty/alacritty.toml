@@ -67,11 +67,13 @@ mode = "~Alt"
 action = "ScrollToTop"
 key = "Home"
 mode = "~Alt"
+mods = "Shift"
 
 [[keyboard.bindings]]
 action = "ScrollToBottom"
 key = "End"
 mode = "~Alt"
+mods = "Shift"
 
 [[keyboard.bindings]]
 action = "Copy"
