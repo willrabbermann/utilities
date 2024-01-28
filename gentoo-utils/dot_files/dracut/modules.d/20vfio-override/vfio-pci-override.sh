@@ -5,7 +5,7 @@ DEVICES=(
 		"0000:01:00.1 " # 3060 (audio)
 )
 
-if [[ -n $(grep VIDEO_CARD_VFIO_PASSTHROUGH=1 /opt/gentoo.conf) ]]
+if [[ -n $(grep VIDEO_CARD_VFIO_PASSTHROUGH=1 /boot/EFI/gentoo/gentoo.conf) ]]
 then
 	for dev in ${DEVICES[@]}; do
 		echo "vfio-pci" > /sys/bus/pci/devices/$dev/driver_override
